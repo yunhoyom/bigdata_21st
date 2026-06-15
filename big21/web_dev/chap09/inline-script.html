@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인라인 스크립트</title>
+</head>
+<body>
+    <h1>인라인 스크립트</h1>
+    <!-- body 끝 직전에 script 배치하면 요소 모두 준비된 뒤 실행 -->
+    <script>
+        console.log("안녕하세요. Javascript");
+        console.log("현재 URL : ", window.location.href); // window: 전체 브라우저 관리하는 최상위 오브젝트. 
+                                                          // location: 주소창을 다룸. href는 주소(변수)
+                                                          // ※ window.history 통해 뒤로가기 가능
+                                                          // document는 화면(본문)
+    </script>
+</body>
+</html>

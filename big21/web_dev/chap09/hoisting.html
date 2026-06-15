@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>호이스팅</title>
+</head>
+<body>
+    <script>
+        // var 호이스팅 : 선언 전 접근해도 undefined 반환.(No Error)
+        console.log(hoistedVar);        // 이 줄만 실행했을 때는 에러(hoistedVar 없음.)
+        var hoistedVar="나중에 선언";    // 이 코드가 끌어올라가 에러 없이 undefined 출력
+                                        // hoisting은 공간만 할당한 것. 값은 안 들어감.
+        console.log(hoistedVar);        // 초기화까지 된 상태라 값 받아옴.
+        
+        // let 호이스팅 : 초기화 전 접근하면 ReferenceError 발생
+        try{
+            console.log(hoistedLet)    // hoistedLet 은 TDZ에 들어가 Error 발생.
+        } catch(e) {
+            console.log("Error : ", e.message)
+        }
+        let hoistedLet="안전한 선언"
+        console.log(hoistedLet)
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>변수와 상수</title>
+</head>
+<body>
+    <h1>변수와 상수</h1>
+    <script>
+        // const: 재할당 불가
+        const siteName = "나의 블로그";
+        console.log(siteName);
+        // siteName = "다른 블로그"        // 상수는 재할당 불가.
+        // let : 재할당 가능
+        let score = 80;
+        console.log("초기 점수 : ", score)
+        score = 95;
+        console.log("수정 점수 : ", score)
+        {
+            const blockVar = '블록 안에서만 유효'
+            console.log(blockVar)
+        }
+        // console.log(blockVar)    // 변수는 블록 안에서만 유효
+
+        // var 선언 변수의 문제점
+        if(true) {
+            var leaky = "var는 블록 탈출 가능"
+            console.log(leaky)
+        }
+        console.log(leaky)      // 이름 중복 발생 가능성. 추적 어렵, 유지보수 어렵. 
+                                // 블록 끝나도 유지되어 메모리 낭비
+    </script>
+</body>
+</html>
