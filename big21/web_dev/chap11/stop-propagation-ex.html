@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #modal-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            border: 1px solid #333;
+            align-items: center;
+            justify-content: center;
+        }
+        #model-box {
+            background: white;
+            padding: 32px;
+            border-radius: 8px;
+            min-width: 280px;
+        }
+        .hidden {
+            display: none !important;  
+        }
+    </style>
+</head>
+<body>
+    <button id="open-btn">모달 열기</button>
+
+
+    <div id="modal-backdrop" class="hidden">
+        <div id="modal-box">
+            <h3>안내</h3>
+            <p>배경을 클릭하면 모달이 닫힙니다.</p>
+            <button id="close-btn">닫기</button>
+        </div>
+    </div>
+    <script>
+        const backdrop = document.querySelector('#modal-backdrop');
+        const modalBox = document.querySelector('#modal-box');
+
+
+        document.querySelector('#open-btn').addEventListener('click',() => {
+            backdrop.classList.remove('hidden');
+        });
+
+
+        backdrop.addEventListener('click', () => {
+            backdrop.classList.add('hidden');
+        });
+
+        
+        // 아래 코드 없으면 상위로 전파되어 텍스트를 클릭해도 닫힘.
+        // 있으면 모달창(텍스트) 클릭하면 안 닫힘.
+        modalBox.addEventListener('click', () => {
+            event.stopPropagation();
+        });
+
+
+        document.querySelector('#close-btn').addEventListener('click', () => {
+            backdrop.classList.add('hidden');
+        });
+    </script>
+</body>
+</html>

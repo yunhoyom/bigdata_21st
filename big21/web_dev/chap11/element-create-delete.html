@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>요소 생성과 삭제</title>
+    <style>
+        #book-list {
+            list-style: none; padding: 0;
+        }
+        .book-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h2>내 독서 목록</h2>
+    <ul id="book-list"></ul>
+    <script>
+        // 서버에서 넘어온 데이터라고 가정
+        const books = ['파이썬', '클로드코드', 'Agentic AI'];
+        const booklist = document.querySelector("#book-list");
+
+        // 최적화
+        const fragment = document.createDocumentFragment();
+
+        books.forEach((title) => {
+            // 새 li 생성
+            const li = document.createElement('li');
+            li.classList.add('book-item');      // <li class="book-item"> </li>
+            // span 생성
+            const titleSpan = document.createElement('span');
+            // span title 넣어주는 작업.
+            titleSpan.textContent = title;
+            // 삭제 버튼 생성
+            const deleteBtn = document.createElement('button');
+            deleteBtn.classList.add('delete-btn');  //delete-btn 클래스 추가
+            deleteBtn.textContent="삭제";
+            // 삭제 버튼 클릭 시 해당 li 를 제거
+            deleteBtn.addEventListener('click', () => {
+                li.remove();
+            });
+            // 자식 요소들을 li에 추가
+            li.append(titleSpan, deleteBtn);
+            // booklist.append(li);  // 화면이 흔들림(3번 추가되는 동안)
+            fragment.append(li);    // 메모리에만 추가
+        });
+        booklist.append(fragment);  // 한 번에 추가
+    </script>
+</body>
+</html>

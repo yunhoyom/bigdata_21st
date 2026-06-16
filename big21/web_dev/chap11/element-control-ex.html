@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>요소 조작 예제</title>
+    <style>
+        .highlight { background-color: #fff3cd; font-weight: bold; }
+        .complete { text-decoration: line-through; color: #999; }
+        #status { margin-top: 16px; font-size: 0.9rem; color: #555;}
+    </style>
+</head>
+<body>
+    <h2 id="heading">오늘의 할 일</h2>
+    <ul id="task-list">
+        <li id="task-1">장보기</li>
+        <li id="task-2">운동하기</li>
+        <li id="task-3">독서하기</li>
+    </ul>
+    <button id="btn-complete">첫 번째 완료 처리</button>
+    <button id="btn-highlight">제목 강조 토글</button>
+    <p id="status"></p>
+    <script>
+        // 요소를 선택하기
+        const heading = document.querySelector("#heading");
+        const firstTask = document.querySelector("#task-1");
+        const allTasks = document.querySelectorAll("#task-list li");
+        const statusEl = document.querySelector("#status");
+
+        // <p> 안에 컨텐츠로 '총 3개의 할 일이 있습니다.' 추가
+        statusEl.textContent = `총 ${allTasks.length}개의 할 일이 있습니다.`;
+        // classList로 클래스 추가
+        // 버튼에 이벤트를 걸어 놓아야 한다.
+        document.querySelector("#btn-complete").addEventListener('click', () => {   // 클릭했을 때 함수 실행해라.
+            // 클릭했을 때 무엇을 할지 지정
+            // 첫 번째 할 일 완료
+            firstTask.classList.add('complete');    // class='complete'
+            firstTask.textContent='장보기 (완료)'
+        });
+
+        document.querySelector("#btn-highlight").addEventListener("click", () => {
+            heading.classList.toggle('highlight')
+        });
+        // 모든 li 요소를 순회
+        allTasks.forEach((task, index) => {
+            console.log(`${index+1} 번 작업 : ${task.textContent}`)
+        });
+    </script>
+</body>
+</html>

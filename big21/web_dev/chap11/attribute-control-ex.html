@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>속성 조작 예제</title>
+</head>
+<body>
+    <a id="link" href="http://example.com">예시 링크</a>
+    <img id="avatar" src="./avata.jpg">
+    <script>
+        const link = document.querySelector("#link");
+        const img = document.querySelector("#avatar");
+        //getAttribute()로 속성값 읽기
+        console.log(link.getAttribute("href"));
+        //setAttribute()로 속성값 변경
+        img.setAttribute("src","v.jpg")
+
+    </script>
+</body>
+</html>

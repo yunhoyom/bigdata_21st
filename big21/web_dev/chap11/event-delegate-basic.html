@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #color-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            gap: 8px;
+            flex-direction: row;
+        }
+        .color-chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color0.2s; 
+        }
+        .color-chip.selected { border-color: #2c3e50; }
+        #selected_color { margin-top:12px; font-weight: bold;}
+    </style>
+</head>
+<body>
+    <h3>색상 선택</h3>
+    <ul id="color-list">
+        <li class="color-chip" data-color="빨강"    
+        style="background: #e74c3c; color:white">빨강</li>
+        <li class="color-chip" data-color="파랑" 
+        style="background: #3498db; color:white">파랑</li>
+        <li class="color-chip" data-color="초록" 
+        style="background: #2ecc71; color:white">초록</li>
+        <li class="color-chip" data-color="노랑" 
+        style="background: #f1c40f;">노랑</li>
+    </ul>
+    <p id="selected-color">선택된 색상 : 없음</p>
+    <script>
+        const colorlist = document.querySelector("#color-list");
+        const selectedText = document.querySelector("#selected-color");
+
+        colorlist.addEventListener('click', (event) => {
+            if(!event.target.matches(".color-chip")) return;
+            colorlist.querySelectorAll(".color-chip").forEach((chip) => {
+                chip.classList.remove("selected")
+            });
+
+            event.target.classList.add('selected');
+            const color = event.target.dataset.color;   /* li의 data-color가 dataset. data-"사용자정의" 가능*/
+            selectedText.textContent = `선택된 색상 : ${color}`;
+        });
+
+    </script>
+</body>
+</html>

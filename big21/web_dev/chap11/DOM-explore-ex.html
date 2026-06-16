@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dom 탐색 실습</title>
+</head>
+<body>
+    <ul id="fruits"> // ul : 태그 선택자, id : id 선택자
+        <li class="item">사과</li> // class : 클래스 선택자
+        <li class="item">바나나</li>
+        <li class="item">포도</li>
+    </ul>
+    <script>
+        // document 가 DOM의 최상위 객체
+        console.log(document.title);
+        // body 요소 자체에 접근
+        console.log(document.body);
+        // id 요소 접근
+        const list = document.getElementById("fruits");
+        console.log(list);
+        // 자식 요소들의 갯수
+        console.log(list.children.length);
+        // 첫 번째 자식 요소를 확인
+        console.log(list.firstElementChild.textContent);
+        
+    </script>
+</body>
+</html>

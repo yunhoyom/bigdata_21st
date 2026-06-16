@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이벤트 버블링 확인</title>
+    <style>
+        .box {
+            padding: 24px;
+            border: 2px solid #3498db;
+            border-radius: 6px;
+            background: #ebf5fb;
+            cursor: pointer;
+        }
+        #inner {
+            padding: 16px;
+            background: #3498db;
+            color: white;
+            border-radius: 4px;
+            text-align: center;
+        }
+        #log {margin-top: 12px; font-size: 0.85rem; color: #333;}
+    </style>
+</head>
+<body>
+    <div id="outer" class="box">
+        외부 div (outer)
+        <div id="inner">내부 div (inner) - 여기를 클릭하세요</div>
+    </div>
+    <p id="log"></p>
+    <script>
+        const log = document.querySelector('#log');
+        //outer 요소에 클릭 리스너를 등록(버블링 단계, 기본값)
+        document.querySelector('#outer').addEventListener('click', (event) => {
+            log.textContent += ` [outer 처리] target : ${event.target.id}, currentTarget : ${event.currentTarget.id}`
+        });
+        document.querySelector('#inner').addEventListener('click', (event) => {
+            log.textContent += ` [inner 처리] target : ${event.target.id}, currentTarget : ${event.currentTarget.id}`
+        });
+        // inner 클릭해도 클릭이 전파되어 outer도 클릭됨.
+        // 나쁜 건 아님. 위임 때문에 필요함. 
+    </script>
+</body>
+</html>
