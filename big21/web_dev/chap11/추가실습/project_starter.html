@@ -183,6 +183,8 @@
       // TODO 1: 이곳에 코드를 작성하세요
       if(todoInput.value.trim() === "") return;
 
+
+
       const li = document.createElement("li");
       li.classList.add("todo-item");
 
@@ -192,27 +194,33 @@
 
       const completeBtn = document.createElement("button");
       completeBtn.classList.add("complete-btn");
-      if(li.classList.contains("done")) {
-        completeBtn.textContent = "취소";
-      } else {
-        completeBtn.textContent = "완료";
-      }
+      completeBtn.textContent = "완료";
 
-      buttonComplete.addEventListener("click", (event) => {
-        const li = event.target.closest("todo-item");
+      completeBtn.addEventListener("click", (event) => {
+        const li = event.target.closest(".todo-item");
         li.classList.toggle('done');
+        if(li.classList.contains("done")) {
+          completeBtn.textContent = "취소";
+        } else {
+          completeBtn.textContent = "완료";
+        }
         updateCounter();
       });
 
       const deleteBtn = document.createElement("button");
       deleteBtn.classList.add("delete-btn");
+      deleteBtn.textContent="삭제";
       deleteBtn.addEventListener("click", (event) => {
-        const li = event.target.closest("todo-item");
+        const li = event.target.closest(".todo-item");
         li.remove();
         updateCounter();
       });
 
       li.append(spanTodo, completeBtn, deleteBtn);
+      todoList.append(li);
+      todoInput.value = '';
+      todoInput.focus();
+      updateCounter();
       // 스켈레톤: 현재는 아무것도 하지 않습니다
       return;
     };
@@ -221,14 +229,16 @@
     // TODO 2: addBtn에 클릭 이벤트를 연결하여 addTodo를 호출하세요
     // ============================================================
     // TODO 2: 이곳에 코드를 작성하세요
-
+    addBtn.addEventListener("click", addTodo);
 
     // ============================================================
     // TODO 3: todoInput에서 Enter 키 입력 시 addTodo를 호출하세요
     //   힌트: keydown 이벤트, event.key === 'Enter'
     // ============================================================
     // TODO 3: 이곳에 코드를 작성하세요
-
+    todoInput.addEventListener("keydown", (event) => {
+      if(event.key === "Enter") addTodo();
+    });
   </script>
 </body>
 </html>
