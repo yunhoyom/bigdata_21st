@@ -1,0 +1,3097 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>12장: 비동기 JavaScript와 API 연동 - 프론트엔드 입문 가이드: HTML, CSS, JavaScript 한 번에</title>
+<style>
+
+:root {
+    --bg: #ffffff;
+    --fg: #1a1a2e;
+    --accent: #3b82f6;
+    --accent-light: #dbeafe;
+    --border: #e2e8f0;
+    --code-bg: #f8fafc;
+    --sidebar-bg: #f1f5f9;
+    --success: #22c55e;
+    --warning: #f59e0b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    line-height: 1.8;
+    font-size: 16px;
+}
+.layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+}
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1rem;
+    font-size: 0.85rem;
+}
+.sidebar h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 0.5rem; }
+.sidebar ul { list-style: none; }
+.sidebar li { margin-bottom: 0.25rem; }
+.sidebar a { color: var(--fg); text-decoration: none; display: block; padding: 0.25rem 0.5rem; border-radius: 4px; transition: background 0.15s; }
+.sidebar a:hover { background: var(--accent-light); }
+.main { padding: 2rem 3rem 4rem; max-width: 900px; }
+.chapter-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--accent); }
+.chapter-header h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+.chapter-header .meta { font-size: 0.9rem; color: #64748b; }
+.difficulty { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+.difficulty-입문 { background: #dcfce7; color: #166534; }
+.difficulty-기초 { background: #dbeafe; color: #1e40af; }
+.difficulty-중급 { background: #fef3c7; color: #92400e; }
+.difficulty-실무 { background: #fce7f3; color: #9d174d; }
+
+/* 본문 */
+.content h1 { font-size: 1.8rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+.content h2 { font-size: 1.4rem; margin: 1.8rem 0 0.8rem; color: var(--accent); }
+.content h3 { font-size: 1.15rem; margin: 1.3rem 0 0.6rem; }
+.content h4 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+.content p { margin-bottom: 1rem; }
+.content ul, .content ol { margin: 0.5rem 0 1rem 1.5rem; }
+.content li { margin-bottom: 0.3rem; }
+.content blockquote {
+    border-left: 4px solid var(--accent);
+    background: var(--accent-light);
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+}
+.content table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.9rem; }
+.content th { background: var(--sidebar-bg); font-weight: 600; text-align: left; }
+.content th, .content td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; }
+.content tr:nth-child(even) { background: #f8fafc; }
+.content pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; overflow-x: auto; margin: 1rem 0; font-size: 0.9rem; }
+.content code { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.9em; }
+.content p code, .content li code, .content td code {
+    background: #f1f5f9;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    color: #e11d48;
+    font-size: 0.85em;
+}
+.content hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+.content img { max-width: 100%; height: auto; border-radius: 8px; }
+
+/* 다이어그램 */
+figure.diagram { margin: 1.5rem 0; text-align: center; }
+figure.diagram .mermaid { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; }
+figure.diagram figcaption { font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; font-style: italic; }
+figure.diagram img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; }
+figure.diagram .svg-diagram { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; text-align: center; }
+figure.diagram .svg-diagram svg { max-width: 100%; height: auto; }
+figure.diagram img.screenshot { border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 10px; }
+.missing-diagram { color: #dc2626; font-style: italic; padding: 1rem; background: #fef2f2; border-radius: 8px; }
+
+/* 코드 섹션 */
+.code-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border); }
+.code-section h2 { font-size: 1.4rem; color: var(--accent); margin-bottom: 1rem; }
+.code-block { margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.code-block h3 { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+.code-block pre { margin: 0; border: none; border-radius: 0; }
+details.code-block { cursor: pointer; }
+details.code-block summary { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+details.code-block[open] summary { border-bottom: 1px solid var(--border); }
+
+/* 네비게이션 */
+.chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    margin-top: 3rem;
+    border-top: 2px solid var(--border);
+    gap: 1rem;
+}
+.chapter-nav a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+.chapter-nav a:hover { background: var(--accent-light); }
+.nav-home { order: 0; }
+.nav-prev { order: -1; }
+.nav-next { order: 1; }
+
+/* 인덱스 페이지 */
+.index-container { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+.book-header { text-align: center; margin-bottom: 3rem; }
+.book-header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.book-header p { color: #64748b; font-size: 1.1rem; }
+.chapter-list { list-style: none; }
+.chapter-list li { margin-bottom: 0.75rem; }
+.chapter-list a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--sidebar-bg);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--fg);
+    transition: all 0.15s;
+    border: 1px solid transparent;
+}
+.chapter-list a:hover { border-color: var(--accent); background: var(--accent-light); }
+.chapter-list .ch-num { font-weight: 700; color: var(--accent); min-width: 3rem; }
+.chapter-list .ch-title { flex: 1; }
+.difficulty-group { margin-top: 2rem; }
+.difficulty-group h2 { font-size: 1.2rem; margin-bottom: 0.75rem; padding-left: 0.5rem; }
+
+/* 코드하이라이트 Pygments 오버라이드 */
+.codehilite { background: var(--code-bg) !important; border-radius: 8px; padding: 1rem; overflow-x: auto; }
+
+/* 줄별 코드 설명 */
+.code-annotation {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 0 0 8px 8px;
+    padding: 1rem 1.2rem;
+    margin: -0.5rem 0 1.5rem;
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+.code-annotation > p:first-child,
+.code-annotation > strong:first-child {
+    display: block;
+    font-weight: 700;
+    color: #0369a1;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+.code-annotation table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.3rem;
+}
+.code-annotation th {
+    background: #e0f2fe;
+    padding: 0.4rem 0.6rem;
+    text-align: left;
+    font-size: 0.82rem;
+    border: 1px solid #bae6fd;
+    color: #0c4a6e;
+}
+.code-annotation td {
+    padding: 0.35rem 0.6rem;
+    border: 1px solid #e0f2fe;
+    vertical-align: top;
+    font-size: 0.85rem;
+}
+.code-annotation td:first-child {
+    width: 2.5rem;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    color: #64748b;
+    font-weight: 600;
+}
+.code-annotation td:nth-child(2) {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: #334155;
+    white-space: nowrap;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.code-annotation td code {
+    background: #e0f2fe;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.82rem;
+}
+.code-annotation tr:nth-child(even) { background: #f0f9ff; }
+.code-annotation tr:nth-child(odd) { background: #ffffff; }
+
+/* API 명세 */
+.api-spec {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 1.2rem 1.4rem;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+.api-spec > p:first-child,
+.api-spec > h4:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: #92400e;
+    margin-bottom: 0.6rem;
+    font-size: 0.95rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid #fde68a;
+}
+.api-spec table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.3rem;
+}
+.api-spec th {
+    background: #fef3c7;
+    padding: 0.4rem 0.7rem;
+    text-align: left;
+    font-size: 0.82rem;
+    border: 1px solid #fde68a;
+    color: #78350f;
+    width: 6.5rem;
+    vertical-align: top;
+}
+.api-spec td {
+    padding: 0.4rem 0.7rem;
+    border: 1px solid #fde68a;
+    vertical-align: top;
+    font-size: 0.85rem;
+}
+.api-spec td code {
+    background: #fef9c3;
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    font-size: 0.83rem;
+    color: #92400e;
+}
+.api-spec tr:nth-child(even) { background: #fffbeb; }
+.api-spec tr:nth-child(odd) { background: #ffffff; }
+
+/* 예제 코드 줄번호 */
+.code-block .ln {
+    color: #94a3b8;
+    user-select: none;
+    display: inline-block;
+    text-align: right;
+    min-width: 2.5em;
+    margin-right: 1em;
+    border-right: 1px solid #e2e8f0;
+    padding-right: 0.8em;
+}
+
+/* 프로젝트 섹션 */
+.project-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border); }
+.project-section h2 { font-size: 1.4rem; color: var(--accent); margin-bottom: 1.2rem; }
+.project-readme { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 1.5rem 2rem; margin-bottom: 1.5rem; line-height: 1.8; }
+.project-readme h1 { font-size: 1.3rem; color: #166534; margin: 0 0 0.8rem; border-bottom: 2px solid #86efac; padding-bottom: 0.5rem; }
+.project-readme h2 { font-size: 1.1rem; color: #15803d; margin: 1.2rem 0 0.5rem; }
+.project-readme h3 { font-size: 1rem; color: #166534; margin: 0.8rem 0 0.4rem; }
+.project-readme ul, .project-readme ol { padding-left: 1.5rem; margin: 0.4rem 0; }
+.project-readme li { margin-bottom: 0.3rem; }
+.project-readme code { background: #dcfce7; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.88rem; }
+.project-readme pre { background: var(--code-bg); padding: 0.8rem; border-radius: 6px; overflow-x: auto; }
+.project-readme pre code { background: none; padding: 0; }
+.project-file { margin-bottom: 0.8rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: pointer; }
+.project-file summary { background: var(--sidebar-bg); padding: 0.6rem 1.2rem; font-size: 0.95rem; font-weight: 600; border-bottom: 1px solid var(--border); }
+.project-file[open] summary { border-bottom: 1px solid var(--border); }
+.project-file pre { margin: 0; border: none; border-radius: 0; }
+
+/* 제목 permalink 숨김 (hover시만 표시) */
+.headerlink { text-decoration: none; color: var(--border); opacity: 0; transition: opacity 0.15s; margin-left: 0.3rem; font-weight: 300; }
+h1:hover .headerlink, h2:hover .headerlink, h3:hover .headerlink, h4:hover .headerlink { opacity: 0.6; }
+.headerlink:hover { opacity: 1 !important; color: var(--accent) !important; }
+
+/* 마크다운 연습문제 */
+.exercise-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.exercise-card-header {
+    background: var(--sidebar-bg);
+    padding: 0.7rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--fg);
+}
+.exercise-card-body {
+    padding: 1.2rem 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.8;
+}
+.exercise-card-body h1 { font-size: 1.2rem; margin: 0 0 0.8rem; color: var(--accent); }
+.exercise-card-body h2 { font-size: 1.05rem; margin: 1rem 0 0.5rem; color: #334155; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+.exercise-card-body h3 { font-size: 0.95rem; margin: 0.8rem 0 0.4rem; color: #475569; }
+.exercise-card-body ul, .exercise-card-body ol { padding-left: 1.5rem; margin: 0.4rem 0; }
+.exercise-card-body li { margin-bottom: 0.3rem; }
+.exercise-card-body table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9rem; }
+.exercise-card-body th { background: var(--sidebar-bg); padding: 0.4rem 0.7rem; border: 1px solid var(--border); text-align: left; }
+.exercise-card-body td { padding: 0.4rem 0.7rem; border: 1px solid var(--border); }
+.exercise-card-body blockquote { border-left: 3px solid var(--accent); padding: 0.5rem 1rem; margin: 0.5rem 0; background: var(--accent-light); border-radius: 0 6px 6px 0; font-style: italic; }
+.exercise-card-body pre { background: var(--code-bg); padding: 0.8rem; border-radius: 6px; overflow-x: auto; font-size: 0.88rem; }
+.exercise-card-body code { background: var(--code-bg); padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.88rem; }
+.exercise-card-body pre code { background: none; padding: 0; }
+
+details.exercise-card { cursor: pointer; }
+details.exercise-card > summary { background: var(--sidebar-bg); padding: 0.7rem 1.2rem; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.95rem; color: var(--fg); list-style: revert; }
+details.exercise-card[open] > summary { border-bottom: 1px solid var(--border); }
+
+/* 반응형 */
+@media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 1.5rem; }
+    .index-container { padding: 1.5rem 1rem; }
+    .book-header h1 { font-size: 1.8rem; }
+}
+
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.codehilite .hll { background-color: #ffffcc }
+.codehilite { background: #f8f8f8; }
+.codehilite .c { color: #3D7B7B; font-style: italic } /* Comment */
+.codehilite .err { border: 1px solid #F00 } /* Error */
+.codehilite .k { color: #008000; font-weight: bold } /* Keyword */
+.codehilite .o { color: #666 } /* Operator */
+.codehilite .ch { color: #3D7B7B; font-style: italic } /* Comment.Hashbang */
+.codehilite .cm { color: #3D7B7B; font-style: italic } /* Comment.Multiline */
+.codehilite .cp { color: #9C6500 } /* Comment.Preproc */
+.codehilite .cpf { color: #3D7B7B; font-style: italic } /* Comment.PreprocFile */
+.codehilite .c1 { color: #3D7B7B; font-style: italic } /* Comment.Single */
+.codehilite .cs { color: #3D7B7B; font-style: italic } /* Comment.Special */
+.codehilite .gd { color: #A00000 } /* Generic.Deleted */
+.codehilite .ge { font-style: italic } /* Generic.Emph */
+.codehilite .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.codehilite .gr { color: #E40000 } /* Generic.Error */
+.codehilite .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.codehilite .gi { color: #008400 } /* Generic.Inserted */
+.codehilite .go { color: #717171 } /* Generic.Output */
+.codehilite .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.codehilite .gs { font-weight: bold } /* Generic.Strong */
+.codehilite .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.codehilite .gt { color: #04D } /* Generic.Traceback */
+.codehilite .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.codehilite .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.codehilite .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.codehilite .kp { color: #008000 } /* Keyword.Pseudo */
+.codehilite .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.codehilite .kt { color: #B00040 } /* Keyword.Type */
+.codehilite .m { color: #666 } /* Literal.Number */
+.codehilite .s { color: #BA2121 } /* Literal.String */
+.codehilite .na { color: #687822 } /* Name.Attribute */
+.codehilite .nb { color: #008000 } /* Name.Builtin */
+.codehilite .nc { color: #00F; font-weight: bold } /* Name.Class */
+.codehilite .no { color: #800 } /* Name.Constant */
+.codehilite .nd { color: #A2F } /* Name.Decorator */
+.codehilite .ni { color: #717171; font-weight: bold } /* Name.Entity */
+.codehilite .ne { color: #CB3F38; font-weight: bold } /* Name.Exception */
+.codehilite .nf { color: #00F } /* Name.Function */
+.codehilite .nl { color: #767600 } /* Name.Label */
+.codehilite .nn { color: #00F; font-weight: bold } /* Name.Namespace */
+.codehilite .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.codehilite .nv { color: #19177C } /* Name.Variable */
+.codehilite .ow { color: #A2F; font-weight: bold } /* Operator.Word */
+.codehilite .w { color: #BBB } /* Text.Whitespace */
+.codehilite .mb { color: #666 } /* Literal.Number.Bin */
+.codehilite .mf { color: #666 } /* Literal.Number.Float */
+.codehilite .mh { color: #666 } /* Literal.Number.Hex */
+.codehilite .mi { color: #666 } /* Literal.Number.Integer */
+.codehilite .mo { color: #666 } /* Literal.Number.Oct */
+.codehilite .sa { color: #BA2121 } /* Literal.String.Affix */
+.codehilite .sb { color: #BA2121 } /* Literal.String.Backtick */
+.codehilite .sc { color: #BA2121 } /* Literal.String.Char */
+.codehilite .dl { color: #BA2121 } /* Literal.String.Delimiter */
+.codehilite .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.codehilite .s2 { color: #BA2121 } /* Literal.String.Double */
+.codehilite .se { color: #AA5D1F; font-weight: bold } /* Literal.String.Escape */
+.codehilite .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.codehilite .si { color: #A45A77; font-weight: bold } /* Literal.String.Interpol */
+.codehilite .sx { color: #008000 } /* Literal.String.Other */
+.codehilite .sr { color: #A45A77 } /* Literal.String.Regex */
+.codehilite .s1 { color: #BA2121 } /* Literal.String.Single */
+.codehilite .ss { color: #19177C } /* Literal.String.Symbol */
+.codehilite .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.codehilite .fm { color: #00F } /* Name.Function.Magic */
+.codehilite .vc { color: #19177C } /* Name.Variable.Class */
+.codehilite .vg { color: #19177C } /* Name.Variable.Global */
+.codehilite .vi { color: #19177C } /* Name.Variable.Instance */
+.codehilite .vm { color: #19177C } /* Name.Variable.Magic */
+.codehilite .il { color: #666 } /* Literal.Number.Integer.Long */
+</style>
+
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <h3>이 장의 목차</h3>
+  <div class="toc">
+<ul>
+<li><a href="#_1">동기와 비동기, 이벤트 루프</a><ul>
+<li><a href="#_2">도입</a></li>
+<li><a href="#_3">핵심 개념 설명</a></li>
+<li><a href="#_4">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#_5">콜백과 프로미스</a><ul>
+<li><a href="#_6">도입</a></li>
+<li><a href="#_7">핵심 개념 설명</a></li>
+<li><a href="#_8">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#asyncawait">async/await로 깔끔하게 쓰기</a><ul>
+<li><a href="#_9">도입</a></li>
+<li><a href="#_10">핵심 개념 설명</a></li>
+<li><a href="#_11">비교 테이블</a></li>
+<li><a href="#_12">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#fetch-api">Fetch API로 데이터 가져오기</a><ul>
+<li><a href="#_13">도입</a></li>
+<li><a href="#_14">핵심 개념 설명</a></li>
+<li><a href="#_16">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#json">JSON 처리와 간단한 앱 만들기</a><ul>
+<li><a href="#_17">도입</a></li>
+<li><a href="#_18">핵심 개념 설명</a></li>
+<li><a href="#_19">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#faq">FAQ</a></li>
+<li><a href="#_20">장 요약</a><ul>
+<li><a href="#_21">핵심 키워드</a></li>
+<li><a href="#_22">다음 장 미리보기</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+</aside>
+<main class="main">
+  <div class="chapter-header">
+    <h1>12장: 비동기 JavaScript와 API 연동</h1>
+    <div class="meta">
+      <span class="difficulty difficulty-중급">중급</span>
+    </div>
+  </div>
+  <div class="content">
+    <h1 id="javascript-api">비동기 JavaScript와 API 연동<a class="headerlink" href="#javascript-api" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>학습 목표</strong>:
+- 동기·비동기의 차이와 이벤트 루프의 동작 원리를 설명할 수 있습니다
+- 콜백과 프로미스로 비동기 작업을 다룰 수 있습니다
+- async/await와 try/catch로 가독성 좋은 비동기 코드를 작성할 수 있습니다
+- Fetch API로 외부 데이터를 가져와 화면에 렌더링하는 앱을 만들 수 있습니다</p>
+</blockquote>
+<hr />
+<h2 id="_1">동기와 비동기, 이벤트 루프<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h2>
+<h3 id="_2">도입<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<p>지금까지 작성한 코드는 모두 위에서 아래로 순서대로 실행되었습니다. 그런데 웹 페이지는 서버에서 데이터를 받아오거나, 사용자의 클릭을 기다리거나, 타이머가 끝날 때까지 대기하는 상황이 자주 생깁니다. 이런 "기다림"을 동기(Synchronous) 방식으로 처리하면 브라우저 전체가 얼어붙어 버립니다. 이를 해결하는 것이 비동기(Asynchronous) 프로그래밍입니다.</p>
+<h3 id="_3">핵심 개념 설명<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<h4 id="synchronous-asynchronous">동기(Synchronous)와 비동기(Asynchronous)<a class="headerlink" href="#synchronous-asynchronous" title="Permanent link">&para;</a></h4>
+<p><strong>동기(Synchronous)</strong> 방식은 앞 작업이 완전히 끝나야 다음 작업을 시작합니다. 은행 창구에서 한 명씩 업무를 처리하는 모습과 같습니다.</p>
+<p><strong>비동기(Asynchronous)</strong> 방식은 시간이 오래 걸리는 작업을 "맡겨 두고" 다른 일을 먼저 처리합니다. 세탁기를 돌려 놓고 밥을 짓는 것과 같습니다. 세탁이 끝나면 알림이 오고, 그때 빨래를 꺼내면 됩니다.</p>
+<h4 id="event-loop">이벤트 루프(Event Loop)가 작업을 처리하는 순서<a class="headerlink" href="#event-loop" title="Permanent link">&para;</a></h4>
+<p>JavaScript는 <strong>단일 스레드(Single Thread)</strong> 언어입니다. 한 번에 하나의 작업만 처리할 수 있습니다. 그런데도 여러 일을 동시에 하는 것처럼 느껴지는 이유가 바로 <strong>이벤트 루프(Event Loop)</strong> 덕분입니다.</p>
+<p>이벤트 루프는 다음 세 가지 구성 요소로 작동합니다.</p>
+<ul>
+<li><strong>콜 스택(Call Stack)</strong>: 현재 실행 중인 함수들이 쌓이는 곳입니다. 함수가 호출되면 쌓이고, 실행이 끝나면 사라집니다.</li>
+<li><strong>웹 API(Web API)</strong>: 브라우저가 제공하는 비동기 기능입니다. <code>setTimeout</code>, <code>fetch</code>, 이벤트 리스너 등이 여기에서 처리됩니다.</li>
+<li><strong>태스크 큐(Task Queue)</strong>: 웹 API에서 처리가 끝난 콜백 함수가 대기하는 줄입니다.</li>
+</ul>
+<p>이벤트 루프는 콜 스택이 비어 있을 때마다 태스크 큐에서 작업을 가져와 실행합니다. 한 명의 요리사(콜 스택)가 주문 대기열(태스크 큐)을 보며 손이 비는 대로 다음 주문을 처리하는 것과 같습니다.</p>
+<figure class="diagram">
+<img src="../chapters/ch_12/images/diagram_01.png" alt="JavaScript 이벤트 루프 다이어그램: 콜 스택(LIFO, main/setTimeout/console.log)·웹 API(setTimeout/fetch/DOM 이벤트)·태스크 큐(FIFO, callback 대기)·마이크로태스크 큐(Promise.then)·이벤트 루프 박스와 비동기 흐름 화살표" loading="lazy">
+<figcaption>JavaScript 이벤트 루프 동작 원리</figcaption>
+</figure>
+
+<h4 id="settimeout">setTimeout으로 비동기 체험하기<a class="headerlink" href="#settimeout" title="Permanent link">&para;</a></h4>
+<p>다음 코드는 <code>setTimeout</code>을 사용하여 이벤트 루프의 실행 순서를 직접 확인합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>이벤트 루프 실험<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;1: 동기 코드 시작&#39;</span><span class="p">);</span>
+
+<span class="w">    </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;3: setTimeout 콜백 (2초 뒤)&#39;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="mf">2000</span><span class="p">);</span>
+
+<span class="w">    </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;2: setTimeout 콜백 (0초 뒤)&#39;</span><span class="p">);</span>
+<span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="mf">0</span><span class="p">);</span>
+
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;1: 동기 코드 끝&#39;</span><span class="p">);</span>
+<span class="w">  </span><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code>// 콘솔 출력:
+// 1: 동기 코드 시작
+// 1: 동기 코드 끝
+// 2: setTimeout 콜백 (0초 뒤)
+// 3: setTimeout 콜백 (2초 뒤)
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1</td>
+<td><code>console.log('1: 동기 코드 시작')</code></td>
+<td>콜 스택에 즉시 쌓이고 실행됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td><code>setTimeout(() =&gt; {...}, 2000)</code></td>
+<td>2초 타이머를 웹 API에 등록하고 즉시 다음 줄로 넘어갑니다. 콜 스택을 막지 않습니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">7</td>
+<td><code>setTimeout(() =&gt; {...}, 0)</code></td>
+<td>0초 타이머도 웹 API를 거쳐 태스크 큐로 갑니다. 동기 코드가 모두 끝난 뒤에 실행됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">11</td>
+<td><code>console.log('1: 동기 코드 끝')</code></td>
+<td>동기 코드가 모두 실행된 후, 이벤트 루프가 태스크 큐의 콜백을 처리합니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p><strong>핵심</strong>: <code>setTimeout(fn, 0)</code>은 "즉시 실행"이 아닙니다. 현재 동기 코드가 전부 끝난 뒤에야 실행됩니다. 이것이 이벤트 루프의 핵심 동작입니다.</p>
+<p><strong>마이크로태스크 큐(Microtask Queue)</strong>: Promise의 <code>.then()</code> 콜백은 일반 태스크 큐보다 우선순위가 높은 마이크로태스크 큐에 들어갑니다. 따라서 <code>setTimeout</code> 콜백보다 먼저 실행됩니다. 이 점을 기억해 두면 나중에 실행 순서 관련 문제를 해결하는 데 도움이 됩니다.</p>
+</blockquote>
+<h3 id="_4">절 요약<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li>JavaScript는 단일 스레드로 한 번에 하나의 작업만 처리합니다</li>
+<li>이벤트 루프는 콜 스택이 빌 때 태스크 큐의 작업을 가져와 실행합니다</li>
+<li><code>setTimeout(fn, 0)</code>도 현재 동기 코드가 끝난 뒤에 실행됩니다</li>
+<li>Promise 콜백(<code>.then</code>)은 마이크로태스크 큐를 통해 <code>setTimeout</code>보다 먼저 실행됩니다</li>
+</ul>
+<hr />
+<h2 id="_5">콜백과 프로미스<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h2>
+<h3 id="_6">도입<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<p>비동기 작업이 끝난 뒤 "그 다음에 할 일"을 어떻게 지정할까요? 가장 기본적인 방법이 <strong>콜백(Callback)</strong> 함수입니다. 그런데 콜백을 여러 번 중첩하면 코드가 깊어지고 읽기 어려워집니다. 이 문제를 해결하기 위해 <strong>프로미스(Promise)</strong> 가 도입되었습니다.</p>
+<h3 id="_7">핵심 개념 설명<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<h4 id="callback-callback-hell">콜백(Callback)과 콜백 지옥(Callback Hell)<a class="headerlink" href="#callback-callback-hell" title="Permanent link">&para;</a></h4>
+<p><strong>콜백(Callback)</strong> 은 "나중에 호출해 달라고 넘겨두는 함수"입니다. 비동기 작업이 끝나면 브라우저가 이 함수를 호출합니다.</p>
+<p>다음 코드는 콜백이 중첩될 때 발생하는 콜백 지옥을 보여줍니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>콜백 지옥 예시<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="c1">// 1단계: 사용자 정보를 가져온다 (0.5초 걸림)</span>
+<span class="w">    </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">userId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">42</span><span class="p">;</span>
+<span class="w">      </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;1단계: 사용자 ID 획득&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">userId</span><span class="p">);</span>
+
+<span class="w">      </span><span class="c1">// 2단계: 해당 사용자의 주문 목록을 가져온다 (0.5초 걸림)</span>
+<span class="w">      </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">orders</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;상품A&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;상품B&#39;</span><span class="p">];</span>
+<span class="w">        </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;2단계: 주문 목록&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">orders</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// 3단계: 첫 번째 주문의 배송 상태를 가져온다 (0.5초 걸림)</span>
+<span class="w">        </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="kd">const</span><span class="w"> </span><span class="nx">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;배송 중&#39;</span><span class="p">;</span>
+<span class="w">          </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;3단계: 배송 상태&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">status</span><span class="p">);</span>
+<span class="w">          </span><span class="c1">// 콜백이 깊어질수록 들여쓰기가 쌓이고 유지보수가 어려워집니다</span>
+<span class="w">        </span><span class="p">},</span><span class="w"> </span><span class="mf">500</span><span class="p">);</span>
+<span class="w">      </span><span class="p">},</span><span class="w"> </span><span class="mf">500</span><span class="p">);</span>
+<span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="mf">500</span><span class="p">);</span>
+<span class="w">  </span><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code>// 콘솔 출력:
+// 1단계: 사용자 ID 획득 42
+// 2단계: 주문 목록 [&#39;상품A&#39;, &#39;상품B&#39;]
+// 3단계: 배송 상태 배송 중
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1</td>
+<td>첫 번째 <code>setTimeout</code></td>
+<td>비동기 1단계 작업을 시뮬레이션합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">6</td>
+<td>두 번째 <code>setTimeout</code> (중첩)</td>
+<td>1단계 완료 후 2단계를 실행합니다. 들여쓰기가 한 단계 더 깊어집니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">12</td>
+<td>세 번째 <code>setTimeout</code> (이중 중첩)</td>
+<td>2단계 완료 후 3단계를 실행합니다. 이처럼 중첩이 계속되면 코드를 읽기 매우 어려워집니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="promise">프로미스(Promise)의 세 가지 상태<a class="headerlink" href="#promise" title="Permanent link">&para;</a></h4>
+<p><strong>프로미스(Promise)</strong> 는 "미래에 완료될 작업"을 나타내는 객체입니다. 음식 주문 후 받는 진동벨처럼, 지금은 결과가 없지만 완료되면 알려 주겠다는 약속과 같습니다.</p>
+<p>프로미스는 세 가지 상태를 가집니다.</p>
+<table>
+<thead>
+<tr>
+<th>상태</th>
+<th>의미</th>
+<th>전환 조건</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>대기(pending)</strong></td>
+<td>아직 결과를 모름</td>
+<td>초기 상태</td>
+</tr>
+<tr>
+<td><strong>이행(fulfilled)</strong></td>
+<td>작업이 성공적으로 완료됨</td>
+<td><code>resolve()</code> 호출 시</td>
+</tr>
+<tr>
+<td><strong>거부(rejected)</strong></td>
+<td>작업이 실패함</td>
+<td><code>reject()</code> 호출 시</td>
+</tr>
+</tbody>
+</table>
+<figure class="diagram">
+<img src="../chapters/ch_12/images/diagram_02.png" alt="Promise 상태 전이: pending에서 resolve()→fulfilled(.then 실행), reject()→rejected(.catch 실행), 둘 다 settled 후 .finally() 실행. 불변성 설명 포함" loading="lazy">
+<figcaption>Promise 상태 전이 다이어그램</figcaption>
+</figure>
+
+<h4 id="thencatchfinally">then·catch·finally로 결과 다루기<a class="headerlink" href="#thencatchfinally" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>Promise 기초<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="c1">// Promise 생성: 2초 뒤 성공 또는 실패</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">fetchData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Promise</span><span class="p">((</span><span class="nx">resolve</span><span class="p">,</span><span class="w"> </span><span class="nx">reject</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">success</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"> </span><span class="c1">// false로 바꾸면 실패 케이스 확인 가능</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">success</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nx">resolve</span><span class="p">({</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;홍길동&#39;</span><span class="w"> </span><span class="p">});</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nx">reject</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s1">&#39;데이터 로드 실패&#39;</span><span class="p">));</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">},</span><span class="w"> </span><span class="mf">2000</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="nx">fetchData</span>
+<span class="w">      </span><span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">data</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;성공:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">data</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span><span class="w"> </span><span class="c1">// fulfilled 상태에서 실행</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nx">data</span><span class="p">.</span><span class="nx">id</span><span class="p">;</span><span class="w">                  </span><span class="c1">// 다음 then으로 값 전달 (체이닝)</span>
+<span class="w">      </span><span class="p">})</span>
+<span class="w">      </span><span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">id</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;ID 확인:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="p">);</span><span class="w">     </span><span class="c1">// 이전 then의 반환값을 받음</span>
+<span class="w">      </span><span class="p">})</span>
+<span class="w">      </span><span class="p">.</span><span class="k">catch</span><span class="p">((</span><span class="nx">error</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;오류:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span><span class="w"> </span><span class="c1">// rejected 상태에서 실행</span>
+<span class="w">      </span><span class="p">})</span>
+<span class="w">      </span><span class="p">.</span><span class="k">finally</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;항상 실행됨&#39;</span><span class="p">);</span><span class="w">      </span><span class="c1">// 성공/실패 무관하게 항상 실행</span>
+<span class="w">      </span><span class="p">});</span>
+
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Promise 상태 확인 (pending):&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">fetchData</span><span class="p">);</span>
+<span class="w">  </span><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code>// 콘솔 출력 (success = true인 경우):
+// Promise 상태 확인 (pending): Promise {&lt;pending&gt;}
+// (2초 뒤)
+// 성공: 홍길동
+// ID 확인: 1
+// 항상 실행됨
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">2</td>
+<td><code>new Promise((resolve, reject) =&gt; {...})</code></td>
+<td>Promise 객체를 생성합니다. 인자로 받은 함수(executor)가 즉시 실행됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">4</td>
+<td><code>const success = true</code></td>
+<td>성공/실패 조건입니다. 실제 API 호출에서는 서버 응답 결과가 이 역할을 합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">6</td>
+<td><code>resolve({ id: 1, name: '홍길동' })</code></td>
+<td>fulfilled 상태로 전환하고, 전달한 값이 <code>.then()</code> 콜백의 인자가 됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">8</td>
+<td><code>reject(new Error('...'))</code></td>
+<td>rejected 상태로 전환하고, <code>.catch()</code> 콜백의 인자가 됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">13</td>
+<td><code>.then((data) =&gt; {...})</code></td>
+<td>fulfilled 상태일 때만 실행됩니다. 반환값은 다음 <code>.then()</code>으로 전달됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">18</td>
+<td><code>.catch((error) =&gt; {...})</code></td>
+<td>rejected 상태이거나 <code>.then()</code> 안에서 오류가 발생했을 때 실행됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">21</td>
+<td><code>.finally(() =&gt; {...})</code></td>
+<td>성공·실패에 관계없이 항상 실행됩니다. 로딩 스피너 숨기기 등에 활용합니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p><strong>팁</strong>: <code>.then()</code> 안에서 값을 <code>return</code>하면 다음 <code>.then()</code>이 그 값을 받아 체이닝이 이어집니다. 이를 <strong>프로미스 체이닝(Promise Chaining)</strong> 이라고 합니다.</p>
+<p><strong>주의</strong>: <code>Promise</code>를 생성하면 executor 함수가 즉시 실행됩니다. 비동기 작업이 <code>.then()</code>에서 시작된다고 오해하지 않도록 주의하십시오.</p>
+</blockquote>
+<h3 id="_8">절 요약<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li>콜백을 중첩하면 코드가 깊어지는 콜백 지옥이 발생합니다</li>
+<li><code>Promise</code>는 pending → fulfilled 또는 rejected 상태로 전이합니다</li>
+<li><code>.then()</code>은 성공, <code>.catch()</code>는 실패, <code>.finally()</code>는 항상 실행됩니다</li>
+<li><code>.then()</code>의 반환값으로 프로미스 체이닝이 가능합니다</li>
+</ul>
+<hr />
+<h2 id="asyncawait">async/await로 깔끔하게 쓰기<a class="headerlink" href="#asyncawait" title="Permanent link">&para;</a></h2>
+<h3 id="_9">도입<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<p>프로미스 체이닝은 콜백 지옥보다 훨씬 낫지만, <code>.then().then().then()</code>이 길어지면 여전히 읽기 불편합니다. <strong>async/await</strong> 문법을 사용하면 비동기 코드를 마치 동기 코드처럼 위에서 아래로 읽히도록 작성할 수 있습니다.</p>
+<h3 id="_10">핵심 개념 설명<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<h4 id="async-await">async 함수와 await<a class="headerlink" href="#async-await" title="Permanent link">&para;</a></h4>
+<p><code>async</code> 키워드를 함수 앞에 붙이면 그 함수는 항상 프로미스를 반환하는 <strong>비동기 함수</strong>가 됩니다. <code>await</code>는 <code>async</code> 함수 안에서만 사용할 수 있으며, 프로미스가 완료될 때까지 해당 함수의 실행을 일시 중단합니다.</p>
+<p>줄을 서서 차례를 기다렸다가 결과를 받고 다음 일을 진행하는 것처럼, 코드를 순서대로 읽게 해 줍니다.</p>
+<p>중요한 점은 <code>await</code>가 <strong>전체 프로그램을 멈추는 것이 아닙니다</strong>. 해당 <code>async</code> 함수의 실행만 일시 중단되고, 다른 코드는 계속 실행됩니다.</p>
+<h4 id="promise-asyncawait">Promise 방식과 async/await 비교<a class="headerlink" href="#promise-asyncawait" title="Permanent link">&para;</a></h4>
+<p>다음 코드는 동일한 비동기 작업을 두 방식으로 작성하여 비교합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>async/await vs Promise<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="c1">// 비동기 작업을 시뮬레이션하는 헬퍼 함수</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">delay</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">ms</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Promise</span><span class="p">((</span><span class="nx">resolve</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">setTimeout</span><span class="p">(</span><span class="nx">resolve</span><span class="p">,</span><span class="w"> </span><span class="nx">ms</span><span class="p">));</span>
+
+<span class="w">    </span><span class="c1">// --- 방식 1: Promise 체이닝 ---</span>
+<span class="w">    </span><span class="kd">function</span><span class="w"> </span><span class="nx">loadUserWithPromise</span><span class="p">(</span><span class="nx">userId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="nx">delay</span><span class="p">(</span><span class="mf">500</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="nx">then</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="nx">userId</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;홍길동&#39;</span><span class="w"> </span><span class="p">}))</span>
+<span class="w">        </span><span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">user</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[Promise] 사용자:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+<span class="w">          </span><span class="k">return</span><span class="w"> </span><span class="nx">delay</span><span class="p">(</span><span class="mf">500</span><span class="p">).</span><span class="nx">then</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;주문A&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;주문B&#39;</span><span class="p">]);</span>
+<span class="w">        </span><span class="p">})</span>
+<span class="w">        </span><span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">orders</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[Promise] 주문 목록:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">orders</span><span class="p">);</span>
+<span class="w">        </span><span class="p">})</span>
+<span class="w">        </span><span class="p">.</span><span class="k">catch</span><span class="p">((</span><span class="nx">error</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;[Promise] 오류:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+<span class="w">        </span><span class="p">});</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// --- 방식 2: async/await ---</span>
+<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">loadUserWithAsync</span><span class="p">(</span><span class="nx">userId</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">await</span><span class="w"> </span><span class="nx">delay</span><span class="p">(</span><span class="mf">500</span><span class="p">);</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="nx">userId</span><span class="p">,</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;홍길동&#39;</span><span class="w"> </span><span class="p">};</span>
+<span class="w">        </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[async] 사용자:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">await</span><span class="w"> </span><span class="nx">delay</span><span class="p">(</span><span class="mf">500</span><span class="p">);</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">orders</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;주문A&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;주문B&#39;</span><span class="p">];</span>
+<span class="w">        </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;[async] 주문 목록:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">orders</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;[async] 오류:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">loadUserWithPromise</span><span class="p">(</span><span class="mf">1</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">loadUserWithAsync</span><span class="p">(</span><span class="mf">2</span><span class="p">);</span>
+<span class="w">  </span><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code>// 콘솔 출력:
+// [Promise] 사용자: 홍길동
+// [async] 사용자: 홍길동
+// (두 방식이 거의 동시에 출력됨. 각 내부는 0.5초 간격)
+// [Promise] 주문 목록: [&#39;주문A&#39;, &#39;주문B&#39;]
+// [async] 주문 목록: [&#39;주문A&#39;, &#39;주문B&#39;]
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">2</td>
+<td><code>const delay = (ms) =&gt; new Promise(...)</code></td>
+<td>지정한 밀리초 뒤 resolve되는 헬퍼 함수입니다. 실제 API 호출 대신 지연을 시뮬레이션합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">5~19</td>
+<td>Promise 체이닝 방식</td>
+<td><code>.then()</code>이 중첩되어 가로로 긴 코드가 됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">22</td>
+<td><code>async function loadUserWithAsync</code></td>
+<td><code>async</code> 키워드로 비동기 함수를 선언합니다. 이 함수는 항상 Promise를 반환합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">24</td>
+<td><code>try {</code></td>
+<td><code>await</code> 코드에서 발생하는 오류를 잡기 위해 <code>try/catch</code>로 감쌉니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">25</td>
+<td><code>await delay(500)</code></td>
+<td>0.5초를 기다립니다. 이 줄에서 함수 실행이 일시 중단되고, 완료 후 다음 줄로 넘어갑니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">30</td>
+<td><code>} catch (error) {</code></td>
+<td>비동기 작업 중 오류가 발생하면 여기서 처리합니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="trycatch">try/catch로 에러 처리하기<a class="headerlink" href="#trycatch" title="Permanent link">&para;</a></h4>
+<p><code>await</code>가 reject된 프로미스를 받으면 에러를 던집니다. 이를 <code>try/catch</code>로 잡습니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>async/await 에러 처리<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">riskyOperation</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// 50% 확률로 실패하는 작업 시뮬레이션</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Promise</span><span class="p">((</span><span class="nx">resolve</span><span class="p">,</span><span class="w"> </span><span class="nx">reject</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nx">setTimeout</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0.5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nx">resolve</span><span class="p">(</span><span class="s1">&#39;작업 성공!&#39;</span><span class="p">);</span>
+<span class="w">            </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">              </span><span class="nx">reject</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s1">&#39;작업 실패: 서버 오류&#39;</span><span class="p">));</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">          </span><span class="p">},</span><span class="w"> </span><span class="mf">1000</span><span class="p">);</span>
+<span class="w">        </span><span class="p">});</span>
+
+<span class="w">        </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;결과:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">result</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// rejected 상태의 에러가 여기서 잡힙니다</span>
+<span class="w">        </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;오류 처리:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;작업 완료 (성공·실패 무관)&#39;</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">riskyOperation</span><span class="p">();</span>
+<span class="w">  </span><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code>// 콘솔 출력 (성공한 경우):
+// 결과: 작업 성공!
+// 작업 완료 (성공·실패 무관)
+
+// 콘솔 출력 (실패한 경우):
+// 오류 처리: 작업 실패: 서버 오류
+// 작업 완료 (성공·실패 무관)
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1</td>
+<td><code>async function riskyOperation()</code></td>
+<td>async 함수를 선언합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td><code>try {</code></td>
+<td><code>await</code> 블록 내에서 오류가 발생할 수 있으므로 <code>try</code>로 시작합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td><code>const result = await new Promise(...)</code></td>
+<td>프로미스가 완료될 때까지 기다립니다. resolve되면 값이, reject되면 <code>catch</code>로 제어가 넘어갑니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">11</td>
+<td><code>resolve('작업 성공!')</code></td>
+<td>성공 시 <code>result</code> 변수에 이 값이 담깁니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">13</td>
+<td><code>reject(new Error('...'))</code></td>
+<td>실패 시 <code>catch</code> 블록의 <code>error</code>로 이 Error 객체가 전달됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">19</td>
+<td><code>} catch (error) {</code></td>
+<td><code>await</code>가 reject된 Promise를 받으면 이 블록이 실행됩니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: <code>await</code>를 사용하는 코드는 항상 <code>try/catch</code>로 감싸십시오. 에러 처리를 빠뜨리면 아무런 알림 없이 작업이 실패할 수 있습니다.</p>
+</blockquote>
+<h3 id="_11">비교 테이블<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>콜백</th>
+<th>Promise (.then)</th>
+<th>async/await</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>가독성</td>
+<td>중첩 시 나쁨</td>
+<td>보통</td>
+<td>좋음 (동기 코드처럼 읽힘)</td>
+</tr>
+<tr>
+<td>에러 처리</td>
+<td>각 단계마다</td>
+<td><code>.catch()</code></td>
+<td><code>try/catch</code></td>
+</tr>
+<tr>
+<td>디버깅</td>
+<td>어려움</td>
+<td>보통</td>
+<td>쉬움</td>
+</tr>
+<tr>
+<td>지원 환경</td>
+<td>모든 환경</td>
+<td>ES2015+</td>
+<td>ES2017+ (모던 브라우저)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_12">절 요약<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>async</code> 함수는 항상 프로미스를 반환합니다</li>
+<li><code>await</code>는 프로미스가 완료될 때까지 해당 함수의 실행을 일시 중단합니다</li>
+<li><code>try/catch</code>로 비동기 오류를 동기 코드처럼 처리합니다</li>
+<li><code>finally</code>는 성공·실패에 관계없이 항상 실행됩니다</li>
+</ul>
+<hr />
+<h2 id="fetch-api">Fetch API로 데이터 가져오기<a class="headerlink" href="#fetch-api" title="Permanent link">&para;</a></h2>
+<h3 id="_13">도입<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<p>이론을 익혔으니 이제 실제 인터넷에서 데이터를 가져와 봅니다. <strong>Fetch API</strong> 는 브라우저에 내장된 표준 네트워크 요청 인터페이스입니다. 음식점에 전화로 주문(요청)을 넣고 배달(응답)을 받는 것과 같습니다. <code>fetch()</code>는 프로미스를 반환하기 때문에 <code>async/await</code>와 자연스럽게 결합됩니다.</p>
+<h3 id="_14">핵심 개념 설명<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
+<h4 id="fetch">fetch로 요청 보내기와 응답 상태 확인하기<a class="headerlink" href="#fetch" title="Permanent link">&para;</a></h4>
+<p><code>fetch(url)</code>을 호출하면 <code>Response</code> 객체를 담은 프로미스를 반환합니다. 이 <code>Response</code> 객체에는 상태 코드(<code>status</code>)와 성공 여부(<code>ok</code>)가 담겨 있습니다.</p>
+<p><strong>중요한 주의사항</strong>: <code>fetch</code>는 404, 500 같은 HTTP 오류 상태 코드를 받아도 reject되지 않습니다. 네트워크 연결 자체가 실패할 때만 reject됩니다. 따라서 <strong><code>response.ok</code>를 반드시 확인</strong>해야 합니다.</p>
+<figure class="diagram">
+<img src="../chapters/ch_12/images/diagram_03.png" alt="Fetch API 요청-응답 5단계 흐름: ①브라우저 fetch() → ②네트워크(HTTP GET) → ③API 서버(200 OK) → ④response.json() 파싱 → ⑤DOM 업데이트, 각 단계 컬러 박스와 코드 예시" loading="lazy">
+<figcaption>Fetch API HTTP 요청-응답 흐름</figcaption>
+</figure>
+
+<div class="api-spec">
+<p><strong><code>fetch(resource, options?)</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>설명</strong></td>
+<td>네트워크 요청을 시작하고 응답을 Promise로 반환하는 브라우저 내장 함수입니다</td>
+</tr>
+<tr>
+<td><strong>매개변수</strong></td>
+<td><code>resource</code> (string | Request): 요청할 URL 또는 Request 객체</td>
+</tr>
+<tr>
+<td></td>
+<td><code>options</code> (object, 선택): <code>method</code>, <code>headers</code>, <code>body</code> 등 요청 옵션</td>
+</tr>
+<tr>
+<td><strong>반환값</strong></td>
+<td><code>Promise&lt;Response&gt;</code> - 응답 객체를 담은 프로미스</td>
+</tr>
+<tr>
+<td><strong>예외</strong></td>
+<td>네트워크 오류 또는 CORS 정책 위반 시 reject</td>
+</tr>
+<tr>
+<td><strong>주의</strong></td>
+<td>HTTP 4xx/5xx 응답은 reject되지 않으므로 <code>response.ok</code>를 직접 확인해야 합니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>다음 코드는 JSONPlaceholder(무료 공개 테스트 API)에서 사용자 목록을 가져옵니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>Fetch API 기초<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">getUsers</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// 1단계: 요청 보내기</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="s1">&#39;https://jsonplaceholder.typicode.com/users&#39;</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// 2단계: 응답 상태 확인 (반드시 필요!)</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="sb">`HTTP 오류: 상태 코드 </span><span class="si">${</span><span class="nx">response</span><span class="p">.</span><span class="nx">status</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// 3단계: JSON으로 파싱</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">users</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">();</span>
+
+<span class="w">        </span><span class="c1">// 4단계: 데이터 사용</span>
+<span class="w">        </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`총 </span><span class="si">${</span><span class="nx">users</span><span class="p">.</span><span class="nx">length</span><span class="si">}</span><span class="sb">명의 사용자를 불러왔습니다`</span><span class="p">);</span>
+<span class="w">        </span><span class="nx">users</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span><span class="w"> </span><span class="mf">3</span><span class="p">).</span><span class="nx">forEach</span><span class="p">((</span><span class="nx">user</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`- </span><span class="si">${</span><span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="sb"> (</span><span class="si">${</span><span class="nx">user</span><span class="p">.</span><span class="nx">email</span><span class="si">}</span><span class="sb">)`</span><span class="p">);</span>
+<span class="w">        </span><span class="p">});</span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;오류 발생:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">getUsers</span><span class="p">();</span>
+<span class="w">  </span><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code>// 콘솔 출력:
+// 총 10명의 사용자를 불러왔습니다
+// - Leanne Graham (Sincere@april.biz)
+// - Ervin Howell (Shanna@melissa.tv)
+// - Clementine Bauch (Nathan@yesenia.net)
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">2</td>
+<td><code>async function getUsers()</code></td>
+<td>비동기 함수를 선언합니다. <code>await</code>를 사용하려면 반드시 <code>async</code> 함수여야 합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td><code>try {</code></td>
+<td>네트워크 오류 및 <code>throw</code>된 오류를 잡기 위해 <code>try/catch</code>로 감쌉니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">5</td>
+<td><code>const response = await fetch(...)</code></td>
+<td>URL로 GET 요청을 보내고, 응답 헤더가 도착할 때까지 기다립니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">8</td>
+<td><code>if (!response.ok)</code></td>
+<td><code>response.ok</code>는 상태 코드가 200~299 범위일 때 <code>true</code>입니다. <strong>이 확인을 생략하면 404나 500 응답도 정상으로 처리됩니다</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;">9</td>
+<td><code>throw new Error(...)</code></td>
+<td>수동으로 오류를 던져 <code>catch</code> 블록이 처리하게 합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">13</td>
+<td><code>const users = await response.json()</code></td>
+<td>응답 본문을 JSON으로 파싱합니다. 이것도 비동기 작업이므로 <code>await</code>가 필요합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">17</td>
+<td><code>users.slice(0, 3).forEach(...)</code></td>
+<td>처음 3명의 정보만 출력합니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="_15">에러와 네트워크 실패 처리하기<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h4>
+<p>실제 서비스에서는 다양한 오류 상황을 처리해야 합니다. 다음 코드는 여러 오류 상황을 체계적으로 다루는 방법을 보여줍니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>Fetch 에러 처리<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">fetchWithErrorHandling</span><span class="p">(</span><span class="nx">url</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="nx">url</span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="c1">// HTTP 오류: 404(찾을 수 없음), 500(서버 오류) 등</span>
+<span class="w">          </span><span class="kd">const</span><span class="w"> </span><span class="nx">message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`요청 실패 (상태 코드: </span><span class="si">${</span><span class="nx">response</span><span class="p">.</span><span class="nx">status</span><span class="si">}</span><span class="sb"> </span><span class="si">${</span><span class="nx">response</span><span class="p">.</span><span class="nx">statusText</span><span class="si">}</span><span class="sb">)`</span><span class="p">;</span>
+<span class="w">          </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">();</span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">error</span><span class="w"> </span><span class="ow">instanceof</span><span class="w"> </span><span class="ne">TypeError</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="c1">// TypeError: 네트워크 연결 실패, CORS 오류, URL이 잘못된 경우</span>
+<span class="w">          </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;네트워크 오류:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="c1">// HTTP 오류 또는 JSON 파싱 오류</span>
+<span class="w">          </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;요청 오류:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w"> </span><span class="c1">// 오류 시 null 반환</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// 정상 요청</span>
+<span class="w">    </span><span class="nx">fetchWithErrorHandling</span><span class="p">(</span><span class="s1">&#39;https://jsonplaceholder.typicode.com/posts/1&#39;</span><span class="p">)</span>
+<span class="w">      </span><span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">data</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;게시글 제목:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">data</span><span class="p">.</span><span class="nx">title</span><span class="p">));</span>
+
+<span class="w">    </span><span class="c1">// 존재하지 않는 리소스 (404 응답)</span>
+<span class="w">    </span><span class="nx">fetchWithErrorHandling</span><span class="p">(</span><span class="s1">&#39;https://jsonplaceholder.typicode.com/posts/99999&#39;</span><span class="p">)</span>
+<span class="w">      </span><span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">data</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;데이터:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">data</span><span class="p">));</span>
+<span class="w">  </span><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code>// 콘솔 출력:
+// 게시글 제목: sunt aut facere repellat provident occaecati excepturi optio reprehenderit
+// 요청 오류: 요청 실패 (상태 코드: 404 Not Found)
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1</td>
+<td><code>async function fetchWithErrorHandling(url)</code></td>
+<td>URL을 인자로 받아 재사용 가능한 fetch 래퍼 함수입니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">4</td>
+<td><code>if (!response.ok)</code></td>
+<td>HTTP 오류 상태 코드를 직접 확인합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">5</td>
+<td><code>`상태 코드: ${response.status} ${response.statusText}`</code></td>
+<td>상태 코드(숫자)와 상태 텍스트("Not Found")를 함께 출력합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">10</td>
+<td><code>if (error instanceof TypeError)</code></td>
+<td>네트워크 연결 실패는 <code>TypeError</code>로 나타납니다. HTTP 오류와 구분하여 처리합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">15</td>
+<td><code>return null</code></td>
+<td>오류 시 <code>null</code>을 반환하여 호출하는 쪽에서 결과를 확인하게 합니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: <code>fetch</code> 호출은 항상 이 두 가지를 갖추어야 합니다. 첫째, <code>try/catch</code>로 네트워크 오류를 처리하십시오. 둘째, <code>if (!response.ok)</code>로 HTTP 오류를 처리하십시오. 이 두 가지를 모두 갖추어야 견고한 코드가 됩니다.</p>
+</blockquote>
+<h3 id="_16">절 요약<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>fetch(url)</code>은 <code>Response</code> 객체를 담은 프로미스를 반환합니다</li>
+<li><code>response.ok</code>로 HTTP 성공 여부를 반드시 확인해야 합니다</li>
+<li><code>response.json()</code>도 비동기 작업이므로 <code>await</code>가 필요합니다</li>
+<li><code>TypeError</code>는 네트워크 실패, 그 외는 HTTP 오류나 파싱 오류를 의미합니다</li>
+</ul>
+<hr />
+<h2 id="json">JSON 처리와 간단한 앱 만들기<a class="headerlink" href="#json" title="Permanent link">&para;</a></h2>
+<h3 id="_17">도입<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
+<p>서버에서 받아온 데이터는 거의 항상 <strong>JSON(JavaScript Object Notation)</strong> 형식입니다. JSON을 JavaScript 객체로 변환하고, 반대로 JavaScript 객체를 JSON으로 바꾸는 방법을 익힙니다. 그런 다음 지금까지 배운 것을 모두 합쳐 실제로 작동하는 미니 앱을 만들어 봅니다.</p>
+<h3 id="_18">핵심 개념 설명<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h3>
+<h4 id="json-javascript">JSON 구조와 JavaScript 객체의 관계<a class="headerlink" href="#json-javascript" title="Permanent link">&para;</a></h4>
+<p><strong>JSON(JavaScript Object Notation)</strong> 은 키-값 쌍으로 데이터를 표현하는 경량 텍스트 형식입니다. 서로 다른 나라 사람도 알아보는 표준 양식의 서류처럼, 시스템 간에 통용되는 공통 데이터 포맷입니다.</p>
+<p>JavaScript 객체와 매우 비슷하지만 차이점이 있습니다.</p>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>JSON</th>
+<th>JavaScript 객체</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>형태</td>
+<td>텍스트 문자열</td>
+<td>메모리의 객체</td>
+</tr>
+<tr>
+<td>키 표기</td>
+<td>반드시 큰따옴표</td>
+<td>따옴표 생략 가능</td>
+</tr>
+<tr>
+<td>값 타입</td>
+<td>문자열·숫자·불리언·null·배열·객체만 가능</td>
+<td>함수·undefined 등도 가능</td>
+</tr>
+<tr>
+<td>주석</td>
+<td>불가</td>
+<td>가능</td>
+</tr>
+</tbody>
+</table>
+<h4 id="jsonparse-jsonstringify">JSON.parse와 JSON.stringify<a class="headerlink" href="#jsonparse-jsonstringify" title="Permanent link">&para;</a></h4>
+<div class="api-spec">
+<p><strong><code>JSON.parse(text)</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>설명</strong></td>
+<td>JSON 문자열을 JavaScript 값·객체로 변환합니다</td>
+</tr>
+<tr>
+<td><strong>매개변수</strong></td>
+<td><code>text</code> (string): 파싱할 JSON 문자열</td>
+</tr>
+<tr>
+<td><strong>반환값</strong></td>
+<td>JavaScript 값 또는 객체</td>
+</tr>
+<tr>
+<td><strong>예외</strong></td>
+<td>유효하지 않은 JSON이면 <code>SyntaxError</code>를 던집니다</td>
+</tr>
+<tr>
+<td><strong>사용 예시</strong></td>
+<td><code>JSON.parse('{"name":"홍길동"}')</code> → <code>{ name: '홍길동' }</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="api-spec">
+<p><strong><code>JSON.stringify(value, replacer?, space?)</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>설명</strong></td>
+<td>JavaScript 값·객체를 JSON 문자열로 변환합니다</td>
+</tr>
+<tr>
+<td><strong>매개변수</strong></td>
+<td><code>value</code>: 변환할 JavaScript 값</td>
+</tr>
+<tr>
+<td></td>
+<td><code>replacer</code> (선택): 포함할 속성을 지정하는 함수 또는 배열</td>
+</tr>
+<tr>
+<td></td>
+<td><code>space</code> (number | string, 선택): 들여쓰기 공백 수</td>
+</tr>
+<tr>
+<td><strong>반환값</strong></td>
+<td>JSON 형식의 문자열</td>
+</tr>
+<tr>
+<td><strong>예외</strong></td>
+<td>순환 참조가 있으면 <code>TypeError</code>를 던집니다</td>
+</tr>
+<tr>
+<td><strong>사용 예시</strong></td>
+<td><code>JSON.stringify({ name: '홍길동' }, null, 2)</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>JSON 처리<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="c1">// JSON 문자열 (서버에서 받은 텍스트라고 가정)</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">jsonString</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;{&quot;id&quot;:1,&quot;name&quot;:&quot;홍길동&quot;,&quot;skills&quot;:[&quot;HTML&quot;,&quot;CSS&quot;,&quot;JS&quot;]}&#39;</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// JSON.parse: 문자열 → JavaScript 객체</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">jsonString</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">user</span><span class="p">);</span><span class="w">           </span><span class="c1">// &quot;object&quot;</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="p">);</span><span class="w">             </span><span class="c1">// &quot;홍길동&quot;</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">user</span><span class="p">.</span><span class="nx">skills</span><span class="p">[</span><span class="mf">0</span><span class="p">]);</span><span class="w">        </span><span class="c1">// &quot;HTML&quot;</span>
+
+<span class="w">    </span><span class="c1">// 객체 수정</span>
+<span class="w">    </span><span class="nx">user</span><span class="p">.</span><span class="nx">skills</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s1">&#39;Python&#39;</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// JSON.stringify: JavaScript 객체 → JSON 문자열</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">updatedJson</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">user</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"> </span><span class="mf">2</span><span class="p">);</span><span class="w"> </span><span class="c1">// 2칸 들여쓰기</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="ow">typeof</span><span class="w"> </span><span class="nx">updatedJson</span><span class="p">);</span><span class="w">    </span><span class="c1">// &quot;string&quot;</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">updatedJson</span><span class="p">);</span>
+<span class="w">  </span><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code>// 콘솔 출력:
+// object
+// 홍길동
+// HTML
+// string
+// {
+//   &quot;id&quot;: 1,
+//   &quot;name&quot;: &quot;홍길동&quot;,
+//   &quot;skills&quot;: [
+//     &quot;HTML&quot;,
+//     &quot;CSS&quot;,
+//     &quot;JS&quot;,
+//     &quot;Python&quot;
+//   ]
+// }
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">2</td>
+<td><code>const jsonString = '...'</code></td>
+<td>서버에서 받아온 JSON 텍스트를 시뮬레이션합니다. 실제로는 <code>response.json()</code>이 파싱을 자동으로 처리합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">5</td>
+<td><code>JSON.parse(jsonString)</code></td>
+<td>텍스트를 JavaScript 객체로 변환합니다. 이 시점부터 점 표기법으로 속성에 접근할 수 있습니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">12</td>
+<td><code>user.skills.push('Python')</code></td>
+<td>변환된 객체는 일반 JavaScript 객체이므로 자유롭게 수정할 수 있습니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">15</td>
+<td><code>JSON.stringify(user, null, 2)</code></td>
+<td>객체를 JSON 문자열로 변환합니다. 세 번째 인자 <code>2</code>는 들여쓰기 칸 수로, 읽기 쉬운 형태로 출력합니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="dom">가져온 데이터를 DOM에 렌더링하기<a class="headerlink" href="#dom" title="Permanent link">&para;</a></h4>
+<p>이제 지금까지 배운 모든 것을 종합하여 공개 API에서 사용자 목록을 가져와 화면에 표시하는 앱을 만들겠습니다. 로딩 중 상태와 오류 상태도 함께 처리합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content</span><span class="o">=</span><span class="s">&quot;width=device-width, initial-scale=1.0&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>사용자 목록 앱<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">style</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="nt">body</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">font-family</span><span class="p">:</span><span class="w"> </span><span class="kc">sans-serif</span><span class="p">;</span>
+<span class="w">      </span><span class="k">max-width</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">      </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="kt">rem</span><span class="w"> </span><span class="kc">auto</span><span class="p">;</span>
+<span class="w">      </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">#</span><span class="nn">status</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mf">0.75</span><span class="kt">rem</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">      </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">      </span><span class="k">margin-bottom</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">#</span><span class="nn">status</span><span class="p">.</span><span class="nc">loading</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">background</span><span class="p">:</span><span class="w"> </span><span class="mh">#e3f2fd</span><span class="p">;</span>
+<span class="w">      </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#1565c0</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">#</span><span class="nn">status</span><span class="p">.</span><span class="nc">error</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">background</span><span class="p">:</span><span class="w"> </span><span class="mh">#ffebee</span><span class="p">;</span>
+<span class="w">      </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#c62828</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">#</span><span class="nn">status</span><span class="p">.</span><span class="nc">hidden</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">display</span><span class="p">:</span><span class="w"> </span><span class="kc">none</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">.</span><span class="nc">user-card</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">px</span><span class="w"> </span><span class="kc">solid</span><span class="w"> </span><span class="mh">#e0e0e0</span><span class="p">;</span>
+<span class="w">      </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">      </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">      </span><span class="k">margin-bottom</span><span class="p">:</span><span class="w"> </span><span class="mf">0.75</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">.</span><span class="nc">user-card</span><span class="w"> </span><span class="nt">h3</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mf">0.25</span><span class="kt">rem</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">      </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="p">.</span><span class="nc">user-card</span><span class="w"> </span><span class="nt">p</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">      </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#666</span><span class="p">;</span>
+<span class="w">      </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mf">0.875</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">&lt;/</span><span class="nt">style</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>사용자 목록<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+
+  <span class="cm">&lt;!-- 로딩/에러 상태 표시 영역 --&gt;</span>
+  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;status&quot;</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;loading&quot;</span><span class="p">&gt;</span>데이터를 불러오는 중...<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+
+  <span class="cm">&lt;!-- 사용자 목록 표시 영역 --&gt;</span>
+  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;user-list&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+
+  <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">statusEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">userListEl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;user-list&#39;</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// 로딩 상태 표시 함수</span>
+<span class="w">    </span><span class="kd">function</span><span class="w"> </span><span class="nx">showLoading</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">statusEl</span><span class="p">.</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;데이터를 불러오는 중...&#39;</span><span class="p">;</span>
+<span class="w">      </span><span class="nx">statusEl</span><span class="p">.</span><span class="nx">className</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;loading&#39;</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// 오류 상태 표시 함수</span>
+<span class="w">    </span><span class="kd">function</span><span class="w"> </span><span class="nx">showError</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">statusEl</span><span class="p">.</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`오류: </span><span class="si">${</span><span class="nx">message</span><span class="si">}</span><span class="sb">`</span><span class="p">;</span>
+<span class="w">      </span><span class="nx">statusEl</span><span class="p">.</span><span class="nx">className</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;error&#39;</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// 상태 숨기기 함수</span>
+<span class="w">    </span><span class="kd">function</span><span class="w"> </span><span class="nx">hideStatus</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">statusEl</span><span class="p">.</span><span class="nx">className</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;hidden&#39;</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// 사용자 카드 DOM 생성 함수 (innerHTML 대신 createElement 사용 - XSS 방지)</span>
+<span class="w">    </span><span class="kd">function</span><span class="w"> </span><span class="nx">createUserCard</span><span class="p">(</span><span class="nx">user</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">card</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s1">&#39;div&#39;</span><span class="p">);</span>
+<span class="w">      </span><span class="nx">card</span><span class="p">.</span><span class="nx">className</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;user-card&#39;</span><span class="p">;</span>
+
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s1">&#39;h3&#39;</span><span class="p">);</span>
+<span class="w">      </span><span class="nx">name</span><span class="p">.</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">user</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span><span class="w"> </span><span class="c1">// textContent로 안전하게 삽입</span>
+
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">email</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">);</span>
+<span class="w">      </span><span class="nx">email</span><span class="p">.</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">user</span><span class="p">.</span><span class="nx">email</span><span class="p">;</span>
+
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">company</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s1">&#39;p&#39;</span><span class="p">);</span>
+<span class="w">      </span><span class="nx">company</span><span class="p">.</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`회사: </span><span class="si">${</span><span class="nx">user</span><span class="p">.</span><span class="nx">company</span><span class="p">.</span><span class="nx">name</span><span class="si">}</span><span class="sb">`</span><span class="p">;</span>
+
+<span class="w">      </span><span class="nx">card</span><span class="p">.</span><span class="nx">append</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span><span class="w"> </span><span class="nx">email</span><span class="p">,</span><span class="w"> </span><span class="nx">company</span><span class="p">);</span>
+<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="nx">card</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// 메인 비동기 함수</span>
+<span class="w">    </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">loadUsers</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">showLoading</span><span class="p">();</span>
+
+<span class="w">      </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span>
+<span class="w">          </span><span class="s1">&#39;https://jsonplaceholder.typicode.com/users&#39;</span>
+<span class="w">        </span><span class="p">);</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="sb">`서버 오류 (</span><span class="si">${</span><span class="nx">response</span><span class="p">.</span><span class="nx">status</span><span class="si">}</span><span class="sb">)`</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">users</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">();</span>
+
+<span class="w">        </span><span class="c1">// DOM 렌더링</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">fragment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">createDocumentFragment</span><span class="p">();</span><span class="w"> </span><span class="c1">// 성능 최적화</span>
+<span class="w">        </span><span class="nx">users</span><span class="p">.</span><span class="nx">forEach</span><span class="p">((</span><span class="nx">user</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nx">fragment</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">createUserCard</span><span class="p">(</span><span class="nx">user</span><span class="p">));</span>
+<span class="w">        </span><span class="p">});</span>
+<span class="w">        </span><span class="nx">userListEl</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">fragment</span><span class="p">);</span>
+
+<span class="w">        </span><span class="nx">hideStatus</span><span class="p">();</span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">error</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">showError</span><span class="p">(</span><span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="nx">loadUsers</span><span class="p">();</span>
+<span class="w">  </span><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<p>브라우저에서 열면 "데이터를 불러오는 중..." 메시지가 표시되다가, API 응답이 도착하면 사용자 카드 목록이 나타납니다.</p>
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><code>showLoading()</code></td>
+<td>상태 표시 함수</td>
+<td>로딩 시작 시 호출합니다. 클래스를 바꿔 스타일을 전환합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>showError(message)</code></td>
+<td>오류 상태 함수</td>
+<td>오류 발생 시 메시지를 화면에 표시합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>createUserCard(user)</code></td>
+<td>DOM 생성 함수</td>
+<td><code>textContent</code>를 사용하여 사용자 입력값이 HTML로 해석되지 않게 합니다 (XSS 방지)</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>createDocumentFragment()</code></td>
+<td>성능 최적화</td>
+<td>여러 요소를 DOM에 추가할 때 Fragment를 사용하면 리플로우를 한 번만 발생시킵니다</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>await fetch(...)</code></td>
+<td>네트워크 요청</td>
+<td>응답 헤더 도착까지 기다립니다</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>if (!response.ok)</code></td>
+<td>상태 코드 확인</td>
+<td>HTTP 오류를 수동으로 throw하여 catch 블록에서 처리합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>await response.json()</code></td>
+<td>JSON 파싱</td>
+<td>응답 본문을 JavaScript 배열로 변환합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;"><code>hideStatus()</code></td>
+<td>상태 숨기기</td>
+<td>성공적으로 렌더링이 완료되면 로딩 메시지를 숨깁니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p><strong>보안 주의</strong>: 서버에서 받아온 데이터를 DOM에 삽입할 때는 <code>innerHTML</code> 대신 <code>textContent</code>를 사용하십시오. <code>innerHTML</code>을 사용하면 악의적인 스크립트가 포함된 데이터가 실행되는 XSS(Cross-Site Scripting) 취약점이 생길 수 있습니다.</p>
+<p><strong>팁</strong>: <code>DocumentFragment</code>는 실제 DOM에 연결되지 않은 임시 컨테이너입니다. 여기에 요소를 추가하고 마지막에 한 번만 DOM에 삽입하면, 브라우저가 레이아웃을 매번 다시 계산하는 비용을 줄일 수 있습니다.</p>
+</blockquote>
+<h3 id="_19">절 요약<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h3>
+<ul>
+<li>JSON은 텍스트 문자열이며, 키는 반드시 큰따옴표로 감싸야 합니다</li>
+<li><code>JSON.parse()</code>는 JSON 문자열을 JavaScript 객체로 변환합니다</li>
+<li><code>JSON.stringify()</code>는 JavaScript 객체를 JSON 문자열로 변환합니다</li>
+<li>데이터를 DOM에 삽입할 때는 <code>textContent</code>를 사용하여 XSS를 방지합니다</li>
+<li>로딩·오류·성공 세 가지 상태를 항상 사용자에게 보여 주어야 합니다</li>
+</ul>
+<hr />
+<h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h2>
+<p><strong>Q1: <code>fetch</code>가 404 응답을 받아도 <code>catch</code>가 실행되지 않는 이유는 무엇인가요?</strong></p>
+<p>A1: <code>fetch</code>는 네트워크 연결 자체가 실패할 때만 reject됩니다. 서버가 존재하고 응답을 돌려줬다면, 그 응답이 404나 500이어도 <code>fetch</code>는 정상적으로 완료(resolve)됩니다. 따라서 <code>response.ok</code>를 직접 확인하고 필요하면 <code>throw new Error()</code>로 오류를 만들어야 합니다. 이것이 <code>fetch</code>를 사용할 때 가장 흔한 실수입니다.</p>
+<p><strong>Q2: <code>await</code>를 <code>async</code> 함수 바깥에서 사용하면 어떻게 되나요?</strong></p>
+<p>A2: 문법 오류(SyntaxError)가 발생합니다. <code>await</code>는 반드시 <code>async</code>로 선언된 함수 안에서만 사용할 수 있습니다. 최상위 레벨(top-level)에서 <code>await</code>를 사용하려면 ES2022의 Top-Level Await를 지원하는 모듈 환경이 필요합니다. 일반 브라우저 스크립트에서는 항상 <code>async</code> 함수로 감싸 사용하십시오.</p>
+<p><strong>Q3: <code>Promise.all()</code>은 무엇이고 언제 사용하나요?</strong></p>
+<p>A3: 여러 프로미스를 동시에 실행하고 모두 완료될 때까지 기다리는 메서드입니다. 예를 들어 사용자 정보와 상품 목록을 동시에 가져올 때 사용합니다. <code>await Promise.all([fetchUsers(), fetchProducts()])</code>처럼 쓰면 두 요청이 순차가 아닌 병렬로 실행되어 전체 대기 시간이 줄어듭니다. 단, 하나라도 실패하면 전체가 reject됩니다.</p>
+<p><strong>Q4: 콜백, 프로미스, async/await 중 어느 것을 써야 하나요?</strong></p>
+<p>A4: 새로 작성하는 코드에는 <code>async/await</code>를 사용하는 것을 권장합니다. 가독성이 가장 좋고 디버깅도 쉽습니다. <code>async/await</code>는 프로미스를 기반으로 하므로, 프로미스를 반환하는 API라면 모두 <code>await</code>로 처리할 수 있습니다. 콜백은 <code>setTimeout</code>, <code>addEventListener</code> 같이 API 자체가 콜백 기반일 때 어쩔 수 없이 사용합니다.</p>
+<p><strong>Q5: 개발자 도구의 Network 탭에서 fetch 요청을 어떻게 확인하나요?</strong></p>
+<p>A5: Chrome/Edge 개발자 도구에서 F12를 누르고 Network 탭을 선택합니다. 페이지를 새로고침하거나 fetch를 실행하면 요청 목록이 표시됩니다. 요청 항목을 클릭하면 Headers(요청/응답 헤더), Preview(파싱된 JSON), Response(원본 텍스트), Timing(소요 시간) 등을 확인할 수 있습니다. 네트워크 디버깅 시 가장 먼저 확인해야 할 도구입니다.</p>
+<hr />
+<h2 id="_20">장 요약<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h2>
+<p>이번 장에서는 JavaScript의 비동기 처리 체계 전반을 학습했습니다. 이벤트 루프가 단일 스레드로 비동기를 처리하는 원리를 이해하고, 콜백에서 프로미스를 거쳐 <code>async/await</code>로 발전해 온 비동기 코드 작성 방식을 익혔습니다. Fetch API를 사용하여 실제 공개 API를 호출하고, JSON을 파싱하여 DOM에 렌더링하는 완전한 데이터 흐름을 구현했습니다. 나아가 <code>response.ok</code> 확인, <code>try/catch</code> 에러 처리, <code>textContent</code> 사용을 통한 XSS 방지 등 실무에서 반드시 갖추어야 할 패턴도 함께 다루었습니다.</p>
+<h3 id="_21">핵심 키워드<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h3>
+<p><code>이벤트 루프</code>, <code>콜 스택</code>, <code>태스크 큐</code>, <code>Promise</code>, <code>async/await</code>, <code>Fetch API</code>, <code>response.ok</code>, <code>JSON.parse</code>, <code>JSON.stringify</code>, <code>try/catch</code></p>
+<h3 id="_22">다음 장 미리보기<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h3>
+<p>이번 장이 이 교재의 마지막 챕터입니다. 지금까지 HTML로 구조를, CSS로 표현을, JavaScript로 동작과 API 연동까지 다루며 프론트엔드 개발의 전체 흐름을 완성했습니다. 지금 배운 기초를 바탕으로 React, Vue 같은 현대적인 프레임워크를 학습하거나, 더 복잡한 웹 애플리케이션을 직접 만들어 보기를 권합니다.</p>
+  </div>
+  <section class="project-section">
+<h2>&#128736; 실습 프로젝트 (Hands-on Project)</h2>
+<div class="project-readme">
+<h1>API 연동 미니 앱 프로젝트</h1>
+<p>이 장에서 배운 개념을 실무 시나리오에 적용하는 프로젝트입니다.</p>
+<hr />
+<h2>초급: JSONPlaceholder 게시판 탐색기</h2>
+<h3>시나리오</h3>
+<p>스타트업 팀에서 "공지사항 게시판" 프로토타입을 만들어 달라는 요청을 받았습니다.
+JSONPlaceholder 공개 API에서 게시글 목록을 가져와 화면에 표시하고,
+특정 게시글을 클릭하면 상세 내용을 보여주는 간단한 탐색기를 완성합니다.
+로딩 중과 오류 발생 시 사용자가 상황을 알 수 있도록 상태 메시지도 표시합니다.</p>
+<h3>학습 목표</h3>
+<ul>
+<li>async/await + try/catch로 Fetch API 호출 구조 구현하기</li>
+<li>response.ok 확인으로 HTTP 오류를 안전하게 처리하기</li>
+<li>로딩·오류·성공 세 가지 UI 상태를 전환하기</li>
+<li>textContent로 API 데이터를 DOM에 안전하게 렌더링하기</li>
+</ul>
+<h3>진행 방법</h3>
+<ol>
+<li><code>project_starter.html</code>을 열고 TODO 주석을 찾습니다</li>
+<li>각 TODO를 이 장에서 배운 async/await, Fetch, JSON 개념으로 완성합니다</li>
+<li>브라우저에서 열어 게시글 목록이 표시되고 클릭 시 상세 내용이 나오는지 확인합니다</li>
+</ol>
+<h3>실행 방법</h3>
+<div class="codehilite"><pre><span></span><code>project_starter.html 파일을 브라우저에서 열기
+(인터넷 연결 필요: JSONPlaceholder API 사용)
+</code></pre></div>
+
+<h3>사용 API</h3>
+<ul>
+<li>게시글 목록: <code>GET https://jsonplaceholder.typicode.com/posts?_limit=10</code></li>
+<li>게시글 상세: <code>GET https://jsonplaceholder.typicode.com/posts/{id}</code></li>
+<li>응답 구조: <code>{ id, title, body, userId }</code></li>
+</ul>
+<hr />
+<h2>중급: Open-Meteo 날씨 앱</h2>
+<h3>시나리오</h3>
+<p>사용자가 도시 이름을 입력하면 현재 날씨를 보여주는 미니 앱을 완성합니다.
+Open-Meteo API는 API 키 없이 사용할 수 있는 공개 날씨 서비스입니다.
+도시 이름 → 위도/경도 변환(Geocoding API) → 날씨 데이터 조회 두 단계의
+연속 API 호출을 async/await로 처리하며, 로딩·오류·성공 상태를 모두 구현합니다.</p>
+<h3>학습 목표</h3>
+<ul>
+<li>두 단계 연속 API 호출을 async/await로 순서대로 처리하기</li>
+<li>여러 fetch 요청의 response.ok를 각각 확인하기</li>
+<li>날씨 코드(WMO code)를 읽기 좋은 텍스트로 변환하는 데이터 매핑 구현하기</li>
+<li>복잡한 JSON 구조에서 필요한 데이터 추출하기</li>
+</ul>
+<h3>진행 방법</h3>
+<ol>
+<li><code>project_advanced_starter.html</code>을 열고 TODO 주석을 찾습니다</li>
+<li>초급에서 연습한 패턴을 바탕으로 더 복잡한 두 단계 API 호출을 완성합니다</li>
+<li>도시 이름을 입력하고 버튼을 눌러 날씨 정보가 표시되는지 확인합니다</li>
+</ol>
+<h3>실행 방법</h3>
+<div class="codehilite"><pre><span></span><code>project_advanced_starter.html 파일을 브라우저에서 열기
+(인터넷 연결 필요: Open-Meteo + Geocoding API 사용)
+</code></pre></div>
+
+<h3>사용 API (모두 무료, API 키 불필요)</h3>
+<ul>
+<li><strong>Geocoding</strong>: <code>GET https://geocoding-api.open-meteo.com/v1/search?name={도시명}&amp;count=1&amp;language=ko</code></li>
+<li>응답 구조: <code>{ results: [{ name, latitude, longitude, country }] }</code></li>
+<li><strong>날씨</strong>: <code>GET https://api.open-meteo.com/v1/forecast?latitude={위도}&amp;longitude={경도}&amp;current_weather=true</code></li>
+<li>응답 구조: <code>{ current_weather: { temperature, windspeed, weathercode } }</code></li>
+</ul>
+<h3>날씨 코드(WMO) 참고</h3>
+<table>
+<thead>
+<tr>
+<th>코드</th>
+<th>날씨</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>맑음</td>
+</tr>
+<tr>
+<td>1, 2, 3</td>
+<td>대체로 맑음 ~ 흐림</td>
+</tr>
+<tr>
+<td>45, 48</td>
+<td>안개</td>
+</tr>
+<tr>
+<td>51~67</td>
+<td>이슬비 ~ 비</td>
+</tr>
+<tr>
+<td>71~77</td>
+<td>눈</td>
+</tr>
+<tr>
+<td>80~82</td>
+<td>소나기</td>
+</tr>
+<tr>
+<td>95~99</td>
+<td>천둥번개</td>
+</tr>
+</tbody>
+</table>
+<h3>확장 아이디어</h3>
+<ul>
+<li>여러 도시의 날씨를 Promise.all로 동시에 가져와 비교하기</li>
+<li>검색 기록을 localStorage에 저장하여 최근 검색 도시 표시하기</li>
+<li>날씨 코드에 따라 다른 배경 색상 또는 날씨 아이콘 표시하기</li>
+</ul>
+</div>
+<details class="project-file">
+<summary>&#128221; project_starter.html (스타터 코드 - 직접 완성해보세요)</summary>
+<pre><code class="language-html"><span class="ln">  1</span>&lt;!DOCTYPE html&gt;
+<span class="ln">  2</span>&lt;!--
+<span class="ln">  3</span>  [초급 프로젝트 스타터] JSONPlaceholder 게시판 탐색기
+<span class="ln">  4</span>  챕터: 비동기 JavaScript와 API 연동 (ch_12)
+<span class="ln">  5</span>
+<span class="ln">  6</span>  목표:
+<span class="ln">  7</span>  - async/await로 Fetch API 호출하기
+<span class="ln">  8</span>  - response.ok 확인 + try/catch 에러 처리
+<span class="ln">  9</span>  - 로딩·오류·성공 상태 UI 전환
+<span class="ln"> 10</span>  - textContent로 DOM 안전 렌더링
+<span class="ln"> 11</span>
+<span class="ln"> 12</span>  TODO 위치를 찾아 완성하세요. 스타터 코드 자체는 에러 없이 실행되며
+<span class="ln"> 13</span>  목록과 상세 영역이 비어있는 상태로 열립니다.
+<span class="ln"> 14</span>--&gt;
+<span class="ln"> 15</span>&lt;html lang=&quot;ko&quot;&gt;
+<span class="ln"> 16</span>&lt;head&gt;
+<span class="ln"> 17</span>  &lt;meta charset=&quot;UTF-8&quot;&gt;
+<span class="ln"> 18</span>  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+<span class="ln"> 19</span>  &lt;title&gt;게시판 탐색기&lt;/title&gt;
+<span class="ln"> 20</span>  &lt;style&gt;
+<span class="ln"> 21</span>    /* 기본 레이아웃 */
+<span class="ln"> 22</span>    * { box-sizing: border-box; }
+<span class="ln"> 23</span>
+<span class="ln"> 24</span>    body {
+<span class="ln"> 25</span>      font-family: sans-serif;
+<span class="ln"> 26</span>      margin: 0;
+<span class="ln"> 27</span>      padding: 0;
+<span class="ln"> 28</span>      background: #f0f2f5;
+<span class="ln"> 29</span>    }
+<span class="ln"> 30</span>
+<span class="ln"> 31</span>    header {
+<span class="ln"> 32</span>      background: #0078d4;
+<span class="ln"> 33</span>      color: #fff;
+<span class="ln"> 34</span>      padding: 1rem 1.5rem;
+<span class="ln"> 35</span>    }
+<span class="ln"> 36</span>
+<span class="ln"> 37</span>    header h1 { margin: 0; font-size: 1.25rem; }
+<span class="ln"> 38</span>    header p  { margin: 0.25rem 0 0; font-size: 0.875rem; opacity: 0.85; }
+<span class="ln"> 39</span>
+<span class="ln"> 40</span>    main {
+<span class="ln"> 41</span>      max-width: 900px;
+<span class="ln"> 42</span>      margin: 1.5rem auto;
+<span class="ln"> 43</span>      padding: 0 1rem;
+<span class="ln"> 44</span>      display: grid;
+<span class="ln"> 45</span>      grid-template-columns: 1fr 1fr;
+<span class="ln"> 46</span>      gap: 1.5rem;
+<span class="ln"> 47</span>    }
+<span class="ln"> 48</span>
+<span class="ln"> 49</span>    @media (max-width: 600px) {
+<span class="ln"> 50</span>      main { grid-template-columns: 1fr; }
+<span class="ln"> 51</span>    }
+<span class="ln"> 52</span>
+<span class="ln"> 53</span>    section {
+<span class="ln"> 54</span>      background: #fff;
+<span class="ln"> 55</span>      border-radius: 8px;
+<span class="ln"> 56</span>      padding: 1.25rem;
+<span class="ln"> 57</span>      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+<span class="ln"> 58</span>    }
+<span class="ln"> 59</span>
+<span class="ln"> 60</span>    section h2 {
+<span class="ln"> 61</span>      margin: 0 0 1rem 0;
+<span class="ln"> 62</span>      font-size: 1rem;
+<span class="ln"> 63</span>      color: #333;
+<span class="ln"> 64</span>      border-bottom: 1px solid #e0e0e0;
+<span class="ln"> 65</span>      padding-bottom: 0.5rem;
+<span class="ln"> 66</span>    }
+<span class="ln"> 67</span>
+<span class="ln"> 68</span>    /* 상태 메시지 */
+<span class="ln"> 69</span>    .status {
+<span class="ln"> 70</span>      padding: 0.625rem 0.875rem;
+<span class="ln"> 71</span>      border-radius: 4px;
+<span class="ln"> 72</span>      font-size: 0.875rem;
+<span class="ln"> 73</span>      margin-bottom: 0.75rem;
+<span class="ln"> 74</span>    }
+<span class="ln"> 75</span>
+<span class="ln"> 76</span>    .status.loading { background: #e3f2fd; color: #1565c0; }
+<span class="ln"> 77</span>    .status.error   { background: #ffebee; color: #c62828; }
+<span class="ln"> 78</span>    .status.hidden  { display: none; }
+<span class="ln"> 79</span>
+<span class="ln"> 80</span>    /* 게시글 목록 아이템 */
+<span class="ln"> 81</span>    .post-item {
+<span class="ln"> 82</span>      padding: 0.75rem;
+<span class="ln"> 83</span>      border: 1px solid #e8e8e8;
+<span class="ln"> 84</span>      border-radius: 6px;
+<span class="ln"> 85</span>      margin-bottom: 0.5rem;
+<span class="ln"> 86</span>      cursor: pointer;
+<span class="ln"> 87</span>      transition: background 0.15s;
+<span class="ln"> 88</span>    }
+<span class="ln"> 89</span>
+<span class="ln"> 90</span>    .post-item:hover { background: #f0f7ff; border-color: #0078d4; }
+<span class="ln"> 91</span>    .post-item.active { background: #e3f2fd; border-color: #0078d4; }
+<span class="ln"> 92</span>
+<span class="ln"> 93</span>    .post-item-title {
+<span class="ln"> 94</span>      font-size: 0.875rem;
+<span class="ln"> 95</span>      font-weight: 600;
+<span class="ln"> 96</span>      margin: 0 0 0.25rem 0;
+<span class="ln"> 97</span>      /* 긴 제목은 한 줄로 자르기 */
+<span class="ln"> 98</span>      white-space: nowrap;
+<span class="ln"> 99</span>      overflow: hidden;
+<span class="ln">100</span>      text-overflow: ellipsis;
+<span class="ln">101</span>    }
+<span class="ln">102</span>
+<span class="ln">103</span>    .post-item-meta {
+<span class="ln">104</span>      font-size: 0.75rem;
+<span class="ln">105</span>      color: #888;
+<span class="ln">106</span>      margin: 0;
+<span class="ln">107</span>    }
+<span class="ln">108</span>
+<span class="ln">109</span>    /* 상세 영역 */
+<span class="ln">110</span>    #detail-placeholder {
+<span class="ln">111</span>      text-align: center;
+<span class="ln">112</span>      color: #999;
+<span class="ln">113</span>      font-size: 0.875rem;
+<span class="ln">114</span>      padding: 2rem 0;
+<span class="ln">115</span>    }
+<span class="ln">116</span>
+<span class="ln">117</span>    #post-detail { display: none; }
+<span class="ln">118</span>    #post-detail.visible { display: block; }
+<span class="ln">119</span>
+<span class="ln">120</span>    #detail-title {
+<span class="ln">121</span>      font-size: 1.1rem;
+<span class="ln">122</span>      margin: 0 0 0.5rem 0;
+<span class="ln">123</span>      line-height: 1.4;
+<span class="ln">124</span>    }
+<span class="ln">125</span>
+<span class="ln">126</span>    #detail-meta {
+<span class="ln">127</span>      font-size: 0.75rem;
+<span class="ln">128</span>      color: #888;
+<span class="ln">129</span>      margin-bottom: 0.75rem;
+<span class="ln">130</span>    }
+<span class="ln">131</span>
+<span class="ln">132</span>    #detail-body {
+<span class="ln">133</span>      font-size: 0.875rem;
+<span class="ln">134</span>      line-height: 1.7;
+<span class="ln">135</span>      color: #555;
+<span class="ln">136</span>    }
+<span class="ln">137</span>  &lt;/style&gt;
+<span class="ln">138</span>&lt;/head&gt;
+<span class="ln">139</span>&lt;body&gt;
+<span class="ln">140</span>  &lt;header&gt;
+<span class="ln">141</span>    &lt;h1&gt;게시판 탐색기&lt;/h1&gt;
+<span class="ln">142</span>    &lt;p&gt;JSONPlaceholder API — async/await + Fetch 실습 프로젝트&lt;/p&gt;
+<span class="ln">143</span>  &lt;/header&gt;
+<span class="ln">144</span>
+<span class="ln">145</span>  &lt;main&gt;
+<span class="ln">146</span>    &lt;!-- 왼쪽: 게시글 목록 --&gt;
+<span class="ln">147</span>    &lt;section&gt;
+<span class="ln">148</span>      &lt;h2&gt;게시글 목록 (최신 10개)&lt;/h2&gt;
+<span class="ln">149</span>      &lt;div id=&quot;list-status&quot; class=&quot;status loading&quot;&gt;목록을 불러오는 중...&lt;/div&gt;
+<span class="ln">150</span>      &lt;div id=&quot;post-list&quot;&gt;
+<span class="ln">151</span>        &lt;!-- TODO: 게시글 아이템이 여기에 동적으로 추가됩니다 --&gt;
+<span class="ln">152</span>      &lt;/div&gt;
+<span class="ln">153</span>    &lt;/section&gt;
+<span class="ln">154</span>
+<span class="ln">155</span>    &lt;!-- 오른쪽: 게시글 상세 --&gt;
+<span class="ln">156</span>    &lt;section&gt;
+<span class="ln">157</span>      &lt;h2&gt;게시글 상세&lt;/h2&gt;
+<span class="ln">158</span>      &lt;div id=&quot;detail-status&quot; class=&quot;status hidden&quot;&gt;&lt;/div&gt;
+<span class="ln">159</span>      &lt;p id=&quot;detail-placeholder&quot;&gt;왼쪽 목록에서 게시글을 선택하세요.&lt;/p&gt;
+<span class="ln">160</span>      &lt;div id=&quot;post-detail&quot;&gt;
+<span class="ln">161</span>        &lt;p id=&quot;detail-meta&quot;&gt;&lt;/p&gt;
+<span class="ln">162</span>        &lt;h3 id=&quot;detail-title&quot;&gt;&lt;/h3&gt;
+<span class="ln">163</span>        &lt;p id=&quot;detail-body&quot;&gt;&lt;/p&gt;
+<span class="ln">164</span>      &lt;/div&gt;
+<span class="ln">165</span>    &lt;/section&gt;
+<span class="ln">166</span>  &lt;/main&gt;
+<span class="ln">167</span>
+<span class="ln">168</span>  &lt;script&gt;
+<span class="ln">169</span>    // DOM 요소 참조
+<span class="ln">170</span>    const listStatusEl    = document.getElementById('list-status');
+<span class="ln">171</span>    const postListEl      = document.getElementById('post-list');
+<span class="ln">172</span>    const detailStatusEl  = document.getElementById('detail-status');
+<span class="ln">173</span>    const detailPlaceEl   = document.getElementById('detail-placeholder');
+<span class="ln">174</span>    const postDetailEl    = document.getElementById('post-detail');
+<span class="ln">175</span>    const detailTitleEl   = document.getElementById('detail-title');
+<span class="ln">176</span>    const detailMetaEl    = document.getElementById('detail-meta');
+<span class="ln">177</span>    const detailBodyEl    = document.getElementById('detail-body');
+<span class="ln">178</span>
+<span class="ln">179</span>    // ============================================================
+<span class="ln">180</span>    // 상태 표시 헬퍼 함수 (이미 완성됨 — 참고용)
+<span class="ln">181</span>    // ============================================================
+<span class="ln">182</span>    function setStatus(el, message, type) {
+<span class="ln">183</span>      el.textContent = message;
+<span class="ln">184</span>      el.className = `status ${type}`;
+<span class="ln">185</span>    }
+<span class="ln">186</span>
+<span class="ln">187</span>    // ============================================================
+<span class="ln">188</span>    // TODO 1: fetchPostList 함수를 완성하세요.
+<span class="ln">189</span>    //
+<span class="ln">190</span>    // 요청 URL: https://jsonplaceholder.typicode.com/posts?_limit=10
+<span class="ln">191</span>    // 응답: 게시글 배열 [{ id, title, body, userId }, ...]
+<span class="ln">192</span>    //
+<span class="ln">193</span>    // 구현 순서:
+<span class="ln">194</span>    // 1. setStatus(listStatusEl, '불러오는 중...', 'loading') 호출
+<span class="ln">195</span>    // 2. try { } catch { } 블록 작성
+<span class="ln">196</span>    // 3. await fetch(URL)로 요청 전송
+<span class="ln">197</span>    // 4. response.ok 확인 → false이면 throw new Error(...)
+<span class="ln">198</span>    // 5. await response.json()으로 파싱
+<span class="ln">199</span>    // 6. renderPostList(posts) 호출
+<span class="ln">200</span>    // 7. setStatus(listStatusEl, '', 'hidden')으로 상태 숨기기
+<span class="ln">201</span>    // 8. catch: setStatus(listStatusEl, `오류: ${error.message}`, 'error')
+<span class="ln">202</span>    // ============================================================
+<span class="ln">203</span>    async function fetchPostList() {
+<span class="ln">204</span>      // TODO: 구현하세요
+<span class="ln">205</span>      // 기본 동작 확인용 (완성하면 이 줄은 제거합니다)
+<span class="ln">206</span>      setStatus(listStatusEl, '목록 로드 함수를 완성하세요 (TODO 1)', 'error');
+<span class="ln">207</span>    }
+<span class="ln">208</span>
+<span class="ln">209</span>    // ============================================================
+<span class="ln">210</span>    // TODO 2: renderPostList 함수를 완성하세요.
+<span class="ln">211</span>    //
+<span class="ln">212</span>    // 인자: posts — 게시글 배열
+<span class="ln">213</span>    //
+<span class="ln">214</span>    // 구현 순서:
+<span class="ln">215</span>    // 1. posts.forEach()로 각 post를 순회합니다
+<span class="ln">216</span>    // 2. 각 post마다 div.post-item을 createElement로 생성합니다
+<span class="ln">217</span>    // 3. 제목(p.post-item-title)과 메타(p.post-item-meta) 요소를 생성합니다
+<span class="ln">218</span>    //    - 제목: post.title (textContent 사용)
+<span class="ln">219</span>    //    - 메타: `게시글 #${post.id} · 작성자 ${post.userId}` (textContent 사용)
+<span class="ln">220</span>    // 4. div.onclick = () =&gt; fetchPostDetail(post.id) 이벤트 연결
+<span class="ln">221</span>    // 5. div.dataset.id = post.id 로 ID 저장
+<span class="ln">222</span>    // 6. postListEl.appendChild(div)로 목록에 추가
+<span class="ln">223</span>    // ============================================================
+<span class="ln">224</span>    function renderPostList(posts) {
+<span class="ln">225</span>      // TODO: 구현하세요
+<span class="ln">226</span>    }
+<span class="ln">227</span>
+<span class="ln">228</span>    // ============================================================
+<span class="ln">229</span>    // TODO 3: fetchPostDetail 함수를 완성하세요.
+<span class="ln">230</span>    //
+<span class="ln">231</span>    // 인자: id — 가져올 게시글 ID
+<span class="ln">232</span>    // 요청 URL: `https://jsonplaceholder.typicode.com/posts/${id}`
+<span class="ln">233</span>    //
+<span class="ln">234</span>    // 구현 순서:
+<span class="ln">235</span>    // 1. 이전에 선택된 .active 클래스를 제거하고 현재 선택 항목에 추가
+<span class="ln">236</span>    //    document.querySelectorAll('.post-item').forEach(el =&gt; el.classList.remove('active'))
+<span class="ln">237</span>    //    document.querySelector(`[data-id=&quot;${id}&quot;]`).classList.add('active')
+<span class="ln">238</span>    // 2. detailPlaceEl.style.display = 'none'으로 안내 문구 숨기기
+<span class="ln">239</span>    // 3. setStatus(detailStatusEl, '상세 정보 불러오는 중...', 'loading') 호출
+<span class="ln">240</span>    // 4. try { } catch { } 블록 작성
+<span class="ln">241</span>    // 5. await fetch(URL)로 요청
+<span class="ln">242</span>    // 6. response.ok 확인
+<span class="ln">243</span>    // 7. await response.json()으로 파싱
+<span class="ln">244</span>    // 8. renderPostDetail(post) 호출
+<span class="ln">245</span>    // 9. setStatus(detailStatusEl, '', 'hidden')으로 상태 숨기기
+<span class="ln">246</span>    // 10. catch: setStatus(detailStatusEl, `오류: ${error.message}`, 'error')
+<span class="ln">247</span>    // ============================================================
+<span class="ln">248</span>    async function fetchPostDetail(id) {
+<span class="ln">249</span>      // TODO: 구현하세요
+<span class="ln">250</span>    }
+<span class="ln">251</span>
+<span class="ln">252</span>    // ============================================================
+<span class="ln">253</span>    // TODO 4: renderPostDetail 함수를 완성하세요.
+<span class="ln">254</span>    //
+<span class="ln">255</span>    // 인자: post — { id, title, body, userId }
+<span class="ln">256</span>    //
+<span class="ln">257</span>    // 구현 순서:
+<span class="ln">258</span>    // 1. detailMetaEl.textContent = `게시글 #${post.id} · 작성자 ${post.userId}`
+<span class="ln">259</span>    // 2. detailTitleEl.textContent = post.title
+<span class="ln">260</span>    // 3. detailBodyEl.textContent = post.body
+<span class="ln">261</span>    // 4. postDetailEl.className = 'visible'로 상세 영역 표시
+<span class="ln">262</span>    // ============================================================
+<span class="ln">263</span>    function renderPostDetail(post) {
+<span class="ln">264</span>      // TODO: 구현하세요
+<span class="ln">265</span>    }
+<span class="ln">266</span>
+<span class="ln">267</span>    // ============================================================
+<span class="ln">268</span>    // 페이지 로드 시 게시글 목록 자동 로드
+<span class="ln">269</span>    // ============================================================
+<span class="ln">270</span>    fetchPostList();
+<span class="ln">271</span>  &lt;/script&gt;
+<span class="ln">272</span>&lt;/body&gt;
+<span class="ln">273</span>&lt;/html&gt;
+<span class="ln">274</span></code></pre>
+</details>
+<details class="project-file">
+<summary>&#9989; project_complete.html (완성 코드)</summary>
+<pre><code class="language-html"><span class="ln">  1</span>&lt;!DOCTYPE html&gt;
+<span class="ln">  2</span>&lt;!--
+<span class="ln">  3</span>  [초급 프로젝트 완성] JSONPlaceholder 게시판 탐색기
+<span class="ln">  4</span>  챕터: 비동기 JavaScript와 API 연동 (ch_12)
+<span class="ln">  5</span>  (인터넷 연결 필요: JSONPlaceholder API 사용)
+<span class="ln">  6</span>--&gt;
+<span class="ln">  7</span>&lt;html lang=&quot;ko&quot;&gt;
+<span class="ln">  8</span>&lt;head&gt;
+<span class="ln">  9</span>  &lt;meta charset=&quot;UTF-8&quot;&gt;
+<span class="ln"> 10</span>  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+<span class="ln"> 11</span>  &lt;title&gt;게시판 탐색기 (완성)&lt;/title&gt;
+<span class="ln"> 12</span>  &lt;style&gt;
+<span class="ln"> 13</span>    * { box-sizing: border-box; }
+<span class="ln"> 14</span>
+<span class="ln"> 15</span>    body {
+<span class="ln"> 16</span>      font-family: sans-serif;
+<span class="ln"> 17</span>      margin: 0;
+<span class="ln"> 18</span>      padding: 0;
+<span class="ln"> 19</span>      background: #f0f2f5;
+<span class="ln"> 20</span>    }
+<span class="ln"> 21</span>
+<span class="ln"> 22</span>    header {
+<span class="ln"> 23</span>      background: #0078d4;
+<span class="ln"> 24</span>      color: #fff;
+<span class="ln"> 25</span>      padding: 1rem 1.5rem;
+<span class="ln"> 26</span>    }
+<span class="ln"> 27</span>
+<span class="ln"> 28</span>    header h1 { margin: 0; font-size: 1.25rem; }
+<span class="ln"> 29</span>    header p  { margin: 0.25rem 0 0; font-size: 0.875rem; opacity: 0.85; }
+<span class="ln"> 30</span>
+<span class="ln"> 31</span>    main {
+<span class="ln"> 32</span>      max-width: 900px;
+<span class="ln"> 33</span>      margin: 1.5rem auto;
+<span class="ln"> 34</span>      padding: 0 1rem;
+<span class="ln"> 35</span>      display: grid;
+<span class="ln"> 36</span>      grid-template-columns: 1fr 1fr;
+<span class="ln"> 37</span>      gap: 1.5rem;
+<span class="ln"> 38</span>    }
+<span class="ln"> 39</span>
+<span class="ln"> 40</span>    @media (max-width: 600px) {
+<span class="ln"> 41</span>      main { grid-template-columns: 1fr; }
+<span class="ln"> 42</span>    }
+<span class="ln"> 43</span>
+<span class="ln"> 44</span>    section {
+<span class="ln"> 45</span>      background: #fff;
+<span class="ln"> 46</span>      border-radius: 8px;
+<span class="ln"> 47</span>      padding: 1.25rem;
+<span class="ln"> 48</span>      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+<span class="ln"> 49</span>    }
+<span class="ln"> 50</span>
+<span class="ln"> 51</span>    section h2 {
+<span class="ln"> 52</span>      margin: 0 0 1rem 0;
+<span class="ln"> 53</span>      font-size: 1rem;
+<span class="ln"> 54</span>      color: #333;
+<span class="ln"> 55</span>      border-bottom: 1px solid #e0e0e0;
+<span class="ln"> 56</span>      padding-bottom: 0.5rem;
+<span class="ln"> 57</span>    }
+<span class="ln"> 58</span>
+<span class="ln"> 59</span>    .status {
+<span class="ln"> 60</span>      padding: 0.625rem 0.875rem;
+<span class="ln"> 61</span>      border-radius: 4px;
+<span class="ln"> 62</span>      font-size: 0.875rem;
+<span class="ln"> 63</span>      margin-bottom: 0.75rem;
+<span class="ln"> 64</span>    }
+<span class="ln"> 65</span>
+<span class="ln"> 66</span>    .status.loading { background: #e3f2fd; color: #1565c0; }
+<span class="ln"> 67</span>    .status.error   { background: #ffebee; color: #c62828; }
+<span class="ln"> 68</span>    .status.hidden  { display: none; }
+<span class="ln"> 69</span>
+<span class="ln"> 70</span>    .post-item {
+<span class="ln"> 71</span>      padding: 0.75rem;
+<span class="ln"> 72</span>      border: 1px solid #e8e8e8;
+<span class="ln"> 73</span>      border-radius: 6px;
+<span class="ln"> 74</span>      margin-bottom: 0.5rem;
+<span class="ln"> 75</span>      cursor: pointer;
+<span class="ln"> 76</span>      transition: background 0.15s;
+<span class="ln"> 77</span>    }
+<span class="ln"> 78</span>
+<span class="ln"> 79</span>    .post-item:hover  { background: #f0f7ff; border-color: #0078d4; }
+<span class="ln"> 80</span>    .post-item.active { background: #e3f2fd; border-color: #0078d4; }
+<span class="ln"> 81</span>
+<span class="ln"> 82</span>    .post-item-title {
+<span class="ln"> 83</span>      font-size: 0.875rem;
+<span class="ln"> 84</span>      font-weight: 600;
+<span class="ln"> 85</span>      margin: 0 0 0.25rem 0;
+<span class="ln"> 86</span>      white-space: nowrap;
+<span class="ln"> 87</span>      overflow: hidden;
+<span class="ln"> 88</span>      text-overflow: ellipsis;
+<span class="ln"> 89</span>    }
+<span class="ln"> 90</span>
+<span class="ln"> 91</span>    .post-item-meta {
+<span class="ln"> 92</span>      font-size: 0.75rem;
+<span class="ln"> 93</span>      color: #888;
+<span class="ln"> 94</span>      margin: 0;
+<span class="ln"> 95</span>    }
+<span class="ln"> 96</span>
+<span class="ln"> 97</span>    #detail-placeholder {
+<span class="ln"> 98</span>      text-align: center;
+<span class="ln"> 99</span>      color: #999;
+<span class="ln">100</span>      font-size: 0.875rem;
+<span class="ln">101</span>      padding: 2rem 0;
+<span class="ln">102</span>    }
+<span class="ln">103</span>
+<span class="ln">104</span>    #post-detail { display: none; }
+<span class="ln">105</span>    #post-detail.visible { display: block; }
+<span class="ln">106</span>
+<span class="ln">107</span>    #detail-title {
+<span class="ln">108</span>      font-size: 1.1rem;
+<span class="ln">109</span>      margin: 0 0 0.5rem 0;
+<span class="ln">110</span>      line-height: 1.4;
+<span class="ln">111</span>    }
+<span class="ln">112</span>
+<span class="ln">113</span>    #detail-meta {
+<span class="ln">114</span>      font-size: 0.75rem;
+<span class="ln">115</span>      color: #888;
+<span class="ln">116</span>      margin-bottom: 0.75rem;
+<span class="ln">117</span>    }
+<span class="ln">118</span>
+<span class="ln">119</span>    #detail-body {
+<span class="ln">120</span>      font-size: 0.875rem;
+<span class="ln">121</span>      line-height: 1.7;
+<span class="ln">122</span>      color: #555;
+<span class="ln">123</span>    }
+<span class="ln">124</span>  &lt;/style&gt;
+<span class="ln">125</span>&lt;/head&gt;
+<span class="ln">126</span>&lt;body&gt;
+<span class="ln">127</span>  &lt;header&gt;
+<span class="ln">128</span>    &lt;h1&gt;게시판 탐색기&lt;/h1&gt;
+<span class="ln">129</span>    &lt;p&gt;JSONPlaceholder API — async/await + Fetch 완성 코드&lt;/p&gt;
+<span class="ln">130</span>  &lt;/header&gt;
+<span class="ln">131</span>
+<span class="ln">132</span>  &lt;main&gt;
+<span class="ln">133</span>    &lt;section&gt;
+<span class="ln">134</span>      &lt;h2&gt;게시글 목록 (최신 10개)&lt;/h2&gt;
+<span class="ln">135</span>      &lt;div id=&quot;list-status&quot; class=&quot;status loading&quot;&gt;목록을 불러오는 중...&lt;/div&gt;
+<span class="ln">136</span>      &lt;div id=&quot;post-list&quot;&gt;&lt;/div&gt;
+<span class="ln">137</span>    &lt;/section&gt;
+<span class="ln">138</span>
+<span class="ln">139</span>    &lt;section&gt;
+<span class="ln">140</span>      &lt;h2&gt;게시글 상세&lt;/h2&gt;
+<span class="ln">141</span>      &lt;div id=&quot;detail-status&quot; class=&quot;status hidden&quot;&gt;&lt;/div&gt;
+<span class="ln">142</span>      &lt;p id=&quot;detail-placeholder&quot;&gt;왼쪽 목록에서 게시글을 선택하세요.&lt;/p&gt;
+<span class="ln">143</span>      &lt;div id=&quot;post-detail&quot;&gt;
+<span class="ln">144</span>        &lt;p id=&quot;detail-meta&quot;&gt;&lt;/p&gt;
+<span class="ln">145</span>        &lt;h3 id=&quot;detail-title&quot;&gt;&lt;/h3&gt;
+<span class="ln">146</span>        &lt;p id=&quot;detail-body&quot;&gt;&lt;/p&gt;
+<span class="ln">147</span>      &lt;/div&gt;
+<span class="ln">148</span>    &lt;/section&gt;
+<span class="ln">149</span>  &lt;/main&gt;
+<span class="ln">150</span>
+<span class="ln">151</span>  &lt;script&gt;
+<span class="ln">152</span>    // DOM 요소 참조
+<span class="ln">153</span>    const listStatusEl   = document.getElementById('list-status');
+<span class="ln">154</span>    const postListEl     = document.getElementById('post-list');
+<span class="ln">155</span>    const detailStatusEl = document.getElementById('detail-status');
+<span class="ln">156</span>    const detailPlaceEl  = document.getElementById('detail-placeholder');
+<span class="ln">157</span>    const postDetailEl   = document.getElementById('post-detail');
+<span class="ln">158</span>    const detailTitleEl  = document.getElementById('detail-title');
+<span class="ln">159</span>    const detailMetaEl   = document.getElementById('detail-meta');
+<span class="ln">160</span>    const detailBodyEl   = document.getElementById('detail-body');
+<span class="ln">161</span>
+<span class="ln">162</span>    // 상태 표시 헬퍼: 타입에 따라 CSS 클래스를 전환합니다
+<span class="ln">163</span>    function setStatus(el, message, type) {
+<span class="ln">164</span>      el.textContent = message;
+<span class="ln">165</span>      el.className = `status ${type}`;
+<span class="ln">166</span>    }
+<span class="ln">167</span>
+<span class="ln">168</span>    // ============================================================
+<span class="ln">169</span>    // 게시글 목록 가져오기
+<span class="ln">170</span>    //   _limit=10 파라미터로 10개만 요청
+<span class="ln">171</span>    // ============================================================
+<span class="ln">172</span>    async function fetchPostList() {
+<span class="ln">173</span>      setStatus(listStatusEl, '목록을 불러오는 중...', 'loading');
+<span class="ln">174</span>
+<span class="ln">175</span>      try {
+<span class="ln">176</span>        // 1. 요청 전송 (쿼리 파라미터로 10개 제한)
+<span class="ln">177</span>        const response = await fetch(
+<span class="ln">178</span>          'https://jsonplaceholder.typicode.com/posts?_limit=10'
+<span class="ln">179</span>        );
+<span class="ln">180</span>
+<span class="ln">181</span>        // 2. HTTP 오류 확인
+<span class="ln">182</span>        if (!response.ok) {
+<span class="ln">183</span>          throw new Error(`목록 로드 실패 (${response.status})`);
+<span class="ln">184</span>        }
+<span class="ln">185</span>
+<span class="ln">186</span>        // 3. JSON 배열로 파싱
+<span class="ln">187</span>        const posts = await response.json();
+<span class="ln">188</span>
+<span class="ln">189</span>        // 4. DOM에 렌더링
+<span class="ln">190</span>        renderPostList(posts);
+<span class="ln">191</span>
+<span class="ln">192</span>        setStatus(listStatusEl, '', 'hidden'); // 로딩 상태 숨기기
+<span class="ln">193</span>      } catch (error) {
+<span class="ln">194</span>        setStatus(listStatusEl, `오류: ${error.message}`, 'error');
+<span class="ln">195</span>      }
+<span class="ln">196</span>    }
+<span class="ln">197</span>
+<span class="ln">198</span>    // ============================================================
+<span class="ln">199</span>    // 게시글 목록 렌더링
+<span class="ln">200</span>    //   각 게시글을 클릭 가능한 아이템으로 생성
+<span class="ln">201</span>    // ============================================================
+<span class="ln">202</span>    function renderPostList(posts) {
+<span class="ln">203</span>      // DocumentFragment로 리플로우 최소화 (content.md 패턴)
+<span class="ln">204</span>      const fragment = document.createDocumentFragment();
+<span class="ln">205</span>
+<span class="ln">206</span>      posts.forEach((post) =&gt; {
+<span class="ln">207</span>        const item = document.createElement('div');
+<span class="ln">208</span>        item.className = 'post-item';
+<span class="ln">209</span>        item.dataset.id = post.id; // 클릭 시 ID 참조에 사용
+<span class="ln">210</span>
+<span class="ln">211</span>        // 제목 — textContent로 XSS 방지
+<span class="ln">212</span>        const title = document.createElement('p');
+<span class="ln">213</span>        title.className = 'post-item-title';
+<span class="ln">214</span>        title.textContent = post.title;
+<span class="ln">215</span>
+<span class="ln">216</span>        // 메타 정보 — textContent로 XSS 방지
+<span class="ln">217</span>        const meta = document.createElement('p');
+<span class="ln">218</span>        meta.className = 'post-item-meta';
+<span class="ln">219</span>        meta.textContent = `게시글 #${post.id} · 작성자 ${post.userId}`;
+<span class="ln">220</span>
+<span class="ln">221</span>        item.append(title, meta);
+<span class="ln">222</span>
+<span class="ln">223</span>        // 클릭 시 상세 정보 로드
+<span class="ln">224</span>        item.onclick = () =&gt; fetchPostDetail(post.id);
+<span class="ln">225</span>
+<span class="ln">226</span>        fragment.appendChild(item);
+<span class="ln">227</span>      });
+<span class="ln">228</span>
+<span class="ln">229</span>      postListEl.appendChild(fragment); // 한 번에 DOM에 삽입
+<span class="ln">230</span>    }
+<span class="ln">231</span>
+<span class="ln">232</span>    // ============================================================
+<span class="ln">233</span>    // 게시글 상세 가져오기
+<span class="ln">234</span>    //   클릭된 아이템에 active 클래스 적용 후 API 요청
+<span class="ln">235</span>    // ============================================================
+<span class="ln">236</span>    async function fetchPostDetail(id) {
+<span class="ln">237</span>      // 이전 선택 active 클래스 제거 후 현재 항목에 적용
+<span class="ln">238</span>      document.querySelectorAll('.post-item').forEach((el) =&gt; {
+<span class="ln">239</span>        el.classList.remove('active');
+<span class="ln">240</span>      });
+<span class="ln">241</span>      const activeItem = document.querySelector(`[data-id=&quot;${id}&quot;]`);
+<span class="ln">242</span>      if (activeItem) {
+<span class="ln">243</span>        activeItem.classList.add('active');
+<span class="ln">244</span>      }
+<span class="ln">245</span>
+<span class="ln">246</span>      detailPlaceEl.style.display = 'none'; // 안내 문구 숨기기
+<span class="ln">247</span>      setStatus(detailStatusEl, '상세 정보 불러오는 중...', 'loading');
+<span class="ln">248</span>
+<span class="ln">249</span>      try {
+<span class="ln">250</span>        const response = await fetch(
+<span class="ln">251</span>          `https://jsonplaceholder.typicode.com/posts/${id}`
+<span class="ln">252</span>        );
+<span class="ln">253</span>
+<span class="ln">254</span>        if (!response.ok) {
+<span class="ln">255</span>          throw new Error(`상세 로드 실패 (${response.status})`);
+<span class="ln">256</span>        }
+<span class="ln">257</span>
+<span class="ln">258</span>        const post = await response.json();
+<span class="ln">259</span>        renderPostDetail(post);
+<span class="ln">260</span>
+<span class="ln">261</span>        setStatus(detailStatusEl, '', 'hidden');
+<span class="ln">262</span>      } catch (error) {
+<span class="ln">263</span>        setStatus(detailStatusEl, `오류: ${error.message}`, 'error');
+<span class="ln">264</span>        postDetailEl.className = ''; // 이전 상세 숨기기
+<span class="ln">265</span>      }
+<span class="ln">266</span>    }
+<span class="ln">267</span>
+<span class="ln">268</span>    // ============================================================
+<span class="ln">269</span>    // 게시글 상세 렌더링
+<span class="ln">270</span>    //   모든 텍스트 삽입에 textContent 사용 (XSS 방지)
+<span class="ln">271</span>    // ============================================================
+<span class="ln">272</span>    function renderPostDetail(post) {
+<span class="ln">273</span>      detailMetaEl.textContent = `게시글 #${post.id} · 작성자 ${post.userId}`;
+<span class="ln">274</span>      detailTitleEl.textContent = post.title;
+<span class="ln">275</span>      detailBodyEl.textContent = post.body;
+<span class="ln">276</span>      postDetailEl.className = 'visible'; // 상세 영역 표시
+<span class="ln">277</span>    }
+<span class="ln">278</span>
+<span class="ln">279</span>    // 페이지 로드 시 목록 자동 로드
+<span class="ln">280</span>    fetchPostList();
+<span class="ln">281</span>  &lt;/script&gt;
+<span class="ln">282</span>&lt;/body&gt;
+<span class="ln">283</span>&lt;/html&gt;
+<span class="ln">284</span></code></pre>
+</details>
+<details class="project-file">
+<summary>&#128221; project_advanced_starter.html (스타터 코드 - 직접 완성해보세요)</summary>
+<pre><code class="language-html"><span class="ln">  1</span>&lt;!DOCTYPE html&gt;
+<span class="ln">  2</span>&lt;!--
+<span class="ln">  3</span>  [중급 프로젝트 스타터] Open-Meteo 날씨 앱
+<span class="ln">  4</span>  챕터: 비동기 JavaScript와 API 연동 (ch_12)
+<span class="ln">  5</span>
+<span class="ln">  6</span>  목표:
+<span class="ln">  7</span>  - 두 단계 연속 API 호출 (Geocoding → Weather) async/await로 처리
+<span class="ln">  8</span>  - 각 fetch의 response.ok 확인 + 단계별 에러 메시지
+<span class="ln">  9</span>  - 날씨 코드를 한국어 텍스트로 변환하는 데이터 매핑
+<span class="ln"> 10</span>  - 복잡한 JSON 구조에서 필요한 데이터 추출
+<span class="ln"> 11</span>
+<span class="ln"> 12</span>  사용 API (API 키 불필요):
+<span class="ln"> 13</span>  - Geocoding: https://geocoding-api.open-meteo.com/v1/search
+<span class="ln"> 14</span>  - 날씨: https://api.open-meteo.com/v1/forecast
+<span class="ln"> 15</span>
+<span class="ln"> 16</span>  TODO 위치를 찾아 완성하세요.
+<span class="ln"> 17</span>  스타터 코드는 에러 없이 실행되며, 검색 시 &quot;구현 필요&quot; 안내만 표시됩니다.
+<span class="ln"> 18</span>--&gt;
+<span class="ln"> 19</span>&lt;html lang=&quot;ko&quot;&gt;
+<span class="ln"> 20</span>&lt;head&gt;
+<span class="ln"> 21</span>  &lt;meta charset=&quot;UTF-8&quot;&gt;
+<span class="ln"> 22</span>  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+<span class="ln"> 23</span>  &lt;title&gt;날씨 앱 (스타터)&lt;/title&gt;
+<span class="ln"> 24</span>  &lt;style&gt;
+<span class="ln"> 25</span>    * { box-sizing: border-box; }
+<span class="ln"> 26</span>
+<span class="ln"> 27</span>    body {
+<span class="ln"> 28</span>      font-family: sans-serif;
+<span class="ln"> 29</span>      background: linear-gradient(135deg, #74b9ff, #0984e3);
+<span class="ln"> 30</span>      min-height: 100vh;
+<span class="ln"> 31</span>      display: flex;
+<span class="ln"> 32</span>      flex-direction: column;
+<span class="ln"> 33</span>      align-items: center;
+<span class="ln"> 34</span>      padding: 2rem 1rem;
+<span class="ln"> 35</span>    }
+<span class="ln"> 36</span>
+<span class="ln"> 37</span>    .app-card {
+<span class="ln"> 38</span>      background: rgba(255,255,255,0.95);
+<span class="ln"> 39</span>      border-radius: 16px;
+<span class="ln"> 40</span>      padding: 2rem;
+<span class="ln"> 41</span>      width: 100%;
+<span class="ln"> 42</span>      max-width: 420px;
+<span class="ln"> 43</span>      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+<span class="ln"> 44</span>    }
+<span class="ln"> 45</span>
+<span class="ln"> 46</span>    h1 {
+<span class="ln"> 47</span>      text-align: center;
+<span class="ln"> 48</span>      font-size: 1.5rem;
+<span class="ln"> 49</span>      margin: 0 0 1.5rem 0;
+<span class="ln"> 50</span>      color: #2d3436;
+<span class="ln"> 51</span>    }
+<span class="ln"> 52</span>
+<span class="ln"> 53</span>    .search-row {
+<span class="ln"> 54</span>      display: flex;
+<span class="ln"> 55</span>      gap: 0.5rem;
+<span class="ln"> 56</span>      margin-bottom: 1.25rem;
+<span class="ln"> 57</span>    }
+<span class="ln"> 58</span>
+<span class="ln"> 59</span>    input[type=&quot;text&quot;] {
+<span class="ln"> 60</span>      flex: 1;
+<span class="ln"> 61</span>      padding: 0.625rem 0.875rem;
+<span class="ln"> 62</span>      border: 1.5px solid #ddd;
+<span class="ln"> 63</span>      border-radius: 8px;
+<span class="ln"> 64</span>      font-size: 1rem;
+<span class="ln"> 65</span>      outline: none;
+<span class="ln"> 66</span>    }
+<span class="ln"> 67</span>
+<span class="ln"> 68</span>    input[type=&quot;text&quot;]:focus { border-color: #0078d4; }
+<span class="ln"> 69</span>
+<span class="ln"> 70</span>    button {
+<span class="ln"> 71</span>      padding: 0.625rem 1.25rem;
+<span class="ln"> 72</span>      border: none;
+<span class="ln"> 73</span>      border-radius: 8px;
+<span class="ln"> 74</span>      background: #0078d4;
+<span class="ln"> 75</span>      color: #fff;
+<span class="ln"> 76</span>      cursor: pointer;
+<span class="ln"> 77</span>      font-size: 0.9rem;
+<span class="ln"> 78</span>      white-space: nowrap;
+<span class="ln"> 79</span>    }
+<span class="ln"> 80</span>
+<span class="ln"> 81</span>    button:hover { background: #106ebe; }
+<span class="ln"> 82</span>    button:disabled { background: #aaa; cursor: not-allowed; }
+<span class="ln"> 83</span>
+<span class="ln"> 84</span>    /* 상태 표시 */
+<span class="ln"> 85</span>    #status {
+<span class="ln"> 86</span>      text-align: center;
+<span class="ln"> 87</span>      padding: 0.75rem;
+<span class="ln"> 88</span>      border-radius: 8px;
+<span class="ln"> 89</span>      font-size: 0.9rem;
+<span class="ln"> 90</span>      margin-bottom: 1rem;
+<span class="ln"> 91</span>      display: none;
+<span class="ln"> 92</span>    }
+<span class="ln"> 93</span>
+<span class="ln"> 94</span>    #status.loading { display: block; background: #e3f2fd; color: #1565c0; }
+<span class="ln"> 95</span>    #status.error   { display: block; background: #ffebee; color: #c62828; }
+<span class="ln"> 96</span>
+<span class="ln"> 97</span>    /* 날씨 결과 카드 */
+<span class="ln"> 98</span>    #weather-result { display: none; text-align: center; }
+<span class="ln"> 99</span>    #weather-result.visible { display: block; }
+<span class="ln">100</span>
+<span class="ln">101</span>    #city-name     { font-size: 1.5rem; font-weight: bold; margin: 0 0 0.25rem 0; }
+<span class="ln">102</span>    #country-name  { font-size: 0.875rem; color: #888; margin: 0 0 1.25rem 0; }
+<span class="ln">103</span>    #temperature   { font-size: 3rem; font-weight: bold; color: #0078d4; margin: 0; }
+<span class="ln">104</span>    #weather-desc  { font-size: 1rem; color: #555; margin: 0.25rem 0 1rem 0; }
+<span class="ln">105</span>    #wind-speed    { font-size: 0.875rem; color: #888; }
+<span class="ln">106</span>
+<span class="ln">107</span>    .divider {
+<span class="ln">108</span>      border: none;
+<span class="ln">109</span>      border-top: 1px solid #eee;
+<span class="ln">110</span>      margin: 1.25rem 0;
+<span class="ln">111</span>    }
+<span class="ln">112</span>
+<span class="ln">113</span>    .recent-list {
+<span class="ln">114</span>      font-size: 0.8rem;
+<span class="ln">115</span>      color: #888;
+<span class="ln">116</span>    }
+<span class="ln">117</span>
+<span class="ln">118</span>    .recent-list span {
+<span class="ln">119</span>      cursor: pointer;
+<span class="ln">120</span>      color: #0078d4;
+<span class="ln">121</span>      text-decoration: underline;
+<span class="ln">122</span>      margin-right: 0.5rem;
+<span class="ln">123</span>    }
+<span class="ln">124</span>
+<span class="ln">125</span>    .recent-list span:hover { color: #106ebe; }
+<span class="ln">126</span>  &lt;/style&gt;
+<span class="ln">127</span>&lt;/head&gt;
+<span class="ln">128</span>&lt;body&gt;
+<span class="ln">129</span>  &lt;div class=&quot;app-card&quot;&gt;
+<span class="ln">130</span>    &lt;h1&gt;날씨 검색&lt;/h1&gt;
+<span class="ln">131</span>
+<span class="ln">132</span>    &lt;div class=&quot;search-row&quot;&gt;
+<span class="ln">133</span>      &lt;input
+<span class="ln">134</span>        type=&quot;text&quot;
+<span class="ln">135</span>        id=&quot;city-input&quot;
+<span class="ln">136</span>        placeholder=&quot;도시 이름 (예: Seoul, Tokyo, London)&quot;
+<span class="ln">137</span>        value=&quot;Seoul&quot;
+<span class="ln">138</span>      &gt;
+<span class="ln">139</span>      &lt;button id=&quot;search-btn&quot; onclick=&quot;searchWeather()&quot;&gt;검색&lt;/button&gt;
+<span class="ln">140</span>    &lt;/div&gt;
+<span class="ln">141</span>
+<span class="ln">142</span>    &lt;!-- 로딩/오류 상태 --&gt;
+<span class="ln">143</span>    &lt;div id=&quot;status&quot;&gt;&lt;/div&gt;
+<span class="ln">144</span>
+<span class="ln">145</span>    &lt;!-- 날씨 결과 --&gt;
+<span class="ln">146</span>    &lt;div id=&quot;weather-result&quot;&gt;
+<span class="ln">147</span>      &lt;h2 id=&quot;city-name&quot;&gt;&lt;/h2&gt;
+<span class="ln">148</span>      &lt;p id=&quot;country-name&quot;&gt;&lt;/p&gt;
+<span class="ln">149</span>      &lt;p id=&quot;temperature&quot;&gt;&lt;/p&gt;
+<span class="ln">150</span>      &lt;p id=&quot;weather-desc&quot;&gt;&lt;/p&gt;
+<span class="ln">151</span>      &lt;p id=&quot;wind-speed&quot;&gt;&lt;/p&gt;
+<span class="ln">152</span>    &lt;/div&gt;
+<span class="ln">153</span>
+<span class="ln">154</span>    &lt;!-- 최근 검색 기록 --&gt;
+<span class="ln">155</span>    &lt;hr class=&quot;divider&quot;&gt;
+<span class="ln">156</span>    &lt;div class=&quot;recent-list&quot;&gt;
+<span class="ln">157</span>      최근 검색: &lt;span id=&quot;recent-cities&quot;&gt;없음&lt;/span&gt;
+<span class="ln">158</span>    &lt;/div&gt;
+<span class="ln">159</span>  &lt;/div&gt;
+<span class="ln">160</span>
+<span class="ln">161</span>  &lt;script&gt;
+<span class="ln">162</span>    const statusEl        = document.getElementById('status');
+<span class="ln">163</span>    const weatherResultEl = document.getElementById('weather-result');
+<span class="ln">164</span>    const cityNameEl      = document.getElementById('city-name');
+<span class="ln">165</span>    const countryNameEl   = document.getElementById('country-name');
+<span class="ln">166</span>    const temperatureEl   = document.getElementById('temperature');
+<span class="ln">167</span>    const weatherDescEl   = document.getElementById('weather-desc');
+<span class="ln">168</span>    const windSpeedEl     = document.getElementById('wind-speed');
+<span class="ln">169</span>    const searchBtn       = document.getElementById('search-btn');
+<span class="ln">170</span>    const recentEl        = document.getElementById('recent-cities');
+<span class="ln">171</span>
+<span class="ln">172</span>    // 최근 검색 도시 목록 (최대 3개)
+<span class="ln">173</span>    const recentCities = [];
+<span class="ln">174</span>
+<span class="ln">175</span>    // ============================================================
+<span class="ln">176</span>    // 날씨 코드(WMO) → 한국어 설명 변환 테이블
+<span class="ln">177</span>    //   Open-Meteo API의 weathercode를 텍스트로 변환합니다
+<span class="ln">178</span>    //   README.md의 코드표 참고
+<span class="ln">179</span>    // ============================================================
+<span class="ln">180</span>    const WEATHER_CODES = {
+<span class="ln">181</span>      0:  '맑음',
+<span class="ln">182</span>      1:  '대체로 맑음',
+<span class="ln">183</span>      2:  '부분적으로 흐림',
+<span class="ln">184</span>      3:  '흐림',
+<span class="ln">185</span>      45: '안개',
+<span class="ln">186</span>      48: '짙은 안개',
+<span class="ln">187</span>      51: '가벼운 이슬비',
+<span class="ln">188</span>      53: '이슬비',
+<span class="ln">189</span>      55: '강한 이슬비',
+<span class="ln">190</span>      61: '가벼운 비',
+<span class="ln">191</span>      63: '비',
+<span class="ln">192</span>      65: '강한 비',
+<span class="ln">193</span>      71: '가벼운 눈',
+<span class="ln">194</span>      73: '눈',
+<span class="ln">195</span>      75: '강한 눈',
+<span class="ln">196</span>      80: '소나기',
+<span class="ln">197</span>      95: '천둥번개',
+<span class="ln">198</span>      99: '강한 천둥번개',
+<span class="ln">199</span>    };
+<span class="ln">200</span>
+<span class="ln">201</span>    // 날씨 코드 → 텍스트 변환 (매핑에 없으면 '날씨 정보 없음' 반환)
+<span class="ln">202</span>    function getWeatherDescription(code) {
+<span class="ln">203</span>      return WEATHER_CODES[code] ?? '날씨 정보 없음';
+<span class="ln">204</span>    }
+<span class="ln">205</span>
+<span class="ln">206</span>    // 상태 표시 헬퍼
+<span class="ln">207</span>    function showStatus(message, type) {
+<span class="ln">208</span>      statusEl.textContent = message;
+<span class="ln">209</span>      statusEl.className = type;
+<span class="ln">210</span>    }
+<span class="ln">211</span>
+<span class="ln">212</span>    function hideStatus() {
+<span class="ln">213</span>      statusEl.className = '';
+<span class="ln">214</span>      statusEl.style.display = 'none';
+<span class="ln">215</span>    }
+<span class="ln">216</span>
+<span class="ln">217</span>    // 최근 검색 목록 업데이트
+<span class="ln">218</span>    function updateRecentCities(cityName) {
+<span class="ln">219</span>      // 중복 제거 후 맨 앞에 추가 (최대 3개 유지)
+<span class="ln">220</span>      const idx = recentCities.indexOf(cityName);
+<span class="ln">221</span>      if (idx !== -1) {
+<span class="ln">222</span>        recentCities.splice(idx, 1);
+<span class="ln">223</span>      }
+<span class="ln">224</span>      recentCities.unshift(cityName);
+<span class="ln">225</span>      if (recentCities.length &gt; 3) {
+<span class="ln">226</span>        recentCities.pop();
+<span class="ln">227</span>      }
+<span class="ln">228</span>
+<span class="ln">229</span>      // 최근 검색 표시 (클릭 시 재검색 — textContent 사용 가능하지만 클릭 이벤트 필요)
+<span class="ln">230</span>      recentEl.textContent = '';
+<span class="ln">231</span>      recentCities.forEach((name) =&gt; {
+<span class="ln">232</span>        const span = document.createElement('span');
+<span class="ln">233</span>        span.textContent = name;
+<span class="ln">234</span>        span.onclick = () =&gt; {
+<span class="ln">235</span>          document.getElementById('city-input').value = name;
+<span class="ln">236</span>          searchWeather();
+<span class="ln">237</span>        };
+<span class="ln">238</span>        recentEl.appendChild(span);
+<span class="ln">239</span>      });
+<span class="ln">240</span>    }
+<span class="ln">241</span>
+<span class="ln">242</span>    // ============================================================
+<span class="ln">243</span>    // TODO 1: fetchGeocode 함수를 완성하세요.
+<span class="ln">244</span>    //
+<span class="ln">245</span>    // 목적: 도시 이름 → 위도/경도 변환
+<span class="ln">246</span>    // API URL: https://geocoding-api.open-meteo.com/v1/search
+<span class="ln">247</span>    //   쿼리 파라미터: name={cityName}&amp;count=1&amp;language=ko
+<span class="ln">248</span>    //
+<span class="ln">249</span>    // 구현 순서:
+<span class="ln">250</span>    // 1. fetch로 API 요청 전송
+<span class="ln">251</span>    // 2. response.ok 확인 → false이면 throw new Error('위치 검색 실패')
+<span class="ln">252</span>    // 3. response.json()으로 파싱
+<span class="ln">253</span>    // 4. data.results가 없거나 빈 배열이면 throw new Error(`&quot;${cityName}&quot;을(를) 찾을 수 없습니다`)
+<span class="ln">254</span>    //    확인: !data.results || data.results.length === 0
+<span class="ln">255</span>    // 5. data.results[0] 반환 (첫 번째 결과: { name, latitude, longitude, country })
+<span class="ln">256</span>    //
+<span class="ln">257</span>    // 반환값: { name, latitude, longitude, country }
+<span class="ln">258</span>    // ============================================================
+<span class="ln">259</span>    async function fetchGeocode(cityName) {
+<span class="ln">260</span>      // TODO: 구현하세요
+<span class="ln">261</span>      // 기본 반환값 (완성 전 에러 방지용 — 완성하면 제거)
+<span class="ln">262</span>      return null;
+<span class="ln">263</span>    }
+<span class="ln">264</span>
+<span class="ln">265</span>    // ============================================================
+<span class="ln">266</span>    // TODO 2: fetchWeather 함수를 완성하세요.
+<span class="ln">267</span>    //
+<span class="ln">268</span>    // 목적: 위도/경도 → 현재 날씨 데이터 가져오기
+<span class="ln">269</span>    // API URL: https://api.open-meteo.com/v1/forecast
+<span class="ln">270</span>    //   쿼리 파라미터: latitude={lat}&amp;longitude={lon}&amp;current_weather=true
+<span class="ln">271</span>    //
+<span class="ln">272</span>    // 구현 순서:
+<span class="ln">273</span>    // 1. fetch로 API 요청 전송
+<span class="ln">274</span>    // 2. response.ok 확인 → false이면 throw new Error('날씨 데이터 로드 실패')
+<span class="ln">275</span>    // 3. response.json()으로 파싱
+<span class="ln">276</span>    // 4. data.current_weather 반환
+<span class="ln">277</span>    //    (구조: { temperature, windspeed, weathercode })
+<span class="ln">278</span>    //
+<span class="ln">279</span>    // 반환값: { temperature, windspeed, weathercode }
+<span class="ln">280</span>    // ============================================================
+<span class="ln">281</span>    async function fetchWeather(lat, lon) {
+<span class="ln">282</span>      // TODO: 구현하세요
+<span class="ln">283</span>      // 기본 반환값 (완성 전 에러 방지용 — 완성하면 제거)
+<span class="ln">284</span>      return null;
+<span class="ln">285</span>    }
+<span class="ln">286</span>
+<span class="ln">287</span>    // ============================================================
+<span class="ln">288</span>    // TODO 3: renderWeather 함수를 완성하세요.
+<span class="ln">289</span>    //
+<span class="ln">290</span>    // 인자:
+<span class="ln">291</span>    //   location — fetchGeocode의 반환값 { name, country, ... }
+<span class="ln">292</span>    //   weather  — fetchWeather의 반환값 { temperature, windspeed, weathercode }
+<span class="ln">293</span>    //
+<span class="ln">294</span>    // 구현 순서 (모두 textContent 사용):
+<span class="ln">295</span>    // 1. cityNameEl.textContent = location.name
+<span class="ln">296</span>    // 2. countryNameEl.textContent = location.country
+<span class="ln">297</span>    // 3. temperatureEl.textContent = `${weather.temperature}°C`
+<span class="ln">298</span>    // 4. weatherDescEl.textContent = getWeatherDescription(weather.weathercode)
+<span class="ln">299</span>    // 5. windSpeedEl.textContent = `바람 속도: ${weather.windspeed} km/h`
+<span class="ln">300</span>    // 6. weatherResultEl.className = 'visible'로 결과 표시
+<span class="ln">301</span>    // ============================================================
+<span class="ln">302</span>    function renderWeather(location, weather) {
+<span class="ln">303</span>      // TODO: 구현하세요
+<span class="ln">304</span>    }
+<span class="ln">305</span>
+<span class="ln">306</span>    // ============================================================
+<span class="ln">307</span>    // searchWeather: 검색 버튼 클릭 시 실행되는 메인 함수
+<span class="ln">308</span>    //   (이미 완성됨 — TODO 1~3 함수를 완성하면 동작합니다)
+<span class="ln">309</span>    // ============================================================
+<span class="ln">310</span>    async function searchWeather() {
+<span class="ln">311</span>      const cityName = document.getElementById('city-input').value.trim();
+<span class="ln">312</span>
+<span class="ln">313</span>      if (!cityName) {
+<span class="ln">314</span>        showStatus('도시 이름을 입력하세요.', 'error');
+<span class="ln">315</span>        return;
+<span class="ln">316</span>      }
+<span class="ln">317</span>
+<span class="ln">318</span>      searchBtn.disabled = true;
+<span class="ln">319</span>      weatherResultEl.className = ''; // 이전 결과 숨기기
+<span class="ln">320</span>      showStatus(`&quot;${cityName}&quot; 날씨를 검색하는 중...`, 'loading');
+<span class="ln">321</span>
+<span class="ln">322</span>      try {
+<span class="ln">323</span>        // 1단계: 도시 이름 → 위도/경도 변환
+<span class="ln">324</span>        const location = await fetchGeocode(cityName);
+<span class="ln">325</span>
+<span class="ln">326</span>        if (!location) {
+<span class="ln">327</span>          // TODO 1이 미완성일 때 기본 처리
+<span class="ln">328</span>          showStatus('fetchGeocode 함수를 완성하세요 (TODO 1)', 'error');
+<span class="ln">329</span>          return;
+<span class="ln">330</span>        }
+<span class="ln">331</span>
+<span class="ln">332</span>        // 2단계: 위도/경도 → 날씨 데이터 조회
+<span class="ln">333</span>        const weather = await fetchWeather(location.latitude, location.longitude);
+<span class="ln">334</span>
+<span class="ln">335</span>        if (!weather) {
+<span class="ln">336</span>          // TODO 2가 미완성일 때 기본 처리
+<span class="ln">337</span>          showStatus('fetchWeather 함수를 완성하세요 (TODO 2)', 'error');
+<span class="ln">338</span>          return;
+<span class="ln">339</span>        }
+<span class="ln">340</span>
+<span class="ln">341</span>        // 3단계: 결과 렌더링
+<span class="ln">342</span>        renderWeather(location, weather);
+<span class="ln">343</span>        hideStatus();
+<span class="ln">344</span>
+<span class="ln">345</span>        // 최근 검색 기록 업데이트
+<span class="ln">346</span>        updateRecentCities(location.name);
+<span class="ln">347</span>      } catch (error) {
+<span class="ln">348</span>        showStatus(`오류: ${error.message}`, 'error');
+<span class="ln">349</span>        weatherResultEl.className = '';
+<span class="ln">350</span>      } finally {
+<span class="ln">351</span>        searchBtn.disabled = false;
+<span class="ln">352</span>      }
+<span class="ln">353</span>    }
+<span class="ln">354</span>
+<span class="ln">355</span>    // Enter 키로도 검색 가능하게
+<span class="ln">356</span>    document.getElementById('city-input').addEventListener('keydown', (e) =&gt; {
+<span class="ln">357</span>      if (e.key === 'Enter') {
+<span class="ln">358</span>        searchWeather();
+<span class="ln">359</span>      }
+<span class="ln">360</span>    });
+<span class="ln">361</span>  &lt;/script&gt;
+<span class="ln">362</span>&lt;/body&gt;
+<span class="ln">363</span>&lt;/html&gt;
+<span class="ln">364</span></code></pre>
+</details>
+<details class="project-file">
+<summary>&#9989; project_advanced_complete.html (완성 코드)</summary>
+<pre><code class="language-html"><span class="ln">  1</span>&lt;!DOCTYPE html&gt;
+<span class="ln">  2</span>&lt;!--
+<span class="ln">  3</span>  [중급 프로젝트 완성] Open-Meteo 날씨 앱
+<span class="ln">  4</span>  챕터: 비동기 JavaScript와 API 연동 (ch_12)
+<span class="ln">  5</span>  (인터넷 연결 필요: Open-Meteo API 사용)
+<span class="ln">  6</span>--&gt;
+<span class="ln">  7</span>&lt;html lang=&quot;ko&quot;&gt;
+<span class="ln">  8</span>&lt;head&gt;
+<span class="ln">  9</span>  &lt;meta charset=&quot;UTF-8&quot;&gt;
+<span class="ln"> 10</span>  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+<span class="ln"> 11</span>  &lt;title&gt;날씨 앱 (완성)&lt;/title&gt;
+<span class="ln"> 12</span>  &lt;style&gt;
+<span class="ln"> 13</span>    * { box-sizing: border-box; }
+<span class="ln"> 14</span>
+<span class="ln"> 15</span>    body {
+<span class="ln"> 16</span>      font-family: sans-serif;
+<span class="ln"> 17</span>      background: linear-gradient(135deg, #74b9ff, #0984e3);
+<span class="ln"> 18</span>      min-height: 100vh;
+<span class="ln"> 19</span>      display: flex;
+<span class="ln"> 20</span>      flex-direction: column;
+<span class="ln"> 21</span>      align-items: center;
+<span class="ln"> 22</span>      padding: 2rem 1rem;
+<span class="ln"> 23</span>    }
+<span class="ln"> 24</span>
+<span class="ln"> 25</span>    .app-card {
+<span class="ln"> 26</span>      background: rgba(255,255,255,0.95);
+<span class="ln"> 27</span>      border-radius: 16px;
+<span class="ln"> 28</span>      padding: 2rem;
+<span class="ln"> 29</span>      width: 100%;
+<span class="ln"> 30</span>      max-width: 420px;
+<span class="ln"> 31</span>      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+<span class="ln"> 32</span>    }
+<span class="ln"> 33</span>
+<span class="ln"> 34</span>    h1 {
+<span class="ln"> 35</span>      text-align: center;
+<span class="ln"> 36</span>      font-size: 1.5rem;
+<span class="ln"> 37</span>      margin: 0 0 1.5rem 0;
+<span class="ln"> 38</span>      color: #2d3436;
+<span class="ln"> 39</span>    }
+<span class="ln"> 40</span>
+<span class="ln"> 41</span>    .search-row {
+<span class="ln"> 42</span>      display: flex;
+<span class="ln"> 43</span>      gap: 0.5rem;
+<span class="ln"> 44</span>      margin-bottom: 1.25rem;
+<span class="ln"> 45</span>    }
+<span class="ln"> 46</span>
+<span class="ln"> 47</span>    input[type=&quot;text&quot;] {
+<span class="ln"> 48</span>      flex: 1;
+<span class="ln"> 49</span>      padding: 0.625rem 0.875rem;
+<span class="ln"> 50</span>      border: 1.5px solid #ddd;
+<span class="ln"> 51</span>      border-radius: 8px;
+<span class="ln"> 52</span>      font-size: 1rem;
+<span class="ln"> 53</span>      outline: none;
+<span class="ln"> 54</span>    }
+<span class="ln"> 55</span>
+<span class="ln"> 56</span>    input[type=&quot;text&quot;]:focus { border-color: #0078d4; }
+<span class="ln"> 57</span>
+<span class="ln"> 58</span>    button {
+<span class="ln"> 59</span>      padding: 0.625rem 1.25rem;
+<span class="ln"> 60</span>      border: none;
+<span class="ln"> 61</span>      border-radius: 8px;
+<span class="ln"> 62</span>      background: #0078d4;
+<span class="ln"> 63</span>      color: #fff;
+<span class="ln"> 64</span>      cursor: pointer;
+<span class="ln"> 65</span>      font-size: 0.9rem;
+<span class="ln"> 66</span>      white-space: nowrap;
+<span class="ln"> 67</span>    }
+<span class="ln"> 68</span>
+<span class="ln"> 69</span>    button:hover { background: #106ebe; }
+<span class="ln"> 70</span>    button:disabled { background: #aaa; cursor: not-allowed; }
+<span class="ln"> 71</span>
+<span class="ln"> 72</span>    #status {
+<span class="ln"> 73</span>      text-align: center;
+<span class="ln"> 74</span>      padding: 0.75rem;
+<span class="ln"> 75</span>      border-radius: 8px;
+<span class="ln"> 76</span>      font-size: 0.9rem;
+<span class="ln"> 77</span>      margin-bottom: 1rem;
+<span class="ln"> 78</span>      display: none;
+<span class="ln"> 79</span>    }
+<span class="ln"> 80</span>
+<span class="ln"> 81</span>    #status.loading { display: block; background: #e3f2fd; color: #1565c0; }
+<span class="ln"> 82</span>    #status.error   { display: block; background: #ffebee; color: #c62828; }
+<span class="ln"> 83</span>
+<span class="ln"> 84</span>    #weather-result { display: none; text-align: center; }
+<span class="ln"> 85</span>    #weather-result.visible { display: block; }
+<span class="ln"> 86</span>
+<span class="ln"> 87</span>    #city-name    { font-size: 1.5rem; font-weight: bold; margin: 0 0 0.25rem 0; }
+<span class="ln"> 88</span>    #country-name { font-size: 0.875rem; color: #888; margin: 0 0 1.25rem 0; }
+<span class="ln"> 89</span>    #temperature  { font-size: 3rem; font-weight: bold; color: #0078d4; margin: 0; }
+<span class="ln"> 90</span>    #weather-desc { font-size: 1rem; color: #555; margin: 0.25rem 0 1rem 0; }
+<span class="ln"> 91</span>    #wind-speed   { font-size: 0.875rem; color: #888; }
+<span class="ln"> 92</span>
+<span class="ln"> 93</span>    .divider { border: none; border-top: 1px solid #eee; margin: 1.25rem 0; }
+<span class="ln"> 94</span>
+<span class="ln"> 95</span>    .recent-list { font-size: 0.8rem; color: #888; }
+<span class="ln"> 96</span>    .recent-list span {
+<span class="ln"> 97</span>      cursor: pointer; color: #0078d4;
+<span class="ln"> 98</span>      text-decoration: underline; margin-right: 0.5rem;
+<span class="ln"> 99</span>    }
+<span class="ln">100</span>    .recent-list span:hover { color: #106ebe; }
+<span class="ln">101</span>  &lt;/style&gt;
+<span class="ln">102</span>&lt;/head&gt;
+<span class="ln">103</span>&lt;body&gt;
+<span class="ln">104</span>  &lt;div class=&quot;app-card&quot;&gt;
+<span class="ln">105</span>    &lt;h1&gt;날씨 검색&lt;/h1&gt;
+<span class="ln">106</span>
+<span class="ln">107</span>    &lt;div class=&quot;search-row&quot;&gt;
+<span class="ln">108</span>      &lt;input
+<span class="ln">109</span>        type=&quot;text&quot;
+<span class="ln">110</span>        id=&quot;city-input&quot;
+<span class="ln">111</span>        placeholder=&quot;도시 이름 (예: Seoul, Tokyo, London)&quot;
+<span class="ln">112</span>        value=&quot;Seoul&quot;
+<span class="ln">113</span>      &gt;
+<span class="ln">114</span>      &lt;button id=&quot;search-btn&quot; onclick=&quot;searchWeather()&quot;&gt;검색&lt;/button&gt;
+<span class="ln">115</span>    &lt;/div&gt;
+<span class="ln">116</span>
+<span class="ln">117</span>    &lt;div id=&quot;status&quot;&gt;&lt;/div&gt;
+<span class="ln">118</span>
+<span class="ln">119</span>    &lt;div id=&quot;weather-result&quot;&gt;
+<span class="ln">120</span>      &lt;h2 id=&quot;city-name&quot;&gt;&lt;/h2&gt;
+<span class="ln">121</span>      &lt;p id=&quot;country-name&quot;&gt;&lt;/p&gt;
+<span class="ln">122</span>      &lt;p id=&quot;temperature&quot;&gt;&lt;/p&gt;
+<span class="ln">123</span>      &lt;p id=&quot;weather-desc&quot;&gt;&lt;/p&gt;
+<span class="ln">124</span>      &lt;p id=&quot;wind-speed&quot;&gt;&lt;/p&gt;
+<span class="ln">125</span>    &lt;/div&gt;
+<span class="ln">126</span>
+<span class="ln">127</span>    &lt;hr class=&quot;divider&quot;&gt;
+<span class="ln">128</span>    &lt;div class=&quot;recent-list&quot;&gt;
+<span class="ln">129</span>      최근 검색: &lt;span id=&quot;recent-cities&quot;&gt;없음&lt;/span&gt;
+<span class="ln">130</span>    &lt;/div&gt;
+<span class="ln">131</span>  &lt;/div&gt;
+<span class="ln">132</span>
+<span class="ln">133</span>  &lt;script&gt;
+<span class="ln">134</span>    const statusEl        = document.getElementById('status');
+<span class="ln">135</span>    const weatherResultEl = document.getElementById('weather-result');
+<span class="ln">136</span>    const cityNameEl      = document.getElementById('city-name');
+<span class="ln">137</span>    const countryNameEl   = document.getElementById('country-name');
+<span class="ln">138</span>    const temperatureEl   = document.getElementById('temperature');
+<span class="ln">139</span>    const weatherDescEl   = document.getElementById('weather-desc');
+<span class="ln">140</span>    const windSpeedEl     = document.getElementById('wind-speed');
+<span class="ln">141</span>    const searchBtn       = document.getElementById('search-btn');
+<span class="ln">142</span>    const recentEl        = document.getElementById('recent-cities');
+<span class="ln">143</span>
+<span class="ln">144</span>    const recentCities = [];
+<span class="ln">145</span>
+<span class="ln">146</span>    // WMO 날씨 코드 → 한국어 설명 매핑 테이블
+<span class="ln">147</span>    const WEATHER_CODES = {
+<span class="ln">148</span>      0:  '맑음',
+<span class="ln">149</span>      1:  '대체로 맑음',
+<span class="ln">150</span>      2:  '부분적으로 흐림',
+<span class="ln">151</span>      3:  '흐림',
+<span class="ln">152</span>      45: '안개',
+<span class="ln">153</span>      48: '짙은 안개',
+<span class="ln">154</span>      51: '가벼운 이슬비',
+<span class="ln">155</span>      53: '이슬비',
+<span class="ln">156</span>      55: '강한 이슬비',
+<span class="ln">157</span>      61: '가벼운 비',
+<span class="ln">158</span>      63: '비',
+<span class="ln">159</span>      65: '강한 비',
+<span class="ln">160</span>      71: '가벼운 눈',
+<span class="ln">161</span>      73: '눈',
+<span class="ln">162</span>      75: '강한 눈',
+<span class="ln">163</span>      80: '소나기',
+<span class="ln">164</span>      95: '천둥번개',
+<span class="ln">165</span>      99: '강한 천둥번개',
+<span class="ln">166</span>    };
+<span class="ln">167</span>
+<span class="ln">168</span>    // 날씨 코드 텍스트 변환 (매핑 없으면 기본값 반환)
+<span class="ln">169</span>    function getWeatherDescription(code) {
+<span class="ln">170</span>      return WEATHER_CODES[code] ?? '날씨 정보 없음';
+<span class="ln">171</span>    }
+<span class="ln">172</span>
+<span class="ln">173</span>    function showStatus(message, type) {
+<span class="ln">174</span>      statusEl.textContent = message;
+<span class="ln">175</span>      statusEl.className = type;
+<span class="ln">176</span>    }
+<span class="ln">177</span>
+<span class="ln">178</span>    function hideStatus() {
+<span class="ln">179</span>      statusEl.className = '';
+<span class="ln">180</span>      statusEl.style.display = 'none';
+<span class="ln">181</span>    }
+<span class="ln">182</span>
+<span class="ln">183</span>    // 최근 검색 목록 업데이트 (최대 3개, 중복 제거)
+<span class="ln">184</span>    function updateRecentCities(cityName) {
+<span class="ln">185</span>      const idx = recentCities.indexOf(cityName);
+<span class="ln">186</span>      if (idx !== -1) {
+<span class="ln">187</span>        recentCities.splice(idx, 1);
+<span class="ln">188</span>      }
+<span class="ln">189</span>      recentCities.unshift(cityName);
+<span class="ln">190</span>      if (recentCities.length &gt; 3) {
+<span class="ln">191</span>        recentCities.pop();
+<span class="ln">192</span>      }
+<span class="ln">193</span>
+<span class="ln">194</span>      recentEl.textContent = '';
+<span class="ln">195</span>      recentCities.forEach((name) =&gt; {
+<span class="ln">196</span>        const span = document.createElement('span');
+<span class="ln">197</span>        span.textContent = name; // textContent로 XSS 방지
+<span class="ln">198</span>        span.onclick = () =&gt; {
+<span class="ln">199</span>          document.getElementById('city-input').value = name;
+<span class="ln">200</span>          searchWeather();
+<span class="ln">201</span>        };
+<span class="ln">202</span>        recentEl.appendChild(span);
+<span class="ln">203</span>      });
+<span class="ln">204</span>    }
+<span class="ln">205</span>
+<span class="ln">206</span>    // ============================================================
+<span class="ln">207</span>    // 해답 1: fetchGeocode — 도시 이름 → 위도/경도 변환
+<span class="ln">208</span>    //   Geocoding API: geocoding-api.open-meteo.com
+<span class="ln">209</span>    // ============================================================
+<span class="ln">210</span>    async function fetchGeocode(cityName) {
+<span class="ln">211</span>      // URL 인코딩으로 한국어 도시명도 안전하게 처리
+<span class="ln">212</span>      const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&amp;count=1&amp;language=ko`;
+<span class="ln">213</span>
+<span class="ln">214</span>      const response = await fetch(url);
+<span class="ln">215</span>
+<span class="ln">216</span>      // 1. HTTP 오류 확인
+<span class="ln">217</span>      if (!response.ok) {
+<span class="ln">218</span>        throw new Error(`위치 검색 실패 (${response.status})`);
+<span class="ln">219</span>      }
+<span class="ln">220</span>
+<span class="ln">221</span>      const data = await response.json();
+<span class="ln">222</span>
+<span class="ln">223</span>      // 2. 검색 결과가 없는 경우 (빈 배열 또는 results 키 없음)
+<span class="ln">224</span>      if (!data.results || data.results.length === 0) {
+<span class="ln">225</span>        throw new Error(`&quot;${cityName}&quot;을(를) 찾을 수 없습니다`);
+<span class="ln">226</span>      }
+<span class="ln">227</span>
+<span class="ln">228</span>      // 첫 번째 결과 반환: { name, latitude, longitude, country }
+<span class="ln">229</span>      return data.results[0];
+<span class="ln">230</span>    }
+<span class="ln">231</span>
+<span class="ln">232</span>    // ============================================================
+<span class="ln">233</span>    // 해답 2: fetchWeather — 위도/경도 → 현재 날씨 데이터
+<span class="ln">234</span>    //   Open-Meteo API: api.open-meteo.com
+<span class="ln">235</span>    // ============================================================
+<span class="ln">236</span>    async function fetchWeather(lat, lon) {
+<span class="ln">237</span>      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&amp;longitude=${lon}&amp;current_weather=true`;
+<span class="ln">238</span>
+<span class="ln">239</span>      const response = await fetch(url);
+<span class="ln">240</span>
+<span class="ln">241</span>      // HTTP 오류 확인
+<span class="ln">242</span>      if (!response.ok) {
+<span class="ln">243</span>        throw new Error(`날씨 데이터 로드 실패 (${response.status})`);
+<span class="ln">244</span>      }
+<span class="ln">245</span>
+<span class="ln">246</span>      const data = await response.json();
+<span class="ln">247</span>
+<span class="ln">248</span>      // current_weather 객체 반환: { temperature, windspeed, weathercode }
+<span class="ln">249</span>      return data.current_weather;
+<span class="ln">250</span>    }
+<span class="ln">251</span>
+<span class="ln">252</span>    // ============================================================
+<span class="ln">253</span>    // 해답 3: renderWeather — 날씨 데이터를 DOM에 표시
+<span class="ln">254</span>    //   모든 텍스트 삽입에 textContent 사용 → XSS 방지
+<span class="ln">255</span>    // ============================================================
+<span class="ln">256</span>    function renderWeather(location, weather) {
+<span class="ln">257</span>      cityNameEl.textContent    = location.name;
+<span class="ln">258</span>      countryNameEl.textContent = location.country;
+<span class="ln">259</span>      temperatureEl.textContent = `${weather.temperature}°C`;
+<span class="ln">260</span>      weatherDescEl.textContent = getWeatherDescription(weather.weathercode);
+<span class="ln">261</span>      windSpeedEl.textContent   = `바람 속도: ${weather.windspeed} km/h`;
+<span class="ln">262</span>      weatherResultEl.className = 'visible'; // 결과 카드 표시
+<span class="ln">263</span>    }
+<span class="ln">264</span>
+<span class="ln">265</span>    // ============================================================
+<span class="ln">266</span>    // searchWeather: 두 단계 API 호출을 순서대로 실행
+<span class="ln">267</span>    //   1단계(Geocoding) 완료 후 2단계(Weather) 시작
+<span class="ln">268</span>    // ============================================================
+<span class="ln">269</span>    async function searchWeather() {
+<span class="ln">270</span>      const cityName = document.getElementById('city-input').value.trim();
+<span class="ln">271</span>
+<span class="ln">272</span>      if (!cityName) {
+<span class="ln">273</span>        showStatus('도시 이름을 입력하세요.', 'error');
+<span class="ln">274</span>        return;
+<span class="ln">275</span>      }
+<span class="ln">276</span>
+<span class="ln">277</span>      searchBtn.disabled = true;
+<span class="ln">278</span>      weatherResultEl.className = '';
+<span class="ln">279</span>      showStatus(`&quot;${cityName}&quot; 날씨를 검색하는 중...`, 'loading');
+<span class="ln">280</span>
+<span class="ln">281</span>      try {
+<span class="ln">282</span>        // 1단계: 도시 이름 → 위도/경도 (Geocoding API)
+<span class="ln">283</span>        const location = await fetchGeocode(cityName);
+<span class="ln">284</span>
+<span class="ln">285</span>        // 2단계: 위도/경도 → 현재 날씨 (Weather API)
+<span class="ln">286</span>        const weather = await fetchWeather(location.latitude, location.longitude);
+<span class="ln">287</span>
+<span class="ln">288</span>        // 3단계: 결과 렌더링
+<span class="ln">289</span>        renderWeather(location, weather);
+<span class="ln">290</span>        hideStatus();
+<span class="ln">291</span>
+<span class="ln">292</span>        updateRecentCities(location.name);
+<span class="ln">293</span>      } catch (error) {
+<span class="ln">294</span>        // 두 단계 중 어느 곳에서 오류가 발생해도 여기서 처리
+<span class="ln">295</span>        showStatus(`오류: ${error.message}`, 'error');
+<span class="ln">296</span>        weatherResultEl.className = '';
+<span class="ln">297</span>      } finally {
+<span class="ln">298</span>        searchBtn.disabled = false;
+<span class="ln">299</span>      }
+<span class="ln">300</span>
+<span class="ln">301</span>      // 성공 시 콘솔 출력 예시 (Seoul):
+<span class="ln">302</span>      // location: { name: &quot;서울&quot;, country: &quot;대한민국&quot;, latitude: 37.566, longitude: 126.9784 }
+<span class="ln">303</span>      // weather: { temperature: 18.5, windspeed: 12.3, weathercode: 1 }
+<span class="ln">304</span>      // 화면: 서울 / 대한민국 / 18.5°C / 대체로 맑음 / 바람 속도: 12.3 km/h
+<span class="ln">305</span>    }
+<span class="ln">306</span>
+<span class="ln">307</span>    // Enter 키 검색 지원
+<span class="ln">308</span>    document.getElementById('city-input').addEventListener('keydown', (e) =&gt; {
+<span class="ln">309</span>      if (e.key === 'Enter') {
+<span class="ln">310</span>        searchWeather();
+<span class="ln">311</span>      }
+<span class="ln">312</span>    });
+<span class="ln">313</span>  &lt;/script&gt;
+<span class="ln">314</span>&lt;/body&gt;
+<span class="ln">315</span>&lt;/html&gt;
+<span class="ln">316</span></code></pre>
+</details>
+</section>
+
+  <nav class="chapter-nav"><a href="ch_11.html" class="nav-prev">&larr; DOM 조작과 이벤트 처리</a><a href="index.html" class="nav-home">목차</a></nav>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,2343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>05장: CSS 기초: 선택자와 박스 모델 - 프론트엔드 입문 가이드: HTML, CSS, JavaScript 한 번에</title>
+<style>
+
+:root {
+    --bg: #ffffff;
+    --fg: #1a1a2e;
+    --accent: #3b82f6;
+    --accent-light: #dbeafe;
+    --border: #e2e8f0;
+    --code-bg: #f8fafc;
+    --sidebar-bg: #f1f5f9;
+    --success: #22c55e;
+    --warning: #f59e0b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    line-height: 1.8;
+    font-size: 16px;
+}
+.layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+}
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1rem;
+    font-size: 0.85rem;
+}
+.sidebar h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 0.5rem; }
+.sidebar ul { list-style: none; }
+.sidebar li { margin-bottom: 0.25rem; }
+.sidebar a { color: var(--fg); text-decoration: none; display: block; padding: 0.25rem 0.5rem; border-radius: 4px; transition: background 0.15s; }
+.sidebar a:hover { background: var(--accent-light); }
+.main { padding: 2rem 3rem 4rem; max-width: 900px; }
+.chapter-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--accent); }
+.chapter-header h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+.chapter-header .meta { font-size: 0.9rem; color: #64748b; }
+.difficulty { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+.difficulty-입문 { background: #dcfce7; color: #166534; }
+.difficulty-기초 { background: #dbeafe; color: #1e40af; }
+.difficulty-중급 { background: #fef3c7; color: #92400e; }
+.difficulty-실무 { background: #fce7f3; color: #9d174d; }
+
+/* 본문 */
+.content h1 { font-size: 1.8rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+.content h2 { font-size: 1.4rem; margin: 1.8rem 0 0.8rem; color: var(--accent); }
+.content h3 { font-size: 1.15rem; margin: 1.3rem 0 0.6rem; }
+.content h4 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+.content p { margin-bottom: 1rem; }
+.content ul, .content ol { margin: 0.5rem 0 1rem 1.5rem; }
+.content li { margin-bottom: 0.3rem; }
+.content blockquote {
+    border-left: 4px solid var(--accent);
+    background: var(--accent-light);
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+}
+.content table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.9rem; }
+.content th { background: var(--sidebar-bg); font-weight: 600; text-align: left; }
+.content th, .content td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; }
+.content tr:nth-child(even) { background: #f8fafc; }
+.content pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; overflow-x: auto; margin: 1rem 0; font-size: 0.9rem; }
+.content code { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.9em; }
+.content p code, .content li code, .content td code {
+    background: #f1f5f9;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    color: #e11d48;
+    font-size: 0.85em;
+}
+.content hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+.content img { max-width: 100%; height: auto; border-radius: 8px; }
+
+/* 다이어그램 */
+figure.diagram { margin: 1.5rem 0; text-align: center; }
+figure.diagram .mermaid { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; }
+figure.diagram figcaption { font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; font-style: italic; }
+figure.diagram img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; }
+figure.diagram .svg-diagram { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; text-align: center; }
+figure.diagram .svg-diagram svg { max-width: 100%; height: auto; }
+figure.diagram img.screenshot { border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 10px; }
+.missing-diagram { color: #dc2626; font-style: italic; padding: 1rem; background: #fef2f2; border-radius: 8px; }
+
+/* 코드 섹션 */
+.code-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border); }
+.code-section h2 { font-size: 1.4rem; color: var(--accent); margin-bottom: 1rem; }
+.code-block { margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.code-block h3 { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+.code-block pre { margin: 0; border: none; border-radius: 0; }
+details.code-block { cursor: pointer; }
+details.code-block summary { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+details.code-block[open] summary { border-bottom: 1px solid var(--border); }
+
+/* 네비게이션 */
+.chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    margin-top: 3rem;
+    border-top: 2px solid var(--border);
+    gap: 1rem;
+}
+.chapter-nav a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+.chapter-nav a:hover { background: var(--accent-light); }
+.nav-home { order: 0; }
+.nav-prev { order: -1; }
+.nav-next { order: 1; }
+
+/* 인덱스 페이지 */
+.index-container { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+.book-header { text-align: center; margin-bottom: 3rem; }
+.book-header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.book-header p { color: #64748b; font-size: 1.1rem; }
+.chapter-list { list-style: none; }
+.chapter-list li { margin-bottom: 0.75rem; }
+.chapter-list a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--sidebar-bg);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--fg);
+    transition: all 0.15s;
+    border: 1px solid transparent;
+}
+.chapter-list a:hover { border-color: var(--accent); background: var(--accent-light); }
+.chapter-list .ch-num { font-weight: 700; color: var(--accent); min-width: 3rem; }
+.chapter-list .ch-title { flex: 1; }
+.difficulty-group { margin-top: 2rem; }
+.difficulty-group h2 { font-size: 1.2rem; margin-bottom: 0.75rem; padding-left: 0.5rem; }
+
+/* 코드하이라이트 Pygments 오버라이드 */
+.codehilite { background: var(--code-bg) !important; border-radius: 8px; padding: 1rem; overflow-x: auto; }
+
+/* 줄별 코드 설명 */
+.code-annotation {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 0 0 8px 8px;
+    padding: 1rem 1.2rem;
+    margin: -0.5rem 0 1.5rem;
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+.code-annotation > p:first-child,
+.code-annotation > strong:first-child {
+    display: block;
+    font-weight: 700;
+    color: #0369a1;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+.code-annotation table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.3rem;
+}
+.code-annotation th {
+    background: #e0f2fe;
+    padding: 0.4rem 0.6rem;
+    text-align: left;
+    font-size: 0.82rem;
+    border: 1px solid #bae6fd;
+    color: #0c4a6e;
+}
+.code-annotation td {
+    padding: 0.35rem 0.6rem;
+    border: 1px solid #e0f2fe;
+    vertical-align: top;
+    font-size: 0.85rem;
+}
+.code-annotation td:first-child {
+    width: 2.5rem;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    color: #64748b;
+    font-weight: 600;
+}
+.code-annotation td:nth-child(2) {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: #334155;
+    white-space: nowrap;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.code-annotation td code {
+    background: #e0f2fe;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.82rem;
+}
+.code-annotation tr:nth-child(even) { background: #f0f9ff; }
+.code-annotation tr:nth-child(odd) { background: #ffffff; }
+
+/* API 명세 */
+.api-spec {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 1.2rem 1.4rem;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+.api-spec > p:first-child,
+.api-spec > h4:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: #92400e;
+    margin-bottom: 0.6rem;
+    font-size: 0.95rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid #fde68a;
+}
+.api-spec table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.3rem;
+}
+.api-spec th {
+    background: #fef3c7;
+    padding: 0.4rem 0.7rem;
+    text-align: left;
+    font-size: 0.82rem;
+    border: 1px solid #fde68a;
+    color: #78350f;
+    width: 6.5rem;
+    vertical-align: top;
+}
+.api-spec td {
+    padding: 0.4rem 0.7rem;
+    border: 1px solid #fde68a;
+    vertical-align: top;
+    font-size: 0.85rem;
+}
+.api-spec td code {
+    background: #fef9c3;
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    font-size: 0.83rem;
+    color: #92400e;
+}
+.api-spec tr:nth-child(even) { background: #fffbeb; }
+.api-spec tr:nth-child(odd) { background: #ffffff; }
+
+/* 예제 코드 줄번호 */
+.code-block .ln {
+    color: #94a3b8;
+    user-select: none;
+    display: inline-block;
+    text-align: right;
+    min-width: 2.5em;
+    margin-right: 1em;
+    border-right: 1px solid #e2e8f0;
+    padding-right: 0.8em;
+}
+
+/* 프로젝트 섹션 */
+.project-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border); }
+.project-section h2 { font-size: 1.4rem; color: var(--accent); margin-bottom: 1.2rem; }
+.project-readme { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 1.5rem 2rem; margin-bottom: 1.5rem; line-height: 1.8; }
+.project-readme h1 { font-size: 1.3rem; color: #166534; margin: 0 0 0.8rem; border-bottom: 2px solid #86efac; padding-bottom: 0.5rem; }
+.project-readme h2 { font-size: 1.1rem; color: #15803d; margin: 1.2rem 0 0.5rem; }
+.project-readme h3 { font-size: 1rem; color: #166534; margin: 0.8rem 0 0.4rem; }
+.project-readme ul, .project-readme ol { padding-left: 1.5rem; margin: 0.4rem 0; }
+.project-readme li { margin-bottom: 0.3rem; }
+.project-readme code { background: #dcfce7; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.88rem; }
+.project-readme pre { background: var(--code-bg); padding: 0.8rem; border-radius: 6px; overflow-x: auto; }
+.project-readme pre code { background: none; padding: 0; }
+.project-file { margin-bottom: 0.8rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: pointer; }
+.project-file summary { background: var(--sidebar-bg); padding: 0.6rem 1.2rem; font-size: 0.95rem; font-weight: 600; border-bottom: 1px solid var(--border); }
+.project-file[open] summary { border-bottom: 1px solid var(--border); }
+.project-file pre { margin: 0; border: none; border-radius: 0; }
+
+/* 제목 permalink 숨김 (hover시만 표시) */
+.headerlink { text-decoration: none; color: var(--border); opacity: 0; transition: opacity 0.15s; margin-left: 0.3rem; font-weight: 300; }
+h1:hover .headerlink, h2:hover .headerlink, h3:hover .headerlink, h4:hover .headerlink { opacity: 0.6; }
+.headerlink:hover { opacity: 1 !important; color: var(--accent) !important; }
+
+/* 마크다운 연습문제 */
+.exercise-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.exercise-card-header {
+    background: var(--sidebar-bg);
+    padding: 0.7rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--fg);
+}
+.exercise-card-body {
+    padding: 1.2rem 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.8;
+}
+.exercise-card-body h1 { font-size: 1.2rem; margin: 0 0 0.8rem; color: var(--accent); }
+.exercise-card-body h2 { font-size: 1.05rem; margin: 1rem 0 0.5rem; color: #334155; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+.exercise-card-body h3 { font-size: 0.95rem; margin: 0.8rem 0 0.4rem; color: #475569; }
+.exercise-card-body ul, .exercise-card-body ol { padding-left: 1.5rem; margin: 0.4rem 0; }
+.exercise-card-body li { margin-bottom: 0.3rem; }
+.exercise-card-body table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9rem; }
+.exercise-card-body th { background: var(--sidebar-bg); padding: 0.4rem 0.7rem; border: 1px solid var(--border); text-align: left; }
+.exercise-card-body td { padding: 0.4rem 0.7rem; border: 1px solid var(--border); }
+.exercise-card-body blockquote { border-left: 3px solid var(--accent); padding: 0.5rem 1rem; margin: 0.5rem 0; background: var(--accent-light); border-radius: 0 6px 6px 0; font-style: italic; }
+.exercise-card-body pre { background: var(--code-bg); padding: 0.8rem; border-radius: 6px; overflow-x: auto; font-size: 0.88rem; }
+.exercise-card-body code { background: var(--code-bg); padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.88rem; }
+.exercise-card-body pre code { background: none; padding: 0; }
+
+details.exercise-card { cursor: pointer; }
+details.exercise-card > summary { background: var(--sidebar-bg); padding: 0.7rem 1.2rem; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.95rem; color: var(--fg); list-style: revert; }
+details.exercise-card[open] > summary { border-bottom: 1px solid var(--border); }
+
+/* 반응형 */
+@media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 1.5rem; }
+    .index-container { padding: 1.5rem 1rem; }
+    .book-header h1 { font-size: 1.8rem; }
+}
+
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.codehilite .hll { background-color: #ffffcc }
+.codehilite { background: #f8f8f8; }
+.codehilite .c { color: #3D7B7B; font-style: italic } /* Comment */
+.codehilite .err { border: 1px solid #F00 } /* Error */
+.codehilite .k { color: #008000; font-weight: bold } /* Keyword */
+.codehilite .o { color: #666 } /* Operator */
+.codehilite .ch { color: #3D7B7B; font-style: italic } /* Comment.Hashbang */
+.codehilite .cm { color: #3D7B7B; font-style: italic } /* Comment.Multiline */
+.codehilite .cp { color: #9C6500 } /* Comment.Preproc */
+.codehilite .cpf { color: #3D7B7B; font-style: italic } /* Comment.PreprocFile */
+.codehilite .c1 { color: #3D7B7B; font-style: italic } /* Comment.Single */
+.codehilite .cs { color: #3D7B7B; font-style: italic } /* Comment.Special */
+.codehilite .gd { color: #A00000 } /* Generic.Deleted */
+.codehilite .ge { font-style: italic } /* Generic.Emph */
+.codehilite .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.codehilite .gr { color: #E40000 } /* Generic.Error */
+.codehilite .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.codehilite .gi { color: #008400 } /* Generic.Inserted */
+.codehilite .go { color: #717171 } /* Generic.Output */
+.codehilite .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.codehilite .gs { font-weight: bold } /* Generic.Strong */
+.codehilite .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.codehilite .gt { color: #04D } /* Generic.Traceback */
+.codehilite .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.codehilite .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.codehilite .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.codehilite .kp { color: #008000 } /* Keyword.Pseudo */
+.codehilite .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.codehilite .kt { color: #B00040 } /* Keyword.Type */
+.codehilite .m { color: #666 } /* Literal.Number */
+.codehilite .s { color: #BA2121 } /* Literal.String */
+.codehilite .na { color: #687822 } /* Name.Attribute */
+.codehilite .nb { color: #008000 } /* Name.Builtin */
+.codehilite .nc { color: #00F; font-weight: bold } /* Name.Class */
+.codehilite .no { color: #800 } /* Name.Constant */
+.codehilite .nd { color: #A2F } /* Name.Decorator */
+.codehilite .ni { color: #717171; font-weight: bold } /* Name.Entity */
+.codehilite .ne { color: #CB3F38; font-weight: bold } /* Name.Exception */
+.codehilite .nf { color: #00F } /* Name.Function */
+.codehilite .nl { color: #767600 } /* Name.Label */
+.codehilite .nn { color: #00F; font-weight: bold } /* Name.Namespace */
+.codehilite .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.codehilite .nv { color: #19177C } /* Name.Variable */
+.codehilite .ow { color: #A2F; font-weight: bold } /* Operator.Word */
+.codehilite .w { color: #BBB } /* Text.Whitespace */
+.codehilite .mb { color: #666 } /* Literal.Number.Bin */
+.codehilite .mf { color: #666 } /* Literal.Number.Float */
+.codehilite .mh { color: #666 } /* Literal.Number.Hex */
+.codehilite .mi { color: #666 } /* Literal.Number.Integer */
+.codehilite .mo { color: #666 } /* Literal.Number.Oct */
+.codehilite .sa { color: #BA2121 } /* Literal.String.Affix */
+.codehilite .sb { color: #BA2121 } /* Literal.String.Backtick */
+.codehilite .sc { color: #BA2121 } /* Literal.String.Char */
+.codehilite .dl { color: #BA2121 } /* Literal.String.Delimiter */
+.codehilite .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.codehilite .s2 { color: #BA2121 } /* Literal.String.Double */
+.codehilite .se { color: #AA5D1F; font-weight: bold } /* Literal.String.Escape */
+.codehilite .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.codehilite .si { color: #A45A77; font-weight: bold } /* Literal.String.Interpol */
+.codehilite .sx { color: #008000 } /* Literal.String.Other */
+.codehilite .sr { color: #A45A77 } /* Literal.String.Regex */
+.codehilite .s1 { color: #BA2121 } /* Literal.String.Single */
+.codehilite .ss { color: #19177C } /* Literal.String.Symbol */
+.codehilite .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.codehilite .fm { color: #00F } /* Name.Function.Magic */
+.codehilite .vc { color: #19177C } /* Name.Variable.Class */
+.codehilite .vg { color: #19177C } /* Name.Variable.Global */
+.codehilite .vi { color: #19177C } /* Name.Variable.Instance */
+.codehilite .vm { color: #19177C } /* Name.Variable.Magic */
+.codehilite .il { color: #666 } /* Literal.Number.Integer.Long */
+</style>
+
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <h3>이 장의 목차</h3>
+  <div class="toc">
+<ul>
+<li><a href="#51-css">5.1 CSS를 적용하는 세 가지 방법</a><ul>
+<li><a href="#_1">도입</a></li>
+<li><a href="#_2">핵심 개념 설명</a></li>
+<li><a href="#_6">비교 테이블</a></li>
+<li><a href="#_7">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#52">5.2 선택자로 요소 지정하기</a><ul>
+<li><a href="#_8">도입</a></li>
+<li><a href="#_9">핵심 개념 설명</a></li>
+<li><a href="#_13">비교 테이블</a></li>
+<li><a href="#_14">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#53">5.3 박스 모델 이해하기</a><ul>
+<li><a href="#_15">도입</a></li>
+<li><a href="#_16">핵심 개념 설명</a></li>
+<li><a href="#_19">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#54">5.4 색상, 단위, 글꼴</a><ul>
+<li><a href="#_20">도입</a></li>
+<li><a href="#_21">핵심 개념 설명</a></li>
+<li><a href="#_26">비교 테이블 — 주요 단위</a></li>
+<li><a href="#_27">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#55">5.5 우선순위와 명시도</a><ul>
+<li><a href="#_28">도입</a></li>
+<li><a href="#_29">핵심 개념 설명</a></li>
+<li><a href="#_33">비교 테이블 — 명시도 점수 예시</a></li>
+<li><a href="#_34">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#faq">FAQ</a></li>
+<li><a href="#_35">장 요약</a><ul>
+<li><a href="#_36">핵심 키워드</a></li>
+<li><a href="#_37">실습 프로젝트: 스타일이 입혀진 프로필 카드</a></li>
+<li><a href="#_38">다음 장 미리보기</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+</aside>
+<main class="main">
+  <div class="chapter-header">
+    <h1>05장: CSS 기초: 선택자와 박스 모델</h1>
+    <div class="meta">
+      <span class="difficulty difficulty-기초">기초</span>
+    </div>
+  </div>
+  <div class="content">
+    <h1 id="5-css">5장. CSS 기초: 선택자와 박스 모델<a class="headerlink" href="#5-css" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>학습 목표</strong></p>
+<ul>
+<li>외부 스타일시트로 CSS를 연결하고 관심사를 분리할 수 있습니다</li>
+<li>타입·클래스·아이디·결합 선택자로 원하는 요소를 정확히 지정할 수 있습니다</li>
+<li>박스 모델의 네 영역을 이해하고 box-sizing을 활용할 수 있습니다</li>
+<li>명시도와 캐스케이드 규칙으로 스타일 충돌을 해결할 수 있습니다</li>
+</ul>
+</blockquote>
+<hr />
+<h2 id="51-css">5.1 CSS를 적용하는 세 가지 방법<a class="headerlink" href="#51-css" title="Permanent link">&para;</a></h2>
+<h3 id="_1">도입<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<p>HTML이 뼈대라면, CSS는 색·크기·여백·배치를 결정하는 인테리어 설계도입니다.
+같은 HTML에 어떻게 CSS를 연결하느냐에 따라 코드의 유지보수성이 크게 달라집니다.
+이 절에서는 세 가지 방법을 비교하고, 실무에서 권장되는 외부 스타일시트 방식을 중심으로 살펴봅니다.</p>
+<h3 id="_2">핵심 개념 설명<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<h4 id="_3">인라인·내부·외부 스타일의 차이<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h4>
+<p>CSS를 HTML 문서에 적용하는 방법은 세 가지입니다.</p>
+<p><strong>인라인 스타일(Inline Style)</strong>은 태그의 <code>style</code> 속성에 직접 씁니다.
+빠르게 테스트할 때 편리하지만, 재사용이 불가능하고 유지보수가 어렵습니다.</p>
+<p><strong>내부 스타일시트(Internal Stylesheet)</strong>는 <code>&lt;head&gt;</code> 안에 <code>&lt;style&gt;</code> 태그를 두어 규칙을 작성합니다.
+같은 파일에 HTML과 CSS가 섞여 있어 여러 페이지에서 공유할 수 없습니다.</p>
+<p><strong>외부 스타일시트(External Stylesheet)</strong>는 별도 <code>.css</code> 파일에 모든 규칙을 작성하고, <code>&lt;link&gt;</code> 태그로 연결합니다.
+HTML과 CSS의 <strong>관심사 분리(Separation of Concerns)</strong>를 실현하는 가장 권장되는 방식입니다.</p>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 실무에서는 항상 외부 스타일시트를 사용합니다. 인라인 스타일은 JavaScript로 동적 제어할 때나 테스트 목적 외에는 지양합니다.</p>
+</blockquote>
+<h4 id="_4">코드로 확인하기<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h4>
+<p>세 가지 방법을 한 파일에서 비교합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content</span><span class="o">=</span><span class="s">&quot;width=device-width, initial-scale=1.0&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>CSS 적용 방법 비교<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+
+  <span class="cm">&lt;!-- 방법 2: 내부 스타일시트 --&gt;</span>
+  <span class="p">&lt;</span><span class="nt">style</span><span class="p">&gt;</span>
+<span class="w">    </span><span class="p">.</span><span class="nc">internal</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">steelblue</span><span class="p">;</span>
+<span class="w">      </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="kc">bold</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">&lt;/</span><span class="nt">style</span><span class="p">&gt;</span>
+
+  <span class="cm">&lt;!-- 방법 3: 외부 스타일시트 (별도 style.css 파일 필요) --&gt;</span>
+  <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;style.css&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="cm">&lt;!-- 방법 1: 인라인 스타일 --&gt;</span>
+  <span class="p">&lt;</span><span class="nt">p</span> <span class="na">style</span><span class="o">=</span><span class="s">&quot;color: tomato; font-size: 18px;&quot;</span><span class="p">&gt;</span>인라인 스타일로 적용한 문단입니다.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+
+  <span class="cm">&lt;!-- 방법 2: 내부 스타일시트 클래스 사용 --&gt;</span>
+  <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;internal&quot;</span><span class="p">&gt;</span>내부 스타일시트로 적용한 문단입니다.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+
+  <span class="cm">&lt;!-- 방법 3: 외부 스타일시트 클래스 사용 --&gt;</span>
+  <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;external&quot;</span><span class="p">&gt;</span>외부 스타일시트로 적용한 문단입니다.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c">/* style.css */</span>
+<span class="p">.</span><span class="nc">external</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">seagreen</span><span class="p">;</span>
+<span class="w">  </span><span class="k">font-style</span><span class="p">:</span><span class="w"> </span><span class="kc">italic</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>브라우저 렌더링 결과</strong>:</p>
+<div class="codehilite"><pre><span></span><code>인라인 스타일로 적용한 문단입니다.    ← 빨간색(tomato), 크기 18px
+내부 스타일시트로 적용한 문단입니다.  ← 파란색(steelblue), 굵은 글씨
+외부 스타일시트로 적용한 문단입니다.  ← 초록색(seagreen), 기울임꼴
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">7~11</td>
+<td><code>&lt;style&gt; ... &lt;/style&gt;</code></td>
+<td>내부 스타일시트. head 안에 위치하며 해당 HTML 파일에서만 유효합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">14</td>
+<td><code>&lt;link rel="stylesheet" href="style.css"&gt;</code></td>
+<td>외부 CSS 파일을 연결합니다. <code>rel="stylesheet"</code>는 연결 관계를 명시하고 <code>href</code>에 파일 경로를 씁니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">17</td>
+<td><code>style="color: tomato; font-size: 18px;"</code></td>
+<td>인라인 스타일. 해당 요소에만 적용되며 세미콜론으로 여러 선언을 구분합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">20</td>
+<td><code>class="internal"</code></td>
+<td>내부 스타일시트에서 정의한 <code>.internal</code> 클래스를 적용합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">23</td>
+<td><code>class="external"</code></td>
+<td>외부 CSS에서 정의한 <code>.external</code> 클래스를 적용합니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="link-css">link 태그로 외부 CSS 연결하기<a class="headerlink" href="#link-css" title="Permanent link">&para;</a></h4>
+<div class="api-spec">
+<p><strong><code>&lt;link rel="stylesheet" href="경로"&gt;</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>설명</strong></td>
+<td>외부 CSS 파일을 현재 HTML 문서에 연결합니다</td>
+</tr>
+<tr>
+<td><strong>속성</strong></td>
+<td><code>rel</code> (필수): 링크 관계 유형. CSS 파일에는 항상 <code>"stylesheet"</code>를 씁니다</td>
+</tr>
+<tr>
+<td></td>
+<td><code>href</code> (필수): CSS 파일의 경로(상대 경로 또는 절대 URL)</td>
+</tr>
+<tr>
+<td></td>
+<td><code>type</code>: <code>"text/css"</code> (HTML5에서는 생략 가능)</td>
+</tr>
+<tr>
+<td><strong>위치</strong></td>
+<td><code>&lt;head&gt;</code> 내부에 배치합니다</td>
+</tr>
+<tr>
+<td><strong>사용 예시</strong></td>
+<td><code>&lt;link rel="stylesheet" href="css/style.css"&gt;</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="_5">외부 스타일시트를 권장하는 이유<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>재사용성</strong>: 여러 HTML 파일이 같은 CSS 파일을 공유할 수 있습니다.</li>
+<li><strong>캐싱 효율</strong>: 브라우저가 CSS 파일을 캐시하면 다음 방문 시 재다운로드하지 않습니다.</li>
+<li><strong>유지보수</strong>: 디자인을 바꿀 때 CSS 파일 하나만 수정하면 모든 페이지에 반영됩니다.</li>
+<li><strong>관심사 분리</strong>: HTML(구조)과 CSS(표현)가 명확히 분리됩니다.</li>
+</ul>
+<h3 id="_6">비교 테이블<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>방법</th>
+<th>작성 위치</th>
+<th>적용 범위</th>
+<th>재사용</th>
+<th>권장 여부</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>인라인 스타일</td>
+<td>태그의 <code>style</code> 속성</td>
+<td>해당 요소 1개</td>
+<td>불가</td>
+<td>지양</td>
+</tr>
+<tr>
+<td>내부 스타일시트</td>
+<td><code>&lt;head&gt;</code> 내 <code>&lt;style&gt;</code></td>
+<td>해당 HTML 파일 전체</td>
+<td>불가</td>
+<td>간단한 예제만</td>
+</tr>
+<tr>
+<td>외부 스타일시트</td>
+<td>별도 <code>.css</code> 파일</td>
+<td>연결한 모든 파일</td>
+<td>가능</td>
+<td><strong>권장</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">절 요약<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li>CSS를 HTML에 연결하는 방법은 인라인·내부·외부 스타일 세 가지입니다.</li>
+<li>외부 스타일시트는 <code>&lt;link rel="stylesheet" href="..."&gt;</code> 태그로 연결하며 가장 권장됩니다.</li>
+<li>관심사 분리 원칙에 따라 구조(HTML)와 표현(CSS)을 파일로 나누면 유지보수가 쉬워집니다.</li>
+</ul>
+<hr />
+<h2 id="52">5.2 선택자로 요소 지정하기<a class="headerlink" href="#52" title="Permanent link">&para;</a></h2>
+<h3 id="_8">도입<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
+<p>스타일을 적용하려면 먼저 "누구에게 적용할지"를 CSS에 알려야 합니다.
+이때 사용하는 것이 <strong>선택자(Selector)</strong>입니다.
+선택자를 교실에 비유하면, '3반 전원'처럼 무리를 지목하거나 '반장'처럼 단 한 명을 특정할 수 있습니다.
+이 절에서는 자주 쓰이는 선택자 유형과 결합 방법을 학습합니다.</p>
+<h3 id="_9">핵심 개념 설명<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<h4 id="css-css-selectors">CSS 선택자 (CSS Selectors)<a class="headerlink" href="#css-css-selectors" title="Permanent link">&para;</a></h4>
+<p>CSS 규칙은 <strong>선택자(Selector)</strong>와 <strong>선언 블록(Declaration Block)</strong>으로 구성됩니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c">/* 선택자 { 속성: 값; } */</span>
+<span class="nt">h1</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">navy</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+
+<p>선택자의 종류를 하나씩 살펴봅니다.</p>
+<h4 id="_10">코드로 확인하기 — 타입·클래스·아이디 선택자<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>기본 선택자<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;style.css&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">h2</span><span class="p">&gt;</span>타입 선택자로 스타일 적용<span class="p">&lt;/</span><span class="nt">h2</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>이 문단은 타입 선택자(p)로 색이 지정됩니다.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+
+  <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;highlight&quot;</span><span class="p">&gt;</span>클래스 선택자(.highlight)로 강조된 문단입니다.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;highlight&quot;</span><span class="p">&gt;</span>같은 클래스는 여러 요소에 쓸 수 있습니다.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+
+  <span class="p">&lt;</span><span class="nt">p</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;intro&quot;</span><span class="p">&gt;</span>아이디 선택자(#intro)로 지정된 특별한 문단입니다.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c">/* style.css */</span>
+
+<span class="c">/* 타입 선택자: 모든 &lt;p&gt; 요소에 적용 */</span>
+<span class="nt">p</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#333</span><span class="p">;</span>
+<span class="w">  </span><span class="k">line-height</span><span class="p">:</span><span class="w"> </span><span class="mf">1.6</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* 클래스 선택자: class=&quot;highlight&quot;인 요소에 적용 */</span>
+<span class="p">.</span><span class="nc">highlight</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#fff9c4</span><span class="p">;</span>
+<span class="w">  </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="kt">px</span><span class="w"> </span><span class="mi">8</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">border-left</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="kt">px</span><span class="w"> </span><span class="kc">solid</span><span class="w"> </span><span class="mh">#f4c430</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* 아이디 선택자: id=&quot;intro&quot;인 요소에 적용 */</span>
+<span class="p">#</span><span class="nn">intro</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mf">1.1</span><span class="kt">rem</span><span class="p">;</span>
+<span class="w">  </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#1a73e8</span><span class="p">;</span>
+<span class="w">  </span><span class="k">font-style</span><span class="p">:</span><span class="w"> </span><span class="kc">italic</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>브라우저 렌더링 결과</strong>:</p>
+<div class="codehilite"><pre><span></span><code>타입 선택자로 스타일 적용          ← h2 기본 스타일
+이 문단은 타입 선택자(p)로 색이... ← 어두운 회색(#333)
+클래스 선택자(.highlight)로 강조... ← 노란 배경 + 왼쪽 황금색 테두리
+같은 클래스는 여러 요소에 쓸 수... ← 동일한 노란 배경 스타일
+아이디 선택자(#intro)로 지정된...  ← 파란색, 기울임꼴
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">3~6</td>
+<td><code>p { color: #333; ... }</code></td>
+<td>타입 선택자. 페이지의 모든 <code>&lt;p&gt;</code> 요소에 적용됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">9~13</td>
+<td><code>.highlight { ... }</code></td>
+<td>클래스 선택자. 점(<code>.</code>)으로 시작하며 <code>class="highlight"</code>인 모든 요소에 적용됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">16~20</td>
+<td><code>#intro { ... }</code></td>
+<td>아이디 선택자. 샵(<code>#</code>)으로 시작하며 <code>id="intro"</code>인 요소에 적용됩니다. 페이지에서 아이디는 유일해야 합니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p><strong>팁</strong>: 클래스 선택자(<code>.</code>)는 한 페이지에서 여러 요소에 반복 사용할 수 있어 재사용성이 높습니다. 아이디 선택자(<code>#</code>)는 페이지 내 유일한 요소에만 사용합니다.</p>
+<p><strong>주의</strong>: 아이디 선택자를 자주 쓰면 명시도가 매우 높아져 나중에 스타일을 재정의하기 어려워집니다. 레이아웃 구분이나 JavaScript 접근에 아이디를 쓰고, 스타일에는 클래스를 우선합니다.</p>
+</blockquote>
+<h4 id="_11">코드로 확인하기 — 자손·자식·인접 형제 결합자<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h4>
+<p>결합자(Combinator)는 두 선택자의 관계를 정의합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>결합 선택자<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;style.css&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">nav</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;#&quot;</span><span class="p">&gt;</span>메뉴1<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;#&quot;</span><span class="p">&gt;</span>메뉴2<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">nav</span><span class="p">&gt;</span>
+
+  <span class="p">&lt;</span><span class="nt">section</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;card&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">h3</span><span class="p">&gt;</span>카드 제목<span class="p">&lt;/</span><span class="nt">h3</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>카드 안의 문단입니다.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span><span class="p">&gt;</span>
+      <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>div 안의 문단(자손)입니다.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">section</span><span class="p">&gt;</span>
+
+  <span class="p">&lt;</span><span class="nt">h3</span><span class="p">&gt;</span>섹션 밖 제목<span class="p">&lt;/</span><span class="nt">h3</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>첫 번째 인접 문단 (h3 바로 다음)<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>두 번째 문단 (인접하지 않음)<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c">/* style.css */</span>
+
+<span class="c">/* 자손 결합자(공백): .card 안의 모든 p (깊이 무관) */</span>
+<span class="p">.</span><span class="nc">card</span><span class="w"> </span><span class="nt">p</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#555</span><span class="p">;</span>
+<span class="w">  </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="kt">px</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* 자식 결합자(&gt;): .card의 직접 자식인 p만 */</span>
+<span class="p">.</span><span class="nc">card</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nt">p</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="kc">bold</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* 인접 형제 결합자(+): h3 바로 다음에 오는 p 하나 */</span>
+<span class="nt">h3</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nt">p</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">tomato</span><span class="p">;</span>
+<span class="w">  </span><span class="k">font-style</span><span class="p">:</span><span class="w"> </span><span class="kc">italic</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* 그룹 선택자(,): 여러 선택자에 같은 스타일 적용 */</span>
+<span class="nt">nav</span><span class="w"> </span><span class="nt">a</span><span class="o">,</span><span class="w"> </span><span class="p">.</span><span class="nc">card</span><span class="w"> </span><span class="nt">h3</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">text-decoration</span><span class="p">:</span><span class="w"> </span><span class="kc">none</span><span class="p">;</span>
+<span class="w">  </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#1a73e8</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>브라우저 렌더링 결과</strong>:</p>
+<div class="codehilite"><pre><span></span><code>메뉴1  메뉴2                         ← nav a: 파란색 링크, 밑줄 없음
+카드 제목                            ← .card h3: 파란색
+카드 안의 문단입니다.                 ← .card &gt; p: 굵은 글씨 + 회색
+  div 안의 문단(자손)입니다.          ← .card p: 회색 (굵지 않음)
+
+섹션 밖 제목
+첫 번째 인접 문단 (h3 바로 다음)     ← h3 + p: 빨간색 기울임꼴
+두 번째 문단 (인접하지 않음)          ← 기본 스타일
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">3~6</td>
+<td><code>.card p { ... }</code></td>
+<td>자손 결합자. <code>.card</code> 내부에 있는 <strong>모든</strong> <code>p</code>에 적용됩니다 (중첩 깊이 무관)</td>
+</tr>
+<tr>
+<td style="text-align: center;">9~11</td>
+<td><code>.card &gt; p { ... }</code></td>
+<td>자식 결합자. <code>.card</code>의 <strong>직접 자식</strong> <code>p</code>에만 적용됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">14~17</td>
+<td><code>h3 + p { ... }</code></td>
+<td>인접 형제 결합자. <code>h3</code> 바로 다음에 오는 <strong>하나의</strong> <code>p</code>에만 적용됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">20~23</td>
+<td><code>nav a, .card h3 { ... }</code></td>
+<td>그룹 선택자. 쉼표로 구분하여 여러 선택자에 같은 규칙을 적용합니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="_12">코드로 확인하기 — 속성 선택자<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h4>
+<p>속성 선택자(Attribute Selector)는 HTML 속성의 존재나 값을 조건으로 요소를 선택합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>속성 선택자<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;style.css&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text&quot;</span> <span class="na">placeholder</span><span class="o">=</span><span class="s">&quot;텍스트 입력&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;email&quot;</span> <span class="na">placeholder</span><span class="o">=</span><span class="s">&quot;이메일 입력&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">input</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;password&quot;</span> <span class="na">placeholder</span><span class="o">=</span><span class="s">&quot;비밀번호 입력&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;https://example.com&quot;</span><span class="p">&gt;</span>외부 링크<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;/about&quot;</span><span class="p">&gt;</span>내부 링크<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c">/* style.css */</span>
+
+<span class="c">/* type 속성이 &quot;email&quot;인 input */</span>
+<span class="nt">input</span><span class="o">[</span><span class="nt">type</span><span class="o">=</span><span class="s2">&quot;email&quot;</span><span class="o">]</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="kt">px</span><span class="w"> </span><span class="kc">solid</span><span class="w"> </span><span class="mh">#1a73e8</span><span class="p">;</span>
+<span class="w">  </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="kt">px</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* href 속성이 &quot;https://&quot;로 시작하는 a */</span>
+<span class="nt">a</span><span class="o">[</span><span class="nt">href</span><span class="o">^=</span><span class="s2">&quot;https://&quot;</span><span class="o">]</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">green</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nt">a</span><span class="o">[</span><span class="nt">href</span><span class="o">^=</span><span class="s2">&quot;https://&quot;</span><span class="o">]</span><span class="p">::</span><span class="nd">after</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">content</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot; ↗&quot;</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>브라우저 렌더링 결과</strong>:</p>
+<div class="codehilite"><pre><span></span><code>[텍스트 입력     ]   ← 기본 테두리
+[이메일 입력     ]   ← 파란색 테두리 (type=&quot;email&quot;)
+[비밀번호 입력   ]   ← 기본 테두리
+외부 링크 ↗         ← 초록색 + 외부 표시 아이콘
+내부 링크            ← 기본 링크 색
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">3~6</td>
+<td><code>input[type="email"] { ... }</code></td>
+<td><code>type</code> 속성 값이 정확히 <code>"email"</code>인 input 요소를 선택합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">9~11</td>
+<td><code>a[href^="https://"]</code></td>
+<td><code>href</code> 속성이 <code>"https://"</code>로 <strong>시작하는</strong> a 요소를 선택합니다. <code>^=</code>는 "시작" 조건입니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">12~14</td>
+<td><code>::after { content: " ↗"; }</code></td>
+<td>외부 링크 뒤에 화살표 기호를 추가합니다 (의사 요소)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="_13">비교 테이블<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>선택자 종류</th>
+<th>문법 예시</th>
+<th>선택 대상</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>타입 선택자</td>
+<td><code>p</code>, <code>h1</code></td>
+<td>해당 태그 이름의 모든 요소</td>
+</tr>
+<tr>
+<td>클래스 선택자</td>
+<td><code>.card</code></td>
+<td><code>class="card"</code> 요소 전체</td>
+</tr>
+<tr>
+<td>아이디 선택자</td>
+<td><code>#header</code></td>
+<td><code>id="header"</code> 요소 1개</td>
+</tr>
+<tr>
+<td>자손 결합자</td>
+<td><code>.wrap p</code></td>
+<td><code>.wrap</code> 안 모든 <code>p</code></td>
+</tr>
+<tr>
+<td>자식 결합자</td>
+<td><code>.wrap &gt; p</code></td>
+<td><code>.wrap</code>의 직접 자식 <code>p</code></td>
+</tr>
+<tr>
+<td>인접 형제</td>
+<td><code>h2 + p</code></td>
+<td><code>h2</code> 바로 다음 <code>p</code></td>
+</tr>
+<tr>
+<td>그룹 선택자</td>
+<td><code>h1, h2</code></td>
+<td><code>h1</code>과 <code>h2</code> 모두</td>
+</tr>
+<tr>
+<td>속성 선택자</td>
+<td><code>input[type="text"]</code></td>
+<td><code>type="text"</code>인 input</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_14">절 요약<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
+<ul>
+<li>타입 선택자는 태그 이름으로, 클래스 선택자는 <code>.</code>으로, 아이디 선택자는 <code>#</code>으로 요소를 선택합니다.</li>
+<li>결합자(공백, <code>&gt;</code>, <code>+</code>)를 사용해 요소 간 관계를 조건으로 선택할 수 있습니다.</li>
+<li>속성 선택자(<code>[attr="값"]</code>)로 속성 조건에 맞는 요소만 선택할 수 있습니다.</li>
+<li>스타일 재사용성을 위해 클래스 선택자를 우선 사용합니다.</li>
+</ul>
+<hr />
+<h2 id="53">5.3 박스 모델 이해하기<a class="headerlink" href="#53" title="Permanent link">&para;</a></h2>
+<h3 id="_15">도입<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
+<p>CSS에서 가장 중요한 개념 중 하나가 <strong>박스 모델(Box Model)</strong>입니다.
+브라우저는 모든 HTML 요소를 사각형 상자로 인식합니다.
+선물 상자에 비유하면, 선물 자체(content), 완충재(padding), 상자 벽(border), 다른 상자와의 간격(margin)으로 구성됩니다.
+박스 모델을 이해해야 여백과 크기를 정확히 제어할 수 있습니다.</p>
+<h3 id="_16">핵심 개념 설명<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<h4 id="box-model">박스 모델 (Box Model)<a class="headerlink" href="#box-model" title="Permanent link">&para;</a></h4>
+<p>모든 요소는 안쪽에서 바깥쪽으로 다음 네 영역을 갖습니다.</p>
+<ul>
+<li><strong>콘텐츠(Content)</strong>: 실제 내용(텍스트, 이미지)이 위치하는 영역. <code>width</code>·<code>height</code>로 크기를 지정합니다.</li>
+<li><strong>패딩(Padding)</strong>: 콘텐츠와 테두리 사이의 안쪽 여백. 배경색이 패딩까지 채워집니다.</li>
+<li><strong>테두리(Border)</strong>: 요소를 둘러싸는 선. <code>border-width</code>·<code>border-style</code>·<code>border-color</code>로 제어합니다.</li>
+<li><strong>마진(Margin)</strong>: 요소 바깥의 여백. 다른 요소와의 간격을 만듭니다.</li>
+</ul>
+<figure class="diagram">
+<img src="../chapters/ch_05/images/diagram_01.png" alt="CSS 박스 모델의 content(파랑), padding(초록), border(주황), margin(노랑) 네 영역이 동심 사각형으로 표현된 다이어그램. 각 방향(top/right/bottom/left) 라벨과 box-sizing 설명 포함" loading="lazy">
+<figcaption>CSS 박스 모델 (Box Model) 동심 사각형 다이어그램</figcaption>
+</figure>
+
+<h4 id="_17">코드로 확인하기 — 박스 모델 기본<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>박스 모델 기본<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;style.css&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;box&quot;</span><span class="p">&gt;</span>박스 모델 예시<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;box-border-box&quot;</span><span class="p">&gt;</span>border-box 예시<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c">/* style.css */</span>
+
+<span class="c">/* 기본 box-sizing: content-box (브라우저 기본값) */</span>
+<span class="p">.</span><span class="nc">box</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">width</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">height</span><span class="p">:</span><span class="w"> </span><span class="mi">80</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="kt">px</span><span class="w"> </span><span class="kc">solid</span><span class="w"> </span><span class="mh">#333</span><span class="p">;</span>
+<span class="w">  </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#e3f2fd</span><span class="p">;</span>
+<span class="w">  </span><span class="c">/* 실제 렌더링 너비: 200 + 20*2 + 4*2 = 248px */</span>
+<span class="p">}</span>
+
+<span class="c">/* box-sizing: border-box 적용 */</span>
+<span class="p">.</span><span class="nc">box-border-box</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">box-sizing</span><span class="p">:</span><span class="w"> </span><span class="kc">border-box</span><span class="p">;</span>
+<span class="w">  </span><span class="k">width</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">height</span><span class="p">:</span><span class="w"> </span><span class="mi">80</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="kt">px</span><span class="w"> </span><span class="kc">solid</span><span class="w"> </span><span class="mh">#388e3c</span><span class="p">;</span>
+<span class="w">  </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#e8f5e9</span><span class="p">;</span>
+<span class="w">  </span><span class="c">/* 실제 렌더링 너비: 200px (padding과 border가 내부에 포함) */</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>브라우저 렌더링 결과</strong>:</p>
+<div class="codehilite"><pre><span></span><code>[      박스 모델 예시      ]  ← 실제 너비 248px (content-box)
+[  border-box 예시  ]         ← 실제 너비 200px (border-box)
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">4</td>
+<td><code>width: 200px;</code></td>
+<td><strong>콘텐츠 영역</strong>의 너비를 200px로 지정합니다. <code>content-box</code>에서 padding·border는 별도로 추가됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">5</td>
+<td><code>height: 80px;</code></td>
+<td>콘텐츠 영역의 높이를 80px로 지정합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">6</td>
+<td><code>padding: 20px;</code></td>
+<td>네 방향 안쪽 여백을 모두 20px로 지정합니다 (상하좌우 동일)</td>
+</tr>
+<tr>
+<td style="text-align: center;">7</td>
+<td><code>border: 4px solid #333;</code></td>
+<td>4px 두께의 실선 테두리를 지정합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">8</td>
+<td><code>margin: 30px;</code></td>
+<td>네 방향 바깥쪽 여백을 30px로 지정합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">16</td>
+<td><code>box-sizing: border-box;</code></td>
+<td>padding과 border를 width 안에 포함시킵니다. 지정한 너비가 실제 렌더링 너비가 됩니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="width-height">width와 height가 적용되는 범위<a class="headerlink" href="#width-height" title="Permanent link">&para;</a></h4>
+<p>기본값인 <code>box-sizing: content-box</code>에서 <code>width</code>는 콘텐츠 영역만의 너비입니다.
+실제 렌더링 너비는 다음과 같이 계산됩니다.</p>
+<div class="codehilite"><pre><span></span><code>실제 너비 = width + padding-left + padding-right + border-left + border-right
+         = 200   + 20            + 20             + 4           + 4
+         = 248px
+</code></pre></div>
+
+<p>이 계산 방식은 직관적이지 않아 레이아웃을 맞추기 어렵게 만듭니다.</p>
+<h4 id="box-sizing-border-box">box-sizing: border-box로 계산 단순화하기<a class="headerlink" href="#box-sizing-border-box" title="Permanent link">&para;</a></h4>
+<p><code>box-sizing: border-box</code>를 설정하면 <code>width</code> 안에 padding과 border가 포함됩니다.
+지정한 <code>width: 200px</code>이 실제 렌더링 너비 200px이 됩니다.</p>
+<p>모던 CSS에서는 <code>*</code> 선택자로 전체 요소에 적용하는 방법을 널리 사용합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="o">*,</span>
+<span class="o">*</span><span class="p">::</span><span class="nd">before</span><span class="o">,</span>
+<span class="o">*</span><span class="p">::</span><span class="nd">after</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">box-sizing</span><span class="p">:</span><span class="w"> </span><span class="kc">border-box</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 모든 프로젝트 CSS 파일의 첫 줄에 위 <code>box-sizing: border-box</code> 초기화 코드를 작성하면 크기 계산이 훨씬 단순해집니다.</p>
+</blockquote>
+<h4 id="_18">코드로 확인하기 — 패딩과 마진 단축 표기<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>패딩과 마진 단축 표기<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;style.css&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;card&quot;</span><span class="p">&gt;</span>카드 컴포넌트<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c">/* style.css */</span>
+<span class="p">.</span><span class="nc">card</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">box-sizing</span><span class="p">:</span><span class="w"> </span><span class="kc">border-box</span><span class="p">;</span>
+<span class="w">  </span><span class="k">width</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#fff</span><span class="p">;</span>
+<span class="w">  </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">px</span><span class="w"> </span><span class="kc">solid</span><span class="w"> </span><span class="mh">#ddd</span><span class="p">;</span>
+<span class="w">  </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="kt">px</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c">/* 단축 표기: 상하 16px, 좌우 24px */</span>
+<span class="w">  </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="kt">px</span><span class="w"> </span><span class="mi">24</span><span class="kt">px</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c">/* 단축 표기: 상 0, 우 auto, 하 32px, 좌 auto (가운데 정렬) */</span>
+<span class="w">  </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="kc">auto</span><span class="w"> </span><span class="mi">32</span><span class="kt">px</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">9</td>
+<td><code>padding: 16px 24px;</code></td>
+<td>두 값일 때: 첫 번째는 상하, 두 번째는 좌우입니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">12</td>
+<td><code>margin: 0 auto 32px;</code></td>
+<td>세 값일 때: 상(0), 좌우(auto), 하(32px). <code>auto</code>는 남은 공간을 자동 분배합니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="margin-collapsing">마진 상쇄(margin collapsing) 현상<a class="headerlink" href="#margin-collapsing" title="Permanent link">&para;</a></h4>
+<p>세로 방향(위·아래)의 마진이 만나면 큰 값 하나로 합쳐지는 현상입니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="p">.</span><span class="nc">first</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="k">margin-bottom</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="kt">px</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">second</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">margin-top</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="kt">px</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="c">/* 두 요소 사이 간격: 50px가 아니라 30px (큰 값 하나) */</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>주의</strong>: 마진 상쇄는 수직 방향에서만 발생하며, 가로 방향 마진은 합쳐지지 않습니다. <code>display: flex</code> 컨테이너 안에서는 마진 상쇄가 발생하지 않습니다.</p>
+</blockquote>
+<h3 id="_19">절 요약<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h3>
+<ul>
+<li>모든 HTML 요소는 content·padding·border·margin으로 구성된 박스 모델을 가집니다.</li>
+<li>기본값 <code>content-box</code>에서 <code>width</code>는 콘텐츠 영역만의 너비이며 패딩·테두리가 추가됩니다.</li>
+<li><code>box-sizing: border-box</code>를 사용하면 지정한 <code>width</code>가 실제 렌더링 너비와 일치합니다.</li>
+<li>수직 방향 마진은 상쇄(collapsing)가 발생하므로 주의합니다.</li>
+</ul>
+<hr />
+<h2 id="54">5.4 색상, 단위, 글꼴<a class="headerlink" href="#54" title="Permanent link">&para;</a></h2>
+<h3 id="_20">도입<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h3>
+<p>색상과 단위는 웹 디자인의 기본 재료입니다.
+색을 표현하는 방법과 크기를 지정하는 단위를 정확히 알아야 일관된 디자인을 만들 수 있습니다.
+특히 <code>em</code>과 <code>rem</code> 같은 상대 단위는 접근성 높은 웹 페이지를 만드는 핵심입니다.</p>
+<h3 id="_21">핵심 개념 설명<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h3>
+<h4 id="hexrgbhsl">색상 표기 방법: hex·rgb·hsl<a class="headerlink" href="#hexrgbhsl" title="Permanent link">&para;</a></h4>
+<p>CSS에서 색상을 지정하는 세 가지 주요 방법이 있습니다.</p>
+<ul>
+<li><strong>hex(16진수)</strong>: <code>#RRGGBB</code> 또는 <code>#RGB</code> 형식. 가장 많이 쓰이는 표기법입니다.</li>
+<li><strong>rgb()</strong>: 빨강(Red)·초록(Green)·파랑(Blue) 각각을 0~255 값으로 지정합니다.</li>
+<li><strong>hsl()</strong>: 색조(Hue, 0~360°)·채도(Saturation, %)·명도(Lightness, %)로 지정합니다. 직관적으로 색을 조절할 때 유리합니다.</li>
+</ul>
+<h4 id="_22">코드로 확인하기 — 색상 표기<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>색상 표기 비교<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;style.css&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;swatch hex&quot;</span><span class="p">&gt;</span>hex: #3498db<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;swatch rgb&quot;</span><span class="p">&gt;</span>rgb(52, 152, 219)<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;swatch hsl&quot;</span><span class="p">&gt;</span>hsl(204, 70%, 53%)<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;swatch alpha&quot;</span><span class="p">&gt;</span>rgba(52, 152, 219, 0.5) — 반투명<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c">/* style.css */</span>
+<span class="p">.</span><span class="nc">swatch</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="kt">px</span><span class="w"> </span><span class="mi">24</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">margin</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="kt">px</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">  </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">white</span><span class="p">;</span>
+<span class="w">  </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="kc">bold</span><span class="p">;</span>
+<span class="w">  </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="kt">px</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">.</span><span class="nc">hex</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#3498db</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">rgb</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgb</span><span class="p">(</span><span class="mi">52</span><span class="p">,</span><span class="w"> </span><span class="mi">152</span><span class="p">,</span><span class="w"> </span><span class="mi">219</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">hsl</span><span class="w">   </span><span class="p">{</span><span class="w"> </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="nb">hsl</span><span class="p">(</span><span class="mi">204</span><span class="p">,</span><span class="w"> </span><span class="mi">70</span><span class="kt">%</span><span class="p">,</span><span class="w"> </span><span class="mi">53</span><span class="kt">%</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">alpha</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="mi">52</span><span class="p">,</span><span class="w"> </span><span class="mi">152</span><span class="p">,</span><span class="w"> </span><span class="mi">219</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">);</span><span class="w"> </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#333</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+
+<p><strong>브라우저 렌더링 결과</strong>:</p>
+<div class="codehilite"><pre><span></span><code>[hex: #3498db            ]  ← 파란색 박스
+[rgb(52, 152, 219)       ]  ← 동일한 파란색 박스
+[hsl(204, 70%, 53%)      ]  ← 거의 동일한 파란색 박스
+[rgba(52, 152, 219, 0.5) ]  ← 반투명 파란색 박스
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">9</td>
+<td><code>background-color: #3498db;</code></td>
+<td>16진수 표기. <code>34</code>=빨강, <code>98</code>=초록, <code>db</code>=파랑</td>
+</tr>
+<tr>
+<td style="text-align: center;">10</td>
+<td><code>background-color: rgb(52, 152, 219);</code></td>
+<td>10진수 RGB. 각 채널을 0~255 범위로 지정합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">11</td>
+<td><code>background-color: hsl(204, 70%, 53%);</code></td>
+<td>HSL 표기. 204°=파란 계열 색조, 70%=적당한 채도, 53%=중간 명도</td>
+</tr>
+<tr>
+<td style="text-align: center;">12</td>
+<td><code>background-color: rgba(52, 152, 219, 0.5);</code></td>
+<td><code>rgba</code>의 네 번째 값은 투명도(alpha). 0(완전 투명)~1(완전 불투명) 범위입니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="_23">절대 단위와 상대 단위<a class="headerlink" href="#_23" title="Permanent link">&para;</a></h4>
+<p>CSS 단위는 크게 절대 단위와 상대 단위로 나뉩니다.</p>
+<p><strong>절대 단위(Absolute Unit)</strong>:
+- <code>px</code> (픽셀): 화면 픽셀 하나에 해당하는 고정 크기. 정밀한 크기 지정에 적합합니다.</p>
+<p><strong>상대 단위(Relative Unit)</strong>:
+- <code>em</code>: 부모 요소의 <code>font-size</code>를 1로 삼는 상대 크기. <code>2em</code>이면 부모의 2배입니다.
+- <code>rem</code>: 루트 요소(<code>html</code>)의 <code>font-size</code>를 기준으로 하는 상대 크기. 브라우저 기본값은 <code>16px</code>이므로 <code>1rem = 16px</code>입니다.
+- <code>%</code>: 부모 요소의 크기에 대한 비율입니다.</p>
+<blockquote>
+<p><strong>팁</strong>: 접근성을 위해 글자 크기는 <code>rem</code> 단위를 사용하는 것이 좋습니다. 사용자가 브라우저 기본 글자 크기를 늘려도 <code>rem</code> 기반 레이아웃은 함께 커집니다.</p>
+</blockquote>
+<h4 id="_24">코드로 확인하기 — 단위 비교<a class="headerlink" href="#_24" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>단위 비교<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;style.css&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">section</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;parent&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;px-text&quot;</span><span class="p">&gt;</span>16px — 고정 크기<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;em-text&quot;</span><span class="p">&gt;</span>1.5em — 부모(20px) 기준 30px<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;rem-text&quot;</span><span class="p">&gt;</span>1.5rem — 루트(16px) 기준 24px<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;percent-box&quot;</span><span class="p">&gt;</span>부모 너비의 50%<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">section</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c">/* style.css */</span>
+<span class="nt">html</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="kt">px</span><span class="p">;</span><span class="w"> </span><span class="c">/* 루트 기본값 명시 */</span>
+<span class="p">}</span>
+
+<span class="p">.</span><span class="nc">parent</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="kt">px</span><span class="p">;</span><span class="w"> </span><span class="c">/* em 기준이 될 부모 폰트 크기 */</span>
+<span class="w">  </span><span class="k">width</span><span class="p">:</span><span class="w"> </span><span class="mi">400</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#f5f5f5</span><span class="p">;</span>
+<span class="w">  </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="kt">px</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">.</span><span class="nc">px-text</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="kt">px</span><span class="p">;</span><span class="w"> </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#333</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">em-text</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mf">1.5</span><span class="kt">em</span><span class="p">;</span><span class="w"> </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">steelblue</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w">  </span><span class="c">/* 20px * 1.5 = 30px */</span>
+<span class="p">.</span><span class="nc">rem-text</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mf">1.5</span><span class="kt">rem</span><span class="p">;</span><span class="w"> </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">seagreen</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w">  </span><span class="c">/* 16px * 1.5 = 24px */</span>
+
+<span class="p">.</span><span class="nc">percent-box</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">width</span><span class="p">:</span><span class="w"> </span><span class="mi">50</span><span class="kt">%</span><span class="p">;</span><span class="w">        </span><span class="c">/* 부모 400px의 50% = 200px */</span>
+<span class="w">  </span><span class="k">height</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#ffe0b2</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>브라우저 렌더링 결과</strong>:</p>
+<div class="codehilite"><pre><span></span><code>16px — 고정 크기             ← 16px 텍스트
+1.5em — 부모(20px) 기준 30px ← 30px 텍스트 (em은 부모 기준)
+1.5rem — 루트(16px) 기준 24px ← 24px 텍스트 (rem은 루트 기준)
+[부모 너비의 50%            ]  ← 너비 200px 박스
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">2</td>
+<td><code>html { font-size: 16px; }</code></td>
+<td>루트 폰트 크기를 명시합니다. rem 계산의 기준이 됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">7</td>
+<td><code>.parent { font-size: 20px; }</code></td>
+<td>em 계산의 기준이 될 부모 폰트 크기를 20px로 지정합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">14</td>
+<td><code>font-size: 1.5em;</code></td>
+<td>부모 폰트 크기(20px) × 1.5 = 30px입니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">15</td>
+<td><code>font-size: 1.5rem;</code></td>
+<td>루트 폰트 크기(16px) × 1.5 = 24px입니다. 중첩 계층과 무관하게 일정합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">18</td>
+<td><code>width: 50%;</code></td>
+<td>부모 요소 너비(400px)의 50% = 200px입니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="_25">글꼴 지정과 웹 폰트 불러오기<a class="headerlink" href="#_25" title="Permanent link">&para;</a></h4>
+<p>기본 글꼴은 <code>font-family</code> 속성으로 지정하며, 여러 폰트를 쉼표로 나열하면 앞에서부터 사용 가능한 폰트를 찾습니다.
+마지막에는 <code>serif</code>, <code>sans-serif</code> 같은 범용 계열명을 씁니다.</p>
+<p><strong>Google Fonts</strong>를 통해 웹 폰트를 쉽게 적용할 수 있습니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="cm">&lt;!-- head에 Google Fonts link 추가 --&gt;</span>
+<span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;preconnect&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;https://fonts.googleapis.com&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;preconnect&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;https://fonts.gstatic.com&quot;</span> <span class="na">crossorigin</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">link</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&amp;display=swap&quot;</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="nt">body</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">font-family</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Noto Sans KR&#39;</span><span class="p">,</span><span class="w"> </span><span class="kc">sans-serif</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>팁</strong>: 웹 폰트를 불러올 때 <code>rel="preconnect"</code>를 추가하면 DNS 연결을 미리 설정하여 폰트 로딩 속도가 빨라집니다.</p>
+</blockquote>
+<h3 id="_26">비교 테이블 — 주요 단위<a class="headerlink" href="#_26" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>단위</th>
+<th>종류</th>
+<th>기준</th>
+<th>주요 용도</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>px</code></td>
+<td>절대</td>
+<td>화면 픽셀</td>
+<td>정밀한 크기, 테두리 굵기</td>
+</tr>
+<tr>
+<td><code>em</code></td>
+<td>상대</td>
+<td>부모 font-size</td>
+<td>여백(padding/margin)에 적합</td>
+</tr>
+<tr>
+<td><code>rem</code></td>
+<td>상대</td>
+<td>루트(html) font-size</td>
+<td>글자 크기, 반응형 레이아웃</td>
+</tr>
+<tr>
+<td><code>%</code></td>
+<td>상대</td>
+<td>부모 요소 크기</td>
+<td>너비, 유동 레이아웃</td>
+</tr>
+<tr>
+<td><code>vw</code></td>
+<td>상대</td>
+<td>뷰포트 너비</td>
+<td>전체 화면 기준 크기 (ch_07)</td>
+</tr>
+<tr>
+<td><code>vh</code></td>
+<td>상대</td>
+<td>뷰포트 높이</td>
+<td>전체 화면 높이 기준 (ch_07)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_27">절 요약<a class="headerlink" href="#_27" title="Permanent link">&para;</a></h3>
+<ul>
+<li>색상은 <code>#hex</code>, <code>rgb()</code>, <code>hsl()</code> 세 방법으로 표기하며, 투명도는 <code>rgba()</code>와 <code>hsla()</code>를 사용합니다.</li>
+<li><code>px</code>는 고정 크기, <code>em</code>은 부모 기준, <code>rem</code>은 루트 기준 상대 단위입니다.</li>
+<li>글자 크기에는 접근성을 고려해 <code>rem</code> 단위를 권장합니다.</li>
+<li>Google Fonts 같은 웹 폰트 서비스로 다양한 폰트를 손쉽게 적용할 수 있습니다.</li>
+</ul>
+<hr />
+<h2 id="55">5.5 우선순위와 명시도<a class="headerlink" href="#55" title="Permanent link">&para;</a></h2>
+<h3 id="_28">도입<a class="headerlink" href="#_28" title="Permanent link">&para;</a></h3>
+<p>같은 요소에 여러 CSS 규칙이 충돌한다면 브라우저는 어느 규칙을 따를까요?
+CSS는 이를 결정하는 명확한 알고리즘을 가지고 있습니다.
+이 알고리즘을 이해하면 스타일이 왜 예상대로 적용되지 않는지 진단하고 해결할 수 있습니다.</p>
+<h3 id="_29">핵심 개념 설명<a class="headerlink" href="#_29" title="Permanent link">&para;</a></h3>
+<h4 id="cascade-specificity">캐스케이드(Cascade)와 명시도(Specificity)<a class="headerlink" href="#cascade-specificity" title="Permanent link">&para;</a></h4>
+<p>CSS는 <strong>캐스케이드(Cascade, 폭포)</strong> 방식으로 동작합니다.
+여러 규칙이 충돌할 때 다음 순서로 우선순위를 결정합니다.</p>
+<ol>
+<li><strong>중요도(Importance)</strong>: <code>!important</code> 선언이 있으면 우선합니다.</li>
+<li><strong>명시도(Specificity)</strong>: 선택자의 구체성 점수가 높을수록 우선합니다.</li>
+<li><strong>선언 순서(Source Order)</strong>: 명시도가 같다면 나중에 선언된 규칙이 우선합니다.</li>
+</ol>
+<p><strong>명시도 계산 규칙</strong>은 네 자리 점수로 표현합니다.</p>
+<table>
+<thead>
+<tr>
+<th>선택자 종류</th>
+<th>점수</th>
+<th>예시</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>인라인 스타일</td>
+<td>1,0,0,0</td>
+<td><code>style="..."</code></td>
+</tr>
+<tr>
+<td>아이디 선택자</td>
+<td>0,1,0,0</td>
+<td><code>#header</code></td>
+</tr>
+<tr>
+<td>클래스·속성·의사 클래스</td>
+<td>0,0,1,0</td>
+<td><code>.btn</code>, <code>[type="text"]</code>, <code>:hover</code></td>
+</tr>
+<tr>
+<td>타입·의사 요소</td>
+<td>0,0,0,1</td>
+<td><code>p</code>, <code>h1</code>, <code>::before</code></td>
+</tr>
+<tr>
+<td>전체 선택자</td>
+<td>0,0,0,0</td>
+<td><code>*</code></td>
+</tr>
+</tbody>
+</table>
+<figure class="diagram">
+<img src="../chapters/ch_05/images/diagram_02.png" alt="CSS 명시도 4단계 가중치(인라인 1000, 아이디 100, 클래스 10, 타입 1)를 카드로 비교하고, 두 예시 선택자의 점수 대결(121 vs 22)을 보여주는 다이어그램" loading="lazy">
+<figcaption>CSS 명시도(Specificity) 계산 가중치 비교 다이어그램</figcaption>
+</figure>
+
+<h4 id="_30">코드로 확인하기 — 명시도 충돌<a class="headerlink" href="#_30" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>명시도 비교<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;style.css&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;text&quot;</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;intro&quot;</span><span class="p">&gt;</span>이 문단에 여러 규칙이 충돌합니다.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">p</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;text&quot;</span><span class="p">&gt;</span>클래스만 적용된 문단입니다.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c">/* style.css */</span>
+
+<span class="c">/* 타입 선택자: 명시도 0,0,0,1 */</span>
+<span class="nt">p</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">gray</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* 클래스 선택자: 명시도 0,0,1,0 (타입보다 높음) */</span>
+<span class="p">.</span><span class="nc">text</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">steelblue</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* 아이디 선택자: 명시도 0,1,0,0 (클래스보다 높음) */</span>
+<span class="p">#</span><span class="nn">intro</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">tomato</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c">/* 결과: #intro가 적용된 첫 번째 p는 tomato(빨간색) */</span>
+<span class="c">/* .text만 있는 두 번째 p는 steelblue(파란색) */</span>
+</code></pre></div>
+
+<p><strong>브라우저 렌더링 결과</strong>:</p>
+<div class="codehilite"><pre><span></span><code>이 문단에 여러 규칙이 충돌합니다.  ← 빨간색(tomato) — #intro 승리
+클래스만 적용된 문단입니다.         ← 파란색(steelblue) — .text 적용
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">3~5</td>
+<td><code>p { color: gray; }</code></td>
+<td>명시도 <code>0,0,0,1</code>. 모든 <code>p</code>에 기본값으로 적용됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">8~10</td>
+<td><code>.text { color: steelblue; }</code></td>
+<td>명시도 <code>0,0,1,0</code>. 타입 선택자보다 높아 <code>steelblue</code>가 <code>gray</code>를 덮습니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">13~15</td>
+<td><code>#intro { color: tomato; }</code></td>
+<td>명시도 <code>0,1,0,0</code>. 클래스보다 높아 <code>tomato</code>가 최종 적용됩니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 id="_31">코드로 확인하기 — 선택자 복합 명시도<a class="headerlink" href="#_31" title="Permanent link">&para;</a></h4>
+<p>여러 선택자가 결합되면 점수가 합산됩니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c">/* 명시도 계산 예시 */</span>
+
+<span class="c">/* 0,0,0,1 (타입 1개) */</span>
+<span class="nt">p</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">black</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="c">/* 0,0,1,1 (클래스 1 + 타입 1) */</span>
+<span class="nt">p</span><span class="p">.</span><span class="nc">text</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">navy</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="c">/* 0,1,1,1 (아이디 1 + 클래스 1 + 타입 1) */</span>
+<span class="p">#</span><span class="nn">wrap</span><span class="w"> </span><span class="nt">p</span><span class="p">.</span><span class="nc">text</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">tomato</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="c">/* 명시도가 같은 경우: 나중에 선언된 것이 우선 */</span>
+<span class="p">.</span><span class="nc">text</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">steelblue</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">text</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">orchid</span><span class="p">;</span><span class="w"> </span><span class="p">}</span><span class="w">   </span><span class="c">/* orchid가 적용됨 (동일 명시도, 후선언 우선) */</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>팁</strong>: 브라우저 개발자 도구(F12)의 Elements &gt; Styles 패널에서 어떤 규칙이 적용되고 어떤 규칙이 취소선(명시도 패배)이 그어져 있는지 확인할 수 있습니다. 명시도 충돌을 디버깅할 때 가장 유용한 도구입니다.</p>
+</blockquote>
+<h4 id="inheritance">상속(Inheritance)<a class="headerlink" href="#inheritance" title="Permanent link">&para;</a></h4>
+<p>일부 CSS 속성은 부모 요소의 값을 자식 요소가 자동으로 물려받습니다.</p>
+<ul>
+<li><strong>상속되는 속성</strong>: <code>color</code>, <code>font-family</code>, <code>font-size</code>, <code>line-height</code>, <code>text-align</code> 등 텍스트 관련 속성</li>
+<li><strong>상속되지 않는 속성</strong>: <code>width</code>, <code>height</code>, <code>margin</code>, <code>padding</code>, <code>border</code>, <code>background</code> 등 박스 모델 속성</li>
+</ul>
+<div class="codehilite"><pre><span></span><code><span class="c">/* 부모에 color를 지정하면 자식 텍스트에 자동 적용됨 */</span>
+<span class="nt">body</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#333</span><span class="p">;</span>
+<span class="w">  </span><span class="k">font-family</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Noto Sans KR&#39;</span><span class="p">,</span><span class="w"> </span><span class="kc">sans-serif</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* 모든 p가 body의 color: #333을 상속받음 (별도 선언 불필요) */</span>
+</code></pre></div>
+
+<p>상속을 강제하거나 취소하고 싶을 때는 키워드를 사용합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="nt">p</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">inherit</span><span class="p">;</span><span class="w">  </span><span class="c">/* 부모 값 강제 상속 */</span>
+<span class="w">  </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="kc">initial</span><span class="p">;</span><span class="w"> </span><span class="c">/* 브라우저 기본값으로 초기화 */</span>
+<span class="w">  </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="kc">unset</span><span class="p">;</span><span class="w">      </span><span class="c">/* inherit 가능하면 inherit, 아니면 initial */</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4 id="important">!important는 최후의 수단<a class="headerlink" href="#important" title="Permanent link">&para;</a></h4>
+<p><code>!important</code>를 선언에 추가하면 모든 명시도 계산을 무시하고 최우선으로 적용됩니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c">/* 이 선언은 아이디 선택자도 이깁니다 */</span>
+<span class="nt">p</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">green</span><span class="w"> </span><span class="cp">!important</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+
+<span class="c">/* 하지만 !important끼리 충돌하면 다시 명시도 계산으로 결정됩니다 */</span>
+</code></pre></div>
+
+<blockquote>
+<p><strong>주의</strong>: <code>!important</code>는 캐스케이드를 깨뜨려 디버깅을 매우 어렵게 만드는 안티패턴입니다. 서드파티 CSS를 덮어써야 할 때 등 불가피한 경우에만 사용하고, 평소에는 명시도 설계로 해결합니다.</p>
+</blockquote>
+<h4 id="_32">코드로 확인하기 — 실전 스타일 시트 구조<a class="headerlink" href="#_32" title="Permanent link">&para;</a></h4>
+<p>좋은 CSS 파일은 명시도를 의도적으로 낮게 유지합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="c">/* ============================</span>
+<span class="c">   style.css — 권장 구조 예시</span>
+<span class="c">   ============================ */</span>
+
+<span class="c">/* 1. 전역 초기화 (낮은 명시도) */</span>
+<span class="o">*,</span>
+<span class="o">*</span><span class="p">::</span><span class="nd">before</span><span class="o">,</span>
+<span class="o">*</span><span class="p">::</span><span class="nd">after</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">box-sizing</span><span class="p">:</span><span class="w"> </span><span class="kc">border-box</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* 2. 베이스 스타일 (타입 선택자) */</span>
+<span class="nt">body</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">font-family</span><span class="p">:</span><span class="w"> </span><span class="s1">&#39;Noto Sans KR&#39;</span><span class="p">,</span><span class="w"> </span><span class="kc">sans-serif</span><span class="p">;</span>
+<span class="w">  </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#333</span><span class="p">;</span>
+<span class="w">  </span><span class="k">line-height</span><span class="p">:</span><span class="w"> </span><span class="mf">1.6</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* 3. 컴포넌트 스타일 (클래스 선택자 위주) */</span>
+<span class="p">.</span><span class="nc">btn</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">display</span><span class="p">:</span><span class="w"> </span><span class="kc">inline-block</span><span class="p">;</span>
+<span class="w">  </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="kt">px</span><span class="w"> </span><span class="mi">20</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#1a73e8</span><span class="p">;</span>
+<span class="w">  </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#fff</span><span class="p">;</span>
+<span class="w">  </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">  </span><span class="k">text-decoration</span><span class="p">:</span><span class="w"> </span><span class="kc">none</span><span class="p">;</span>
+<span class="w">  </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="kc">none</span><span class="p">;</span>
+<span class="w">  </span><span class="k">cursor</span><span class="p">:</span><span class="w"> </span><span class="kc">pointer</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">.</span><span class="nc">btn</span><span class="p">:</span><span class="nd">hover</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#1558b0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* 4. 변형(modifier) 클래스 */</span>
+<span class="p">.</span><span class="nc">btn--danger</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#d32f2f</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">6~8</td>
+<td><code>*, *::before, *::after { box-sizing: border-box; }</code></td>
+<td>모든 요소와 의사 요소에 <code>border-box</code>를 적용합니다. 명시도가 0이어서 나중에 쉽게 재정의할 수 있습니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">11~15</td>
+<td><code>body { ... }</code></td>
+<td>타입 선택자로 전역 기본값을 지정합니다. 자식 요소에 color와 font-family가 상속됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">18~27</td>
+<td><code>.btn { ... }</code></td>
+<td>클래스 선택자로 재사용 가능한 버튼 컴포넌트를 정의합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">29~31</td>
+<td><code>.btn:hover { ... }</code></td>
+<td>의사 클래스로 마우스 오버 시 스타일을 변경합니다 (ch_08에서 자세히 다룸)</td>
+</tr>
+<tr>
+<td style="text-align: center;">34~36</td>
+<td><code>.btn--danger { ... }</code></td>
+<td>BEM 방식의 수정자(modifier) 클래스. 기본 <code>.btn</code>의 색만 재정의합니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="_33">비교 테이블 — 명시도 점수 예시<a class="headerlink" href="#_33" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>선택자</th>
+<th>명시도</th>
+<th>계산 근거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>*</code></td>
+<td>0,0,0,0</td>
+<td>전체 선택자</td>
+</tr>
+<tr>
+<td><code>p</code></td>
+<td>0,0,0,1</td>
+<td>타입 1개</td>
+</tr>
+<tr>
+<td><code>.btn</code></td>
+<td>0,0,1,0</td>
+<td>클래스 1개</td>
+</tr>
+<tr>
+<td><code>p.text</code></td>
+<td>0,0,1,1</td>
+<td>클래스 1 + 타입 1</td>
+</tr>
+<tr>
+<td><code>#header</code></td>
+<td>0,1,0,0</td>
+<td>아이디 1개</td>
+</tr>
+<tr>
+<td><code>#header .nav li</code></td>
+<td>0,1,1,1</td>
+<td>아이디 1 + 클래스 1 + 타입 1</td>
+</tr>
+<tr>
+<td><code>style="..."</code></td>
+<td>1,0,0,0</td>
+<td>인라인 스타일</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_34">절 요약<a class="headerlink" href="#_34" title="Permanent link">&para;</a></h3>
+<ul>
+<li>캐스케이드는 중요도 → 명시도 → 선언 순서 우선순위 규칙입니다.</li>
+<li>명시도는 인라인(1,0,0,0) &gt; 아이디(0,1,0,0) &gt; 클래스/속성/의사 클래스(0,0,1,0) &gt; 타입(0,0,0,1) 순입니다.</li>
+<li><code>color</code>·<code>font-family</code> 등 텍스트 속성은 부모에서 자식으로 상속됩니다.</li>
+<li><code>!important</code>는 캐스케이드를 무너뜨리므로 최후의 수단으로만 사용합니다.</li>
+<li>명시도 충돌은 개발자 도구(F12)의 Styles 패널로 진단합니다.</li>
+</ul>
+<hr />
+<h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h2>
+<p><strong>Q1: 인라인 스타일과 외부 스타일시트 중 어느 쪽이 우선 적용됩니까?</strong></p>
+<p>인라인 스타일이 우선됩니다. 인라인 스타일의 명시도는 <code>1,0,0,0</code>으로 가장 높기 때문입니다. 이것이 인라인 스타일을 지양하는 이유 중 하나입니다. 외부 스타일시트에서 인라인 스타일을 덮어쓰려면 <code>!important</code>를 써야 하는데, 이는 유지보수를 어렵게 만듭니다.</p>
+<p><strong>Q2: <code>padding</code>과 <code>margin</code>의 차이가 무엇입니까?</strong></p>
+<p><code>padding</code>은 콘텐츠와 테두리(border) 사이의 <strong>안쪽</strong> 여백입니다. 요소의 배경색이 패딩 영역까지 채워집니다. 반면 <code>margin</code>은 테두리 바깥의 <strong>외부</strong> 여백으로, 다른 요소와의 간격을 만듭니다. 배경색은 마진 영역에 적용되지 않습니다.</p>
+<p><strong>Q3: <code>em</code>과 <code>rem</code> 중 무엇을 써야 합니까?</strong></p>
+<p>용도에 따라 다릅니다. <code>rem</code>은 루트 폰트 크기를 기준으로 하여 중첩 계층의 영향을 받지 않아 예측 가능합니다. 글자 크기(<code>font-size</code>)와 전반적인 레이아웃 크기에는 <code>rem</code>을 권장합니다. <code>em</code>은 특정 컴포넌트 내부에서 폰트 크기에 비례하여 여백을 맞출 때(예: 버튼 패딩) 유용합니다.</p>
+<p><strong>Q4: <code>class</code>와 <code>id</code> 선택자를 언제 구분해 사용합니까?</strong></p>
+<p><code>class</code>는 여러 요소에 반복 적용할 수 있어 스타일 목적에 적합합니다. <code>id</code>는 페이지 내 유일한 요소를 식별하는 용도이므로 페이지 내 앵커 링크, JavaScript <code>getElementById()</code> 등에 씁니다. CSS 스타일링에는 <code>id</code> 선택자보다 <code>class</code> 선택자를 권장합니다. 명시도가 낮아 재정의가 쉽기 때문입니다.</p>
+<p><strong>Q5: 스타일이 예상대로 적용되지 않을 때 어떻게 디버깅합니까?</strong></p>
+<p>브라우저 개발자 도구(F12 또는 Ctrl+Shift+I)를 열고, Elements 패널에서 해당 요소를 선택합니다. 오른쪽 Styles 탭에서 어떤 규칙이 적용되고 어떤 규칙이 취소선으로 표시되는지 확인합니다. 취소선 규칙은 명시도 경쟁에서 패배한 것입니다. Computed 탭에서 최종 적용 값도 확인할 수 있습니다.</p>
+<hr />
+<h2 id="_35">장 요약<a class="headerlink" href="#_35" title="Permanent link">&para;</a></h2>
+<p>이번 장에서는 CSS의 핵심 기초를 다졌습니다. CSS를 HTML에 연결하는 세 가지 방법 중 외부 스타일시트가 관심사 분리와 재사용성 측면에서 가장 권장됩니다. 선택자는 타입·클래스·아이디와 결합자를 조합하여 원하는 요소를 정밀하게 지정합니다. 박스 모델은 content·padding·border·margin으로 구성되며, <code>box-sizing: border-box</code>를 적용하면 크기 계산이 직관적으로 단순해집니다. 마지막으로 캐스케이드와 명시도 규칙은 스타일 충돌을 해결하는 핵심 메커니즘으로, 이를 이해하면 예측 가능한 CSS를 작성할 수 있습니다.</p>
+<h3 id="_36">핵심 키워드<a class="headerlink" href="#_36" title="Permanent link">&para;</a></h3>
+<p><code>외부 스타일시트</code>, <code>link 태그</code>, <code>타입 선택자</code>, <code>클래스 선택자</code>, <code>아이디 선택자</code>, <code>결합자</code>, <code>속성 선택자</code>, <code>박스 모델</code>, <code>content/padding/border/margin</code>, <code>box-sizing</code>, <code>마진 상쇄</code>, <code>hex/rgb/hsl</code>, <code>px/em/rem</code>, <code>명시도</code>, <code>캐스케이드</code>, <code>상속</code>, <code>!important</code></p>
+<h3 id="_37">실습 프로젝트: 스타일이 입혀진 프로필 카드<a class="headerlink" href="#_37" title="Permanent link">&para;</a></h3>
+<p><strong>목표</strong>: 외부 스타일시트로 프로필 카드 컴포넌트를 디자인합니다.
+박스 모델로 여백과 테두리를 다듬고, 클래스 선택자와 색상·단위를 활용하여 보기 좋은 카드를 완성합니다.</p>
+<p><strong>활용 개념</strong>: 외부 스타일시트, 선택자(클래스·타입·결합), 박스 모델, <code>box-sizing: border-box</code>, 색상과 단위, 명시도</p>
+<h3 id="_38">다음 장 미리보기<a class="headerlink" href="#_38" title="Permanent link">&para;</a></h3>
+<p>6장에서는 CSS 레이아웃의 핵심인 <strong>Flexbox</strong>와 <strong>Grid</strong>를 배웁니다. 이 장에서 배운 박스 모델과 display 속성을 기반으로, 요소를 원하는 위치에 자유롭게 배치하는 방법을 익히게 됩니다.</p>
+  </div>
+  <section class="project-section">
+<h2>&#128736; 실습 프로젝트 (Hands-on Project)</h2>
+<div class="project-readme">
+<h1>5장 실습 프로젝트: 스타일이 입혀진 프로필 카드</h1>
+<p>이 장에서 배운 CSS 기초 개념을 실무 시나리오에 적용하는 프로젝트입니다.</p>
+<hr />
+<h2>초급: 프로필 카드 만들기</h2>
+<h3>시나리오</h3>
+<p>온라인 커뮤니티에서 사용자 프로필을 보여주는 카드 컴포넌트를 만들어야 합니다.
+디자이너로부터 "이름, 직업, 소개 문구, 기술 태그가 들어간 흰 배경의 둥근 카드"를 만들어 달라는 요청을 받았습니다.
+외부 스타일시트로 스타일을 분리하여 나중에 디자인만 쉽게 바꿀 수 있도록 구현합니다.</p>
+<h3>학습 목표</h3>
+<ul>
+<li>외부 스타일시트 연결과 관심사 분리를 실습합니다</li>
+<li>타입·클래스 선택자와 자손 결합자로 카드 내부를 스타일링합니다</li>
+<li>box-sizing: border-box로 패딩이 있어도 너비를 정확히 제어합니다</li>
+<li>hex/rgb 색상과 px/rem 단위를 직접 사용합니다</li>
+</ul>
+<h3>진행 방법</h3>
+<ol>
+<li><code>project_starter.html</code>과 <code>project_starter_style.css</code> 파일을 열어 TODO 주석을 찾습니다</li>
+<li>각 TODO를 이 장에서 배운 CSS 개념으로 완성합니다</li>
+<li>브라우저에서 열어 프로필 카드가 올바르게 보이는지 확인합니다</li>
+</ol>
+<h3>실행 방법</h3>
+<div class="codehilite"><pre><span></span><code>브라우저에서 project_starter.html을 열거나 VS Code Live Server 사용
+</code></pre></div>
+
+<h3>완성 예시</h3>
+<p><code>project_complete.html</code> + <code>project_complete_style.css</code> 파일을 참고하세요.</p>
+<hr />
+<h2>중급: 다색 프로필 카드 그리드 페이지</h2>
+<h3>시나리오</h3>
+<p>초급에서 만든 프로필 카드를 발전시켜 여러 장의 카드를 격자로 배치하는 페이지를 만듭니다.
+각 카드마다 다른 강조 색상을 클래스 수정자(modifier)로 적용하고, 명시도 설계를 활용하여
+베이스 카드 스타일 위에 변형을 쌓는 패턴을 실습합니다.
+속성 선택자로 외부 링크를 내부 링크와 시각적으로 구분합니다.</p>
+<h3>학습 목표</h3>
+<ul>
+<li>클래스 수정자 패턴으로 낮은 명시도를 유지하며 변형을 만듭니다</li>
+<li>자손·자식 결합자와 속성 선택자를 조합합니다</li>
+<li>상속을 활용하여 중복 CSS를 줄입니다</li>
+<li>hsl() 색상으로 일관된 색상 계열을 만듭니다</li>
+</ul>
+<h3>진행 방법</h3>
+<ol>
+<li><code>project_advanced_starter.html</code>과 <code>project_advanced_starter_style.css</code> 파일을 열고 TODO를 찾습니다</li>
+<li>초급에서 연습한 내용을 바탕으로 복잡한 선택자 조합과 명시도 설계를 구현합니다</li>
+<li>완성 후 브라우저에서 여러 색상 카드가 배치되는지 확인합니다</li>
+</ol>
+<h3>실행 방법</h3>
+<div class="codehilite"><pre><span></span><code>브라우저에서 project_advanced_starter.html을 열거나 VS Code Live Server 사용
+</code></pre></div>
+
+<h3>완성 예시</h3>
+<p><code>project_advanced_complete.html</code> + <code>project_advanced_complete_style.css</code> 파일을 참고하세요.</p>
+<h3>확장 아이디어</h3>
+<ul>
+<li>카드에 사용자 아바타 이미지(img + alt)를 추가해 보세요</li>
+<li>:hover 의사 클래스로 마우스를 올렸을 때 카드 효과를 추가해 보세요 (8장)</li>
+<li>미디어 쿼리로 화면이 좁을 때 카드가 한 줄로 바뀌도록 해보세요 (7장)</li>
+</ul>
+</div>
+<details class="project-file">
+<summary>&#128221; project_starter.html (스타터 코드 - 직접 완성해보세요)</summary>
+<pre><code class="language-html"><span class="ln"> 1</span>&lt;!DOCTYPE html&gt;
+<span class="ln"> 2</span>&lt;!--
+<span class="ln"> 3</span>  [초급 스타터] 프로필 카드 만들기
+<span class="ln"> 4</span>  목표: 외부 스타일시트로 프로필 카드 하나를 완성합니다.
+<span class="ln"> 5</span>  방법: project_starter_style.css를 열어 TODO 주석을 모두 완성하세요.
+<span class="ln"> 6</span>
+<span class="ln"> 7</span>  완성 기준:
+<span class="ln"> 8</span>  - 흰 배경의 둥근 모서리 카드가 페이지 가운데에 표시됩니다
+<span class="ln"> 9</span>  - 이름은 크고 진한 색, 직업은 작고 회색으로 표시됩니다
+<span class="ln">10</span>  - 기술 태그들이 각자 파란 배경의 배지로 표시됩니다
+<span class="ln">11</span>  - 카드 너비는 패딩이 추가되어도 320px을 유지합니다
+<span class="ln">12</span>--&gt;
+<span class="ln">13</span>&lt;html lang=&quot;ko&quot;&gt;
+<span class="ln">14</span>&lt;head&gt;
+<span class="ln">15</span>  &lt;meta charset=&quot;UTF-8&quot;&gt;
+<span class="ln">16</span>  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+<span class="ln">17</span>  &lt;title&gt;프로필 카드 스타터&lt;/title&gt;
+<span class="ln">18</span>  &lt;!-- TODO 1: 외부 스타일시트 project_starter_style.css를 연결하세요 --&gt;
+<span class="ln">19</span>  &lt;!-- &lt;link rel=&quot;stylesheet&quot; href=&quot;project_starter_style.css&quot;&gt; --&gt;
+<span class="ln">20</span>&lt;/head&gt;
+<span class="ln">21</span>&lt;body&gt;
+<span class="ln">22</span>  &lt;div class=&quot;page-wrapper&quot;&gt;
+<span class="ln">23</span>    &lt;article class=&quot;profile-card&quot;&gt;
+<span class="ln">24</span>      &lt;header class=&quot;card-header&quot;&gt;
+<span class="ln">25</span>        &lt;div class=&quot;avatar&quot; aria-hidden=&quot;true&quot;&gt;김&lt;/div&gt;
+<span class="ln">26</span>        &lt;div class=&quot;card-identity&quot;&gt;
+<span class="ln">27</span>          &lt;h1 class=&quot;card-name&quot;&gt;김프론트&lt;/h1&gt;
+<span class="ln">28</span>          &lt;p class=&quot;card-role&quot;&gt;프론트엔드 개발자&lt;/p&gt;
+<span class="ln">29</span>        &lt;/div&gt;
+<span class="ln">30</span>      &lt;/header&gt;
+<span class="ln">31</span>      &lt;div class=&quot;card-body&quot;&gt;
+<span class="ln">32</span>        &lt;p class=&quot;card-bio&quot;&gt;CSS를 사랑하는 프론트엔드 개발자입니다. 아름다운 UI와 접근성 높은 웹을 만드는 것이 목표입니다.&lt;/p&gt;
+<span class="ln">33</span>        &lt;div class=&quot;tag-group&quot; aria-label=&quot;기술 스택&quot;&gt;
+<span class="ln">34</span>          &lt;span class=&quot;tag&quot;&gt;HTML&lt;/span&gt;
+<span class="ln">35</span>          &lt;span class=&quot;tag&quot;&gt;CSS&lt;/span&gt;
+<span class="ln">36</span>          &lt;span class=&quot;tag&quot;&gt;JavaScript&lt;/span&gt;
+<span class="ln">37</span>        &lt;/div&gt;
+<span class="ln">38</span>      &lt;/div&gt;
+<span class="ln">39</span>      &lt;footer class=&quot;card-footer&quot;&gt;
+<span class="ln">40</span>        &lt;a href=&quot;mailto:kim@example.com&quot; class=&quot;contact-link&quot;&gt;이메일 보내기&lt;/a&gt;
+<span class="ln">41</span>      &lt;/footer&gt;
+<span class="ln">42</span>    &lt;/article&gt;
+<span class="ln">43</span>  &lt;/div&gt;
+<span class="ln">44</span>&lt;/body&gt;
+<span class="ln">45</span>&lt;/html&gt;
+<span class="ln">46</span></code></pre>
+</details>
+<details class="project-file">
+<summary>&#128221; project_starter_style.css (스타터 코드 - 직접 완성해보세요)</summary>
+<pre><code class="language-css"><span class="ln"> 1</span>/*
+<span class="ln"> 2</span>  project_starter_style.css
+<span class="ln"> 3</span>  초급 프로필 카드 스타터 CSS 파일입니다.
+<span class="ln"> 4</span>  TODO 주석을 찾아 각 속성을 완성하세요.
+<span class="ln"> 5</span>*/
+<span class="ln"> 6</span>
+<span class="ln"> 7</span>/* TODO 2: 전역 초기화 — box-sizing: border-box 적용 */
+<span class="ln"> 8</span>/* *, *::before, *::after { box-sizing: border-box; } */
+<span class="ln"> 9</span>
+<span class="ln">10</span>/* TODO 3: body — font-family: sans-serif, background #f0f4f8, margin 0, padding 0 */
+<span class="ln">11</span>body {
+<span class="ln">12</span>  /* 위 요구사항을 채우세요 */
+<span class="ln">13</span>}
+<span class="ln">14</span>
+<span class="ln">15</span>/* TODO 4: .page-wrapper — min-height 100vh, display flex, 가운데 정렬 */
+<span class="ln">16</span>.page-wrapper {
+<span class="ln">17</span>  /* 위 요구사항을 채우세요 */
+<span class="ln">18</span>}
+<span class="ln">19</span>
+<span class="ln">20</span>/* TODO 5: .profile-card — width 320px, background #ffffff, border-radius 12px, padding 28px, box-shadow */
+<span class="ln">21</span>.profile-card {
+<span class="ln">22</span>  /* 위 요구사항을 채우세요 */
+<span class="ln">23</span>}
+<span class="ln">24</span>
+<span class="ln">25</span>/* TODO 6: .card-header — display flex, align-items center, gap 16px, margin-bottom 16px */
+<span class="ln">26</span>.card-header {
+<span class="ln">27</span>  /* 위 요구사항을 채우세요 */
+<span class="ln">28</span>}
+<span class="ln">29</span>
+<span class="ln">30</span>/* TODO 7: .avatar — 원형(border-radius 50%), width/height 56px, 파란 배경, 흰 글씨 */
+<span class="ln">31</span>.avatar {
+<span class="ln">32</span>  /* 위 요구사항을 채우세요 */
+<span class="ln">33</span>}
+<span class="ln">34</span>
+<span class="ln">35</span>/* TODO 8: .card-name — margin 0, font-size 1.2rem, color #222 */
+<span class="ln">36</span>.card-name {
+<span class="ln">37</span>  /* 위 요구사항을 채우세요 */
+<span class="ln">38</span>}
+<span class="ln">39</span>
+<span class="ln">40</span>/* TODO 9: .card-role — margin 4px 0 0, font-size 0.875rem, color #666 */
+<span class="ln">41</span>.card-role {
+<span class="ln">42</span>  /* 위 요구사항을 채우세요 */
+<span class="ln">43</span>}
+<span class="ln">44</span>
+<span class="ln">45</span>/* TODO 10: .card-bio — font-size 0.9rem, color #444, line-height 1.6, margin 0 0 16px */
+<span class="ln">46</span>.card-bio {
+<span class="ln">47</span>  /* 위 요구사항을 채우세요 */
+<span class="ln">48</span>}
+<span class="ln">49</span>
+<span class="ln">50</span>/* TODO 11: .tag-group — display flex, flex-wrap wrap, gap 8px, margin-bottom 20px */
+<span class="ln">51</span>.tag-group {
+<span class="ln">52</span>  /* 위 요구사항을 채우세요 */
+<span class="ln">53</span>}
+<span class="ln">54</span>
+<span class="ln">55</span>/* TODO 12: .tag — background #e8f0fe, color #1a73e8, padding 4px 10px, border-radius 12px, font-size 0.8rem */
+<span class="ln">56</span>.tag {
+<span class="ln">57</span>  /* 위 요구사항을 채우세요 */
+<span class="ln">58</span>}
+<span class="ln">59</span>
+<span class="ln">60</span>/* TODO 13: .card-footer — border-top 1px solid #eee, padding-top 16px */
+<span class="ln">61</span>.card-footer {
+<span class="ln">62</span>  /* 위 요구사항을 채우세요 */
+<span class="ln">63</span>}
+<span class="ln">64</span>
+<span class="ln">65</span>/* TODO 14: .contact-link — 버튼 스타일: background #1a73e8, color #fff, text-decoration none, padding 8px 20px, border-radius 6px */
+<span class="ln">66</span>.contact-link {
+<span class="ln">67</span>  /* 위 요구사항을 채우세요 */
+<span class="ln">68</span>}
+<span class="ln">69</span></code></pre>
+</details>
+<details class="project-file">
+<summary>&#9989; project_complete.html (완성 코드)</summary>
+<pre><code class="language-html"><span class="ln"> 1</span>&lt;!DOCTYPE html&gt;
+<span class="ln"> 2</span>&lt;!-- [초급 완성] 프로필 카드 만들기 완성본 --&gt;
+<span class="ln"> 3</span>&lt;html lang=&quot;ko&quot;&gt;
+<span class="ln"> 4</span>&lt;head&gt;
+<span class="ln"> 5</span>  &lt;meta charset=&quot;UTF-8&quot;&gt;
+<span class="ln"> 6</span>  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+<span class="ln"> 7</span>  &lt;title&gt;프로필 카드 완성본&lt;/title&gt;
+<span class="ln"> 8</span>  &lt;link rel=&quot;stylesheet&quot; href=&quot;project_complete_style.css&quot;&gt;
+<span class="ln"> 9</span>&lt;/head&gt;
+<span class="ln">10</span>&lt;body&gt;
+<span class="ln">11</span>  &lt;div class=&quot;page-wrapper&quot;&gt;
+<span class="ln">12</span>    &lt;article class=&quot;profile-card&quot;&gt;
+<span class="ln">13</span>      &lt;header class=&quot;card-header&quot;&gt;
+<span class="ln">14</span>        &lt;div class=&quot;avatar&quot; aria-hidden=&quot;true&quot;&gt;김&lt;/div&gt;
+<span class="ln">15</span>        &lt;div class=&quot;card-identity&quot;&gt;
+<span class="ln">16</span>          &lt;h1 class=&quot;card-name&quot;&gt;김프론트&lt;/h1&gt;
+<span class="ln">17</span>          &lt;p class=&quot;card-role&quot;&gt;프론트엔드 개발자&lt;/p&gt;
+<span class="ln">18</span>        &lt;/div&gt;
+<span class="ln">19</span>      &lt;/header&gt;
+<span class="ln">20</span>      &lt;div class=&quot;card-body&quot;&gt;
+<span class="ln">21</span>        &lt;p class=&quot;card-bio&quot;&gt;CSS를 사랑하는 프론트엔드 개발자입니다. 아름다운 UI와 접근성 높은 웹을 만드는 것이 목표입니다.&lt;/p&gt;
+<span class="ln">22</span>        &lt;div class=&quot;tag-group&quot; aria-label=&quot;기술 스택&quot;&gt;
+<span class="ln">23</span>          &lt;span class=&quot;tag&quot;&gt;HTML&lt;/span&gt;
+<span class="ln">24</span>          &lt;span class=&quot;tag&quot;&gt;CSS&lt;/span&gt;
+<span class="ln">25</span>          &lt;span class=&quot;tag&quot;&gt;JavaScript&lt;/span&gt;
+<span class="ln">26</span>        &lt;/div&gt;
+<span class="ln">27</span>      &lt;/div&gt;
+<span class="ln">28</span>      &lt;footer class=&quot;card-footer&quot;&gt;
+<span class="ln">29</span>        &lt;a href=&quot;mailto:kim@example.com&quot; class=&quot;contact-link&quot;&gt;이메일 보내기&lt;/a&gt;
+<span class="ln">30</span>      &lt;/footer&gt;
+<span class="ln">31</span>    &lt;/article&gt;
+<span class="ln">32</span>  &lt;/div&gt;
+<span class="ln">33</span>&lt;/body&gt;
+<span class="ln">34</span>&lt;/html&gt;
+<span class="ln">35</span></code></pre>
+</details>
+<details class="project-file">
+<summary>&#9989; project_complete_style.css (완성 코드)</summary>
+<pre><code class="language-css"><span class="ln"> 1</span>/* project_complete_style.css — 초급 완성본 CSS */
+<span class="ln"> 2</span>*, *::before, *::after { box-sizing: border-box; }
+<span class="ln"> 3</span>
+<span class="ln"> 4</span>body { font-family: sans-serif; background-color: #f0f4f8; margin: 0; padding: 0; color: #333; }
+<span class="ln"> 5</span>
+<span class="ln"> 6</span>.page-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+<span class="ln"> 7</span>
+<span class="ln"> 8</span>/* box-sizing: border-box 덕분에 padding 추가해도 width: 320px 유지 */
+<span class="ln"> 9</span>.profile-card { width: 320px; background-color: #ffffff; border-radius: 12px; padding: 28px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+<span class="ln">10</span>
+<span class="ln">11</span>.card-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+<span class="ln">12</span>
+<span class="ln">13</span>.avatar { width: 56px; height: 56px; border-radius: 50%; background-color: #1a73e8; color: #ffffff; font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+<span class="ln">14</span>
+<span class="ln">15</span>.card-identity { flex: 1; }
+<span class="ln">16</span>
+<span class="ln">17</span>/* 클래스로 h1 기본 마진 재정의 */
+<span class="ln">18</span>.card-name { margin: 0; font-size: 1.2rem; color: #222222; }
+<span class="ln">19</span>.card-role  { margin: 4px 0 0 0; font-size: 0.875rem; color: #666666; }
+<span class="ln">20</span>
+<span class="ln">21</span>.card-bio   { font-size: 0.9rem; color: #444444; line-height: 1.6; margin: 0 0 16px 0; }
+<span class="ln">22</span>
+<span class="ln">23</span>.tag-group  { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+<span class="ln">24</span>
+<span class="ln">25</span>/* 단축 표기: 상하 4px, 좌우 10px */
+<span class="ln">26</span>.tag { background-color: #e8f0fe; color: #1a73e8; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; }
+<span class="ln">27</span>
+<span class="ln">28</span>.card-footer { border-top: 1px solid #eeeeee; padding-top: 16px; }
+<span class="ln">29</span>
+<span class="ln">30</span>.contact-link { display: inline-block; padding: 8px 20px; background-color: #1a73e8; color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 0.875rem; width: 100%; text-align: center; }
+<span class="ln">31</span>.contact-link:hover { background-color: #1558b0; }
+<span class="ln">32</span></code></pre>
+</details>
+<details class="project-file">
+<summary>&#128221; project_advanced_starter.html (스타터 코드 - 직접 완성해보세요)</summary>
+<pre><code class="language-html"><span class="ln"> 1</span>&lt;!DOCTYPE html&gt;
+<span class="ln"> 2</span>&lt;!--
+<span class="ln"> 3</span>  [중급 스타터] 다색 프로필 카드 그리드 페이지
+<span class="ln"> 4</span>  목표: 여러 장의 카드를 격자로 배치하고 클래스 수정자로 강조 색상을 적용합니다.
+<span class="ln"> 5</span>  방법: project_advanced_starter_style.css의 TODO를 모두 완성하세요.
+<span class="ln"> 6</span>
+<span class="ln"> 7</span>  완성 기준:
+<span class="ln"> 8</span>  - 최소 3개의 카드가 가로로 나란히 배치됩니다
+<span class="ln"> 9</span>  - 각 카드는 다른 강조 색상(파랑/초록/보라)을 가집니다
+<span class="ln">10</span>  - 외부 링크(https://)에는 화살표(속성 선택자)가 표시됩니다
+<span class="ln">11</span>--&gt;
+<span class="ln">12</span>&lt;html lang=&quot;ko&quot;&gt;
+<span class="ln">13</span>&lt;head&gt;
+<span class="ln">14</span>  &lt;meta charset=&quot;UTF-8&quot;&gt;
+<span class="ln">15</span>  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+<span class="ln">16</span>  &lt;title&gt;프로필 카드 그리드 중급 스타터&lt;/title&gt;
+<span class="ln">17</span>  &lt;!-- TODO 1: 외부 스타일시트를 연결하세요 --&gt;
+<span class="ln">18</span>&lt;/head&gt;
+<span class="ln">19</span>&lt;body&gt;
+<span class="ln">20</span>  &lt;header class=&quot;page-header&quot;&gt;
+<span class="ln">21</span>    &lt;h1&gt;팀 멤버 소개&lt;/h1&gt;
+<span class="ln">22</span>    &lt;p class=&quot;page-subtitle&quot;&gt;우리 팀의 재능 있는 멤버들을 소개합니다.&lt;/p&gt;
+<span class="ln">23</span>  &lt;/header&gt;
+<span class="ln">24</span>  &lt;main class=&quot;card-grid&quot;&gt;
+<span class="ln">25</span>    &lt;!-- TODO 2: profile-card--blue 수정자 클래스를 추가하세요 --&gt;
+<span class="ln">26</span>    &lt;article class=&quot;profile-card&quot;&gt;
+<span class="ln">27</span>      &lt;div class=&quot;card-accent&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
+<span class="ln">28</span>      &lt;div class=&quot;avatar&quot;&gt;김&lt;/div&gt;
+<span class="ln">29</span>      &lt;h2 class=&quot;card-name&quot;&gt;김프론트&lt;/h2&gt;
+<span class="ln">30</span>      &lt;p class=&quot;card-role&quot;&gt;프론트엔드 개발자&lt;/p&gt;
+<span class="ln">31</span>      &lt;p class=&quot;card-bio&quot;&gt;HTML, CSS, JavaScript로 사용자 경험을 만드는 개발자입니다.&lt;/p&gt;
+<span class="ln">32</span>      &lt;div class=&quot;tag-group&quot;&gt;
+<span class="ln">33</span>        &lt;span class=&quot;tag&quot;&gt;HTML&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;CSS&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;JavaScript&lt;/span&gt;
+<span class="ln">34</span>      &lt;/div&gt;
+<span class="ln">35</span>      &lt;footer class=&quot;card-footer&quot;&gt;
+<span class="ln">36</span>        &lt;!-- 외부 링크: https:// → 속성 선택자로 화살표 추가 --&gt;
+<span class="ln">37</span>        &lt;a href=&quot;https://github.com/example&quot; class=&quot;profile-link&quot;&gt;GitHub 프로필&lt;/a&gt;
+<span class="ln">38</span>      &lt;/footer&gt;
+<span class="ln">39</span>    &lt;/article&gt;
+<span class="ln">40</span>
+<span class="ln">41</span>    &lt;!-- TODO 3: profile-card--green 수정자 클래스를 추가하세요 --&gt;
+<span class="ln">42</span>    &lt;article class=&quot;profile-card&quot;&gt;
+<span class="ln">43</span>      &lt;div class=&quot;card-accent&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
+<span class="ln">44</span>      &lt;div class=&quot;avatar&quot;&gt;이&lt;/div&gt;
+<span class="ln">45</span>      &lt;h2 class=&quot;card-name&quot;&gt;이백엔드&lt;/h2&gt;
+<span class="ln">46</span>      &lt;p class=&quot;card-role&quot;&gt;백엔드 개발자&lt;/p&gt;
+<span class="ln">47</span>      &lt;p class=&quot;card-bio&quot;&gt;API 설계와 데이터베이스 최적화를 즐기는 개발자입니다.&lt;/p&gt;
+<span class="ln">48</span>      &lt;div class=&quot;tag-group&quot;&gt;
+<span class="ln">49</span>        &lt;span class=&quot;tag&quot;&gt;Python&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;Django&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;PostgreSQL&lt;/span&gt;
+<span class="ln">50</span>      &lt;/div&gt;
+<span class="ln">51</span>      &lt;footer class=&quot;card-footer&quot;&gt;
+<span class="ln">52</span>        &lt;a href=&quot;https://portfolio.example.com&quot; class=&quot;profile-link&quot;&gt;포트폴리오&lt;/a&gt;
+<span class="ln">53</span>      &lt;/footer&gt;
+<span class="ln">54</span>    &lt;/article&gt;
+<span class="ln">55</span>
+<span class="ln">56</span>    &lt;!-- TODO 4: profile-card--purple 수정자 클래스를 추가하세요 --&gt;
+<span class="ln">57</span>    &lt;article class=&quot;profile-card&quot;&gt;
+<span class="ln">58</span>      &lt;div class=&quot;card-accent&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
+<span class="ln">59</span>      &lt;div class=&quot;avatar&quot;&gt;박&lt;/div&gt;
+<span class="ln">60</span>      &lt;h2 class=&quot;card-name&quot;&gt;박디자인&lt;/h2&gt;
+<span class="ln">61</span>      &lt;p class=&quot;card-role&quot;&gt;UI/UX 디자이너&lt;/p&gt;
+<span class="ln">62</span>      &lt;p class=&quot;card-bio&quot;&gt;사용자 중심의 인터페이스와 접근성을 고려한 디자인을 추구합니다.&lt;/p&gt;
+<span class="ln">63</span>      &lt;div class=&quot;tag-group&quot;&gt;
+<span class="ln">64</span>        &lt;span class=&quot;tag&quot;&gt;Figma&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;Prototyping&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;a11y&lt;/span&gt;
+<span class="ln">65</span>      &lt;/div&gt;
+<span class="ln">66</span>      &lt;footer class=&quot;card-footer&quot;&gt;
+<span class="ln">67</span>        &lt;!-- 내부 링크: / 시작 → 속성 선택자 미적용 --&gt;
+<span class="ln">68</span>        &lt;a href=&quot;/portfolio/park&quot; class=&quot;profile-link&quot;&gt;포트폴리오 보기&lt;/a&gt;
+<span class="ln">69</span>      &lt;/footer&gt;
+<span class="ln">70</span>    &lt;/article&gt;
+<span class="ln">71</span>  &lt;/main&gt;
+<span class="ln">72</span>&lt;/body&gt;
+<span class="ln">73</span>&lt;/html&gt;
+<span class="ln">74</span></code></pre>
+</details>
+<details class="project-file">
+<summary>&#128221; project_advanced_starter_style.css (스타터 코드 - 직접 완성해보세요)</summary>
+<pre><code class="language-css"><span class="ln"> 1</span>/* project_advanced_starter_style.css — 중급 스타터 CSS */
+<span class="ln"> 2</span>
+<span class="ln"> 3</span>/* TODO 5: 전역 초기화 */
+<span class="ln"> 4</span>/* *, *::before, *::after { box-sizing: border-box; } */
+<span class="ln"> 5</span>
+<span class="ln"> 6</span>/* 베이스 스타일 (완성) */
+<span class="ln"> 7</span>body { font-family: sans-serif; background-color: #f5f7fa; margin: 0; padding: 0; color: #333; line-height: 1.6; }
+<span class="ln"> 8</span>.page-header { text-align: center; padding: 40px 20px 24px; }
+<span class="ln"> 9</span>.page-header h1 { font-size: 1.75rem; color: #222; margin-bottom: 8px; }
+<span class="ln">10</span>.page-subtitle { color: #666; font-size: 1rem; margin: 0; }
+<span class="ln">11</span>
+<span class="ln">12</span>/* TODO 6: .card-grid — max-width 960px, margin 0 auto, display flex, flex-wrap wrap, gap 24px */
+<span class="ln">13</span>.card-grid { /* 위 요구사항을 채우세요 */ }
+<span class="ln">14</span>
+<span class="ln">15</span>/* TODO 7: .profile-card 베이스 — width 280px, background #fff, border-radius 12px, border, overflow hidden */
+<span class="ln">16</span>.profile-card { /* 위 요구사항을 채우세요 */ }
+<span class="ln">17</span>
+<span class="ln">18</span>/* TODO 8: .card-accent — height 6px, background #ccc (수정자가 덮어씀) */
+<span class="ln">19</span>.card-accent { /* 위 요구사항을 채우세요 */ }
+<span class="ln">20</span>
+<span class="ln">21</span>/* TODO 9: .profile-card--blue 수정자 — card-accent, avatar, tag 색상 파랑으로 */
+<span class="ln">22</span>/* .profile-card--blue .card-accent { background-color: #1a73e8; } */
+<span class="ln">23</span>/* .profile-card--blue .avatar { background-color: #1a73e8; } */
+<span class="ln">24</span>/* .profile-card--blue .tag { background-color: #e8f0fe; color: #1a73e8; } */
+<span class="ln">25</span>
+<span class="ln">26</span>/* TODO 10: .profile-card--green 수정자 — 초록(#2e7d32) */
+<span class="ln">27</span>
+<span class="ln">28</span>/* TODO 11: .profile-card--purple 수정자 — 보라(#6a1b9a) */
+<span class="ln">29</span>
+<span class="ln">30</span>/* 공통 카드 내부 스타일 (완성) */
+<span class="ln">31</span>.avatar { width: 52px; height: 52px; border-radius: 50%; background-color: #ccc; color: #fff; font-size: 1.25rem; font-weight: bold; display: flex; align-items: center; justify-content: center; margin: 20px auto 12px; flex-shrink: 0; }
+<span class="ln">32</span>
+<span class="ln">33</span>/* TODO 12: 자손 결합자 .profile-card h2 — text-align center, font-size 1.1rem, color #222 */
+<span class="ln">34</span>/* .profile-card h2 { ... } */
+<span class="ln">35</span>
+<span class="ln">36</span>.card-role { text-align: center; font-size: 0.8rem; color: #888; margin: 0 0 12px; }
+<span class="ln">37</span>.card-bio  { padding: 0 20px; font-size: 0.85rem; color: #555; text-align: center; margin: 0 0 16px; }
+<span class="ln">38</span>
+<span class="ln">39</span>/* TODO 13: 자식 결합자 .profile-card &gt; .tag-group — display flex, flex-wrap wrap, justify-content center, gap 6px */
+<span class="ln">40</span>/* .profile-card &gt; .tag-group { ... } */
+<span class="ln">41</span>
+<span class="ln">42</span>.tag { padding: 3px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; background-color: #f0f0f0; color: #666; }
+<span class="ln">43</span>.card-footer { margin-top: auto; padding: 12px 16px; border-top: 1px solid #f0f0f0; text-align: center; }
+<span class="ln">44</span>.profile-link { font-size: 0.85rem; text-decoration: none; color: #1a73e8; }
+<span class="ln">45</span>
+<span class="ln">46</span>/* TODO 14: 속성 선택자 .profile-link[href^=&quot;https://&quot;] — color seagreen, font-weight bold */
+<span class="ln">47</span>/* .profile-link[href^=&quot;https://&quot;] { ... } */
+<span class="ln">48</span>/* .profile-link[href^=&quot;https://&quot;]::after { content: &quot; \2197&quot;; } */
+<span class="ln">49</span></code></pre>
+</details>
+<details class="project-file">
+<summary>&#9989; project_advanced_complete.html (완성 코드)</summary>
+<pre><code class="language-html"><span class="ln"> 1</span>&lt;!DOCTYPE html&gt;
+<span class="ln"> 2</span>&lt;!-- [중급 완성] 다색 프로필 카드 그리드 완성본 --&gt;
+<span class="ln"> 3</span>&lt;html lang=&quot;ko&quot;&gt;
+<span class="ln"> 4</span>&lt;head&gt;
+<span class="ln"> 5</span>  &lt;meta charset=&quot;UTF-8&quot;&gt;
+<span class="ln"> 6</span>  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+<span class="ln"> 7</span>  &lt;title&gt;프로필 카드 그리드 완성본&lt;/title&gt;
+<span class="ln"> 8</span>  &lt;link rel=&quot;stylesheet&quot; href=&quot;project_advanced_complete_style.css&quot;&gt;
+<span class="ln"> 9</span>&lt;/head&gt;
+<span class="ln">10</span>&lt;body&gt;
+<span class="ln">11</span>  &lt;header class=&quot;page-header&quot;&gt;
+<span class="ln">12</span>    &lt;h1&gt;팀 멤버 소개&lt;/h1&gt;
+<span class="ln">13</span>    &lt;p class=&quot;page-subtitle&quot;&gt;우리 팀의 재능 있는 멤버들을 소개합니다.&lt;/p&gt;
+<span class="ln">14</span>  &lt;/header&gt;
+<span class="ln">15</span>  &lt;main class=&quot;card-grid&quot;&gt;
+<span class="ln">16</span>    &lt;!-- 파란 강조 수정자 --&gt;
+<span class="ln">17</span>    &lt;article class=&quot;profile-card profile-card--blue&quot;&gt;
+<span class="ln">18</span>      &lt;div class=&quot;card-accent&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
+<span class="ln">19</span>      &lt;div class=&quot;avatar&quot;&gt;김&lt;/div&gt;
+<span class="ln">20</span>      &lt;h2&gt;김프론트&lt;/h2&gt;
+<span class="ln">21</span>      &lt;p class=&quot;card-role&quot;&gt;프론트엔드 개발자&lt;/p&gt;
+<span class="ln">22</span>      &lt;p class=&quot;card-bio&quot;&gt;HTML, CSS, JavaScript로 사용자 경험을 만드는 개발자입니다.&lt;/p&gt;
+<span class="ln">23</span>      &lt;div class=&quot;tag-group&quot;&gt;
+<span class="ln">24</span>        &lt;span class=&quot;tag&quot;&gt;HTML&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;CSS&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;JavaScript&lt;/span&gt;
+<span class="ln">25</span>      &lt;/div&gt;
+<span class="ln">26</span>      &lt;footer class=&quot;card-footer&quot;&gt;
+<span class="ln">27</span>        &lt;!-- 외부 링크: https:// → ↗ 아이콘 추가됨 --&gt;
+<span class="ln">28</span>        &lt;a href=&quot;https://github.com/example&quot; class=&quot;profile-link&quot;&gt;GitHub 프로필&lt;/a&gt;
+<span class="ln">29</span>      &lt;/footer&gt;
+<span class="ln">30</span>    &lt;/article&gt;
+<span class="ln">31</span>    &lt;!-- 초록 강조 수정자 --&gt;
+<span class="ln">32</span>    &lt;article class=&quot;profile-card profile-card--green&quot;&gt;
+<span class="ln">33</span>      &lt;div class=&quot;card-accent&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
+<span class="ln">34</span>      &lt;div class=&quot;avatar&quot;&gt;이&lt;/div&gt;
+<span class="ln">35</span>      &lt;h2&gt;이백엔드&lt;/h2&gt;
+<span class="ln">36</span>      &lt;p class=&quot;card-role&quot;&gt;백엔드 개발자&lt;/p&gt;
+<span class="ln">37</span>      &lt;p class=&quot;card-bio&quot;&gt;API 설계와 데이터베이스 최적화를 즐기는 개발자입니다.&lt;/p&gt;
+<span class="ln">38</span>      &lt;div class=&quot;tag-group&quot;&gt;
+<span class="ln">39</span>        &lt;span class=&quot;tag&quot;&gt;Python&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;Django&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;PostgreSQL&lt;/span&gt;
+<span class="ln">40</span>      &lt;/div&gt;
+<span class="ln">41</span>      &lt;footer class=&quot;card-footer&quot;&gt;
+<span class="ln">42</span>        &lt;a href=&quot;https://portfolio.example.com&quot; class=&quot;profile-link&quot;&gt;포트폴리오&lt;/a&gt;
+<span class="ln">43</span>      &lt;/footer&gt;
+<span class="ln">44</span>    &lt;/article&gt;
+<span class="ln">45</span>    &lt;!-- 보라 강조 수정자 --&gt;
+<span class="ln">46</span>    &lt;article class=&quot;profile-card profile-card--purple&quot;&gt;
+<span class="ln">47</span>      &lt;div class=&quot;card-accent&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
+<span class="ln">48</span>      &lt;div class=&quot;avatar&quot;&gt;박&lt;/div&gt;
+<span class="ln">49</span>      &lt;h2&gt;박디자인&lt;/h2&gt;
+<span class="ln">50</span>      &lt;p class=&quot;card-role&quot;&gt;UI/UX 디자이너&lt;/p&gt;
+<span class="ln">51</span>      &lt;p class=&quot;card-bio&quot;&gt;사용자 중심의 인터페이스와 접근성을 고려한 디자인을 추구합니다.&lt;/p&gt;
+<span class="ln">52</span>      &lt;div class=&quot;tag-group&quot;&gt;
+<span class="ln">53</span>        &lt;span class=&quot;tag&quot;&gt;Figma&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;Prototyping&lt;/span&gt;&lt;span class=&quot;tag&quot;&gt;a11y&lt;/span&gt;
+<span class="ln">54</span>      &lt;/div&gt;
+<span class="ln">55</span>      &lt;footer class=&quot;card-footer&quot;&gt;
+<span class="ln">56</span>        &lt;!-- 내부 링크: / 시작 → ↗ 없음 --&gt;
+<span class="ln">57</span>        &lt;a href=&quot;/portfolio/park&quot; class=&quot;profile-link&quot;&gt;포트폴리오 보기&lt;/a&gt;
+<span class="ln">58</span>      &lt;/footer&gt;
+<span class="ln">59</span>    &lt;/article&gt;
+<span class="ln">60</span>  &lt;/main&gt;
+<span class="ln">61</span>&lt;/body&gt;
+<span class="ln">62</span>&lt;/html&gt;
+<span class="ln">63</span></code></pre>
+</details>
+<details class="project-file">
+<summary>&#9989; project_advanced_complete_style.css (완성 코드)</summary>
+<pre><code class="language-css"><span class="ln"> 1</span>/* project_advanced_complete_style.css — 중급 완성본 CSS */
+<span class="ln"> 2</span>*, *::before, *::after { box-sizing: border-box; }
+<span class="ln"> 3</span>
+<span class="ln"> 4</span>/* 상속 활용: body의 font-family, color가 모든 자식에 전달됨 */
+<span class="ln"> 5</span>body { font-family: sans-serif; background-color: #f5f7fa; margin: 0; padding: 0; color: #333; line-height: 1.6; }
+<span class="ln"> 6</span>
+<span class="ln"> 7</span>.page-header { text-align: center; padding: 40px 20px 24px; }
+<span class="ln"> 8</span>.page-header h1 { font-size: 1.75rem; color: #222; margin-bottom: 8px; }
+<span class="ln"> 9</span>.page-subtitle { color: #666; font-size: 1rem; margin: 0; }
+<span class="ln">10</span>
+<span class="ln">11</span>.card-grid { max-width: 960px; margin: 0 auto; padding: 0 20px 40px; display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; }
+<span class="ln">12</span>
+<span class="ln">13</span>/* 카드 베이스: 명시도 0,0,1,0 */
+<span class="ln">14</span>.profile-card { width: 280px; background-color: #ffffff; border-radius: 12px; border: 1px solid #e0e0e0; overflow: hidden; display: flex; flex-direction: column; }
+<span class="ln">15</span>
+<span class="ln">16</span>/* .card-accent 기본: 수정자가 색상을 덮어씁니다 */
+<span class="ln">17</span>.card-accent { height: 6px; background-color: #cccccc; }
+<span class="ln">18</span>
+<span class="ln">19</span>/* 수정자 클래스: 베이스 위에 색상만 재정의 (명시도 0,0,2,0) */
+<span class="ln">20</span>.profile-card--blue .card-accent  { background-color: #1a73e8; }
+<span class="ln">21</span>.profile-card--blue .avatar       { background-color: #1a73e8; }
+<span class="ln">22</span>.profile-card--blue .tag          { background-color: #e8f0fe; color: #1a73e8; }
+<span class="ln">23</span>
+<span class="ln">24</span>.profile-card--green .card-accent { background-color: #2e7d32; }
+<span class="ln">25</span>.profile-card--green .avatar      { background-color: #2e7d32; }
+<span class="ln">26</span>.profile-card--green .tag         { background-color: #e8f5e9; color: #2e7d32; }
+<span class="ln">27</span>
+<span class="ln">28</span>.profile-card--purple .card-accent { background-color: #6a1b9a; }
+<span class="ln">29</span>.profile-card--purple .avatar      { background-color: #6a1b9a; }
+<span class="ln">30</span>.profile-card--purple .tag         { background-color: #f3e5f5; color: #6a1b9a; }
+<span class="ln">31</span>
+<span class="ln">32</span>/* 공통 내부 스타일 */
+<span class="ln">33</span>.avatar { width: 52px; height: 52px; border-radius: 50%; background-color: #ccc; color: #fff; font-size: 1.25rem; font-weight: bold; display: flex; align-items: center; justify-content: center; margin: 20px auto 12px; flex-shrink: 0; }
+<span class="ln">34</span>
+<span class="ln">35</span>/* 자손 결합자: .profile-card 안의 모든 h2 */
+<span class="ln">36</span>.profile-card h2 { text-align: center; font-size: 1.1rem; color: #222; margin: 0 0 4px; }
+<span class="ln">37</span>
+<span class="ln">38</span>.card-role { text-align: center; font-size: 0.8rem; color: #888; margin: 0 0 12px; }
+<span class="ln">39</span>.card-bio  { padding: 0 20px; font-size: 0.85rem; color: #555; text-align: center; margin: 0 0 16px; }
+<span class="ln">40</span>
+<span class="ln">41</span>/* 자식 결합자: .profile-card의 직접 자식 .tag-group */
+<span class="ln">42</span>.profile-card &gt; .tag-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; padding: 0 16px 16px; }
+<span class="ln">43</span>
+<span class="ln">44</span>.tag { padding: 3px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; background-color: #f0f0f0; color: #666; }
+<span class="ln">45</span>.card-footer { margin-top: auto; padding: 12px 16px; border-top: 1px solid #f0f0f0; text-align: center; }
+<span class="ln">46</span>.profile-link { font-size: 0.85rem; text-decoration: none; color: #1a73e8; }
+<span class="ln">47</span>
+<span class="ln">48</span>/* 속성 선택자: href가 &quot;https://&quot;로 시작하는 외부 링크 */
+<span class="ln">49</span>.profile-link[href^=&quot;https://&quot;] { color: seagreen; font-weight: bold; }
+<span class="ln">50</span>.profile-link[href^=&quot;https://&quot;]::after { content: &quot; \2197&quot;; font-size: 0.8em; }
+<span class="ln">51</span></code></pre>
+</details>
+</section>
+
+  <nav class="chapter-nav"><a href="ch_04.html" class="nav-prev">&larr; 시맨틱 HTML과 웹 접근성</a><a href="index.html" class="nav-home">목차</a><a href="ch_06.html" class="nav-next">CSS 레이아웃: Flexbox와 Grid &rarr;</a></nav>
+</main>
+</div>
+</body>
+</html>

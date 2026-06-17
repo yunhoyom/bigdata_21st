@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>01장: 웹과 프론트엔드 시작하기 - 프론트엔드 입문 가이드: HTML, CSS, JavaScript 한 번에</title>
+<style>
+
+:root {
+    --bg: #ffffff;
+    --fg: #1a1a2e;
+    --accent: #3b82f6;
+    --accent-light: #dbeafe;
+    --border: #e2e8f0;
+    --code-bg: #f8fafc;
+    --sidebar-bg: #f1f5f9;
+    --success: #22c55e;
+    --warning: #f59e0b;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    line-height: 1.8;
+    font-size: 16px;
+}
+.layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+}
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1rem;
+    font-size: 0.85rem;
+}
+.sidebar h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-bottom: 0.5rem; }
+.sidebar ul { list-style: none; }
+.sidebar li { margin-bottom: 0.25rem; }
+.sidebar a { color: var(--fg); text-decoration: none; display: block; padding: 0.25rem 0.5rem; border-radius: 4px; transition: background 0.15s; }
+.sidebar a:hover { background: var(--accent-light); }
+.main { padding: 2rem 3rem 4rem; max-width: 900px; }
+.chapter-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--accent); }
+.chapter-header h1 { font-size: 2rem; margin-bottom: 0.25rem; }
+.chapter-header .meta { font-size: 0.9rem; color: #64748b; }
+.difficulty { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+.difficulty-입문 { background: #dcfce7; color: #166534; }
+.difficulty-기초 { background: #dbeafe; color: #1e40af; }
+.difficulty-중급 { background: #fef3c7; color: #92400e; }
+.difficulty-실무 { background: #fce7f3; color: #9d174d; }
+
+/* 본문 */
+.content h1 { font-size: 1.8rem; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+.content h2 { font-size: 1.4rem; margin: 1.8rem 0 0.8rem; color: var(--accent); }
+.content h3 { font-size: 1.15rem; margin: 1.3rem 0 0.6rem; }
+.content h4 { font-size: 1rem; margin: 1rem 0 0.5rem; }
+.content p { margin-bottom: 1rem; }
+.content ul, .content ol { margin: 0.5rem 0 1rem 1.5rem; }
+.content li { margin-bottom: 0.3rem; }
+.content blockquote {
+    border-left: 4px solid var(--accent);
+    background: var(--accent-light);
+    padding: 1rem 1.5rem;
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+}
+.content table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.9rem; }
+.content th { background: var(--sidebar-bg); font-weight: 600; text-align: left; }
+.content th, .content td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; }
+.content tr:nth-child(even) { background: #f8fafc; }
+.content pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; overflow-x: auto; margin: 1rem 0; font-size: 0.9rem; }
+.content code { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.9em; }
+.content p code, .content li code, .content td code {
+    background: #f1f5f9;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    color: #e11d48;
+    font-size: 0.85em;
+}
+.content hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+.content img { max-width: 100%; height: auto; border-radius: 8px; }
+
+/* 다이어그램 */
+figure.diagram { margin: 1.5rem 0; text-align: center; }
+figure.diagram .mermaid { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; }
+figure.diagram figcaption { font-size: 0.85rem; color: #64748b; margin-top: 0.5rem; font-style: italic; }
+figure.diagram img { max-width: 100%; border: 1px solid var(--border); border-radius: 8px; }
+figure.diagram .svg-diagram { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; text-align: center; }
+figure.diagram .svg-diagram svg { max-width: 100%; height: auto; }
+figure.diagram img.screenshot { border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 10px; }
+.missing-diagram { color: #dc2626; font-style: italic; padding: 1rem; background: #fef2f2; border-radius: 8px; }
+
+/* 코드 섹션 */
+.code-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border); }
+.code-section h2 { font-size: 1.4rem; color: var(--accent); margin-bottom: 1rem; }
+.code-block { margin-bottom: 1.5rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.code-block h3 { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+.code-block pre { margin: 0; border: none; border-radius: 0; }
+details.code-block { cursor: pointer; }
+details.code-block summary { background: var(--sidebar-bg); padding: 0.5rem 1rem; font-size: 0.9rem; border-bottom: 1px solid var(--border); }
+details.code-block[open] summary { border-bottom: 1px solid var(--border); }
+
+/* 네비게이션 */
+.chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    margin-top: 3rem;
+    border-top: 2px solid var(--border);
+    gap: 1rem;
+}
+.chapter-nav a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+.chapter-nav a:hover { background: var(--accent-light); }
+.nav-home { order: 0; }
+.nav-prev { order: -1; }
+.nav-next { order: 1; }
+
+/* 인덱스 페이지 */
+.index-container { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+.book-header { text-align: center; margin-bottom: 3rem; }
+.book-header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.book-header p { color: #64748b; font-size: 1.1rem; }
+.chapter-list { list-style: none; }
+.chapter-list li { margin-bottom: 0.75rem; }
+.chapter-list a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--sidebar-bg);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--fg);
+    transition: all 0.15s;
+    border: 1px solid transparent;
+}
+.chapter-list a:hover { border-color: var(--accent); background: var(--accent-light); }
+.chapter-list .ch-num { font-weight: 700; color: var(--accent); min-width: 3rem; }
+.chapter-list .ch-title { flex: 1; }
+.difficulty-group { margin-top: 2rem; }
+.difficulty-group h2 { font-size: 1.2rem; margin-bottom: 0.75rem; padding-left: 0.5rem; }
+
+/* 코드하이라이트 Pygments 오버라이드 */
+.codehilite { background: var(--code-bg) !important; border-radius: 8px; padding: 1rem; overflow-x: auto; }
+
+/* 줄별 코드 설명 */
+.code-annotation {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 0 0 8px 8px;
+    padding: 1rem 1.2rem;
+    margin: -0.5rem 0 1.5rem;
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+.code-annotation > p:first-child,
+.code-annotation > strong:first-child {
+    display: block;
+    font-weight: 700;
+    color: #0369a1;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+.code-annotation table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.3rem;
+}
+.code-annotation th {
+    background: #e0f2fe;
+    padding: 0.4rem 0.6rem;
+    text-align: left;
+    font-size: 0.82rem;
+    border: 1px solid #bae6fd;
+    color: #0c4a6e;
+}
+.code-annotation td {
+    padding: 0.35rem 0.6rem;
+    border: 1px solid #e0f2fe;
+    vertical-align: top;
+    font-size: 0.85rem;
+}
+.code-annotation td:first-child {
+    width: 2.5rem;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    color: #64748b;
+    font-weight: 600;
+}
+.code-annotation td:nth-child(2) {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    color: #334155;
+    white-space: nowrap;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.code-annotation td code {
+    background: #e0f2fe;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.82rem;
+}
+.code-annotation tr:nth-child(even) { background: #f0f9ff; }
+.code-annotation tr:nth-child(odd) { background: #ffffff; }
+
+/* API 명세 */
+.api-spec {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 1.2rem 1.4rem;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+.api-spec > p:first-child,
+.api-spec > h4:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: #92400e;
+    margin-bottom: 0.6rem;
+    font-size: 0.95rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid #fde68a;
+}
+.api-spec table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.3rem;
+}
+.api-spec th {
+    background: #fef3c7;
+    padding: 0.4rem 0.7rem;
+    text-align: left;
+    font-size: 0.82rem;
+    border: 1px solid #fde68a;
+    color: #78350f;
+    width: 6.5rem;
+    vertical-align: top;
+}
+.api-spec td {
+    padding: 0.4rem 0.7rem;
+    border: 1px solid #fde68a;
+    vertical-align: top;
+    font-size: 0.85rem;
+}
+.api-spec td code {
+    background: #fef9c3;
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    font-size: 0.83rem;
+    color: #92400e;
+}
+.api-spec tr:nth-child(even) { background: #fffbeb; }
+.api-spec tr:nth-child(odd) { background: #ffffff; }
+
+/* 예제 코드 줄번호 */
+.code-block .ln {
+    color: #94a3b8;
+    user-select: none;
+    display: inline-block;
+    text-align: right;
+    min-width: 2.5em;
+    margin-right: 1em;
+    border-right: 1px solid #e2e8f0;
+    padding-right: 0.8em;
+}
+
+/* 프로젝트 섹션 */
+.project-section { margin-top: 3rem; padding-top: 2rem; border-top: 2px solid var(--border); }
+.project-section h2 { font-size: 1.4rem; color: var(--accent); margin-bottom: 1.2rem; }
+.project-readme { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 1.5rem 2rem; margin-bottom: 1.5rem; line-height: 1.8; }
+.project-readme h1 { font-size: 1.3rem; color: #166534; margin: 0 0 0.8rem; border-bottom: 2px solid #86efac; padding-bottom: 0.5rem; }
+.project-readme h2 { font-size: 1.1rem; color: #15803d; margin: 1.2rem 0 0.5rem; }
+.project-readme h3 { font-size: 1rem; color: #166534; margin: 0.8rem 0 0.4rem; }
+.project-readme ul, .project-readme ol { padding-left: 1.5rem; margin: 0.4rem 0; }
+.project-readme li { margin-bottom: 0.3rem; }
+.project-readme code { background: #dcfce7; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.88rem; }
+.project-readme pre { background: var(--code-bg); padding: 0.8rem; border-radius: 6px; overflow-x: auto; }
+.project-readme pre code { background: none; padding: 0; }
+.project-file { margin-bottom: 0.8rem; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: pointer; }
+.project-file summary { background: var(--sidebar-bg); padding: 0.6rem 1.2rem; font-size: 0.95rem; font-weight: 600; border-bottom: 1px solid var(--border); }
+.project-file[open] summary { border-bottom: 1px solid var(--border); }
+.project-file pre { margin: 0; border: none; border-radius: 0; }
+
+/* 제목 permalink 숨김 (hover시만 표시) */
+.headerlink { text-decoration: none; color: var(--border); opacity: 0; transition: opacity 0.15s; margin-left: 0.3rem; font-weight: 300; }
+h1:hover .headerlink, h2:hover .headerlink, h3:hover .headerlink, h4:hover .headerlink { opacity: 0.6; }
+.headerlink:hover { opacity: 1 !important; color: var(--accent) !important; }
+
+/* 마크다운 연습문제 */
+.exercise-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.exercise-card-header {
+    background: var(--sidebar-bg);
+    padding: 0.7rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--fg);
+}
+.exercise-card-body {
+    padding: 1.2rem 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.8;
+}
+.exercise-card-body h1 { font-size: 1.2rem; margin: 0 0 0.8rem; color: var(--accent); }
+.exercise-card-body h2 { font-size: 1.05rem; margin: 1rem 0 0.5rem; color: #334155; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+.exercise-card-body h3 { font-size: 0.95rem; margin: 0.8rem 0 0.4rem; color: #475569; }
+.exercise-card-body ul, .exercise-card-body ol { padding-left: 1.5rem; margin: 0.4rem 0; }
+.exercise-card-body li { margin-bottom: 0.3rem; }
+.exercise-card-body table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.9rem; }
+.exercise-card-body th { background: var(--sidebar-bg); padding: 0.4rem 0.7rem; border: 1px solid var(--border); text-align: left; }
+.exercise-card-body td { padding: 0.4rem 0.7rem; border: 1px solid var(--border); }
+.exercise-card-body blockquote { border-left: 3px solid var(--accent); padding: 0.5rem 1rem; margin: 0.5rem 0; background: var(--accent-light); border-radius: 0 6px 6px 0; font-style: italic; }
+.exercise-card-body pre { background: var(--code-bg); padding: 0.8rem; border-radius: 6px; overflow-x: auto; font-size: 0.88rem; }
+.exercise-card-body code { background: var(--code-bg); padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.88rem; }
+.exercise-card-body pre code { background: none; padding: 0; }
+
+details.exercise-card { cursor: pointer; }
+details.exercise-card > summary { background: var(--sidebar-bg); padding: 0.7rem 1.2rem; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 0.95rem; color: var(--fg); list-style: revert; }
+details.exercise-card[open] > summary { border-bottom: 1px solid var(--border); }
+
+/* 반응형 */
+@media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 1.5rem; }
+    .index-container { padding: 1.5rem 1rem; }
+    .book-header h1 { font-size: 1.8rem; }
+}
+
+pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.codehilite .hll { background-color: #ffffcc }
+.codehilite { background: #f8f8f8; }
+.codehilite .c { color: #3D7B7B; font-style: italic } /* Comment */
+.codehilite .err { border: 1px solid #F00 } /* Error */
+.codehilite .k { color: #008000; font-weight: bold } /* Keyword */
+.codehilite .o { color: #666 } /* Operator */
+.codehilite .ch { color: #3D7B7B; font-style: italic } /* Comment.Hashbang */
+.codehilite .cm { color: #3D7B7B; font-style: italic } /* Comment.Multiline */
+.codehilite .cp { color: #9C6500 } /* Comment.Preproc */
+.codehilite .cpf { color: #3D7B7B; font-style: italic } /* Comment.PreprocFile */
+.codehilite .c1 { color: #3D7B7B; font-style: italic } /* Comment.Single */
+.codehilite .cs { color: #3D7B7B; font-style: italic } /* Comment.Special */
+.codehilite .gd { color: #A00000 } /* Generic.Deleted */
+.codehilite .ge { font-style: italic } /* Generic.Emph */
+.codehilite .ges { font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.codehilite .gr { color: #E40000 } /* Generic.Error */
+.codehilite .gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.codehilite .gi { color: #008400 } /* Generic.Inserted */
+.codehilite .go { color: #717171 } /* Generic.Output */
+.codehilite .gp { color: #000080; font-weight: bold } /* Generic.Prompt */
+.codehilite .gs { font-weight: bold } /* Generic.Strong */
+.codehilite .gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.codehilite .gt { color: #04D } /* Generic.Traceback */
+.codehilite .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+.codehilite .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+.codehilite .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+.codehilite .kp { color: #008000 } /* Keyword.Pseudo */
+.codehilite .kr { color: #008000; font-weight: bold } /* Keyword.Reserved */
+.codehilite .kt { color: #B00040 } /* Keyword.Type */
+.codehilite .m { color: #666 } /* Literal.Number */
+.codehilite .s { color: #BA2121 } /* Literal.String */
+.codehilite .na { color: #687822 } /* Name.Attribute */
+.codehilite .nb { color: #008000 } /* Name.Builtin */
+.codehilite .nc { color: #00F; font-weight: bold } /* Name.Class */
+.codehilite .no { color: #800 } /* Name.Constant */
+.codehilite .nd { color: #A2F } /* Name.Decorator */
+.codehilite .ni { color: #717171; font-weight: bold } /* Name.Entity */
+.codehilite .ne { color: #CB3F38; font-weight: bold } /* Name.Exception */
+.codehilite .nf { color: #00F } /* Name.Function */
+.codehilite .nl { color: #767600 } /* Name.Label */
+.codehilite .nn { color: #00F; font-weight: bold } /* Name.Namespace */
+.codehilite .nt { color: #008000; font-weight: bold } /* Name.Tag */
+.codehilite .nv { color: #19177C } /* Name.Variable */
+.codehilite .ow { color: #A2F; font-weight: bold } /* Operator.Word */
+.codehilite .w { color: #BBB } /* Text.Whitespace */
+.codehilite .mb { color: #666 } /* Literal.Number.Bin */
+.codehilite .mf { color: #666 } /* Literal.Number.Float */
+.codehilite .mh { color: #666 } /* Literal.Number.Hex */
+.codehilite .mi { color: #666 } /* Literal.Number.Integer */
+.codehilite .mo { color: #666 } /* Literal.Number.Oct */
+.codehilite .sa { color: #BA2121 } /* Literal.String.Affix */
+.codehilite .sb { color: #BA2121 } /* Literal.String.Backtick */
+.codehilite .sc { color: #BA2121 } /* Literal.String.Char */
+.codehilite .dl { color: #BA2121 } /* Literal.String.Delimiter */
+.codehilite .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
+.codehilite .s2 { color: #BA2121 } /* Literal.String.Double */
+.codehilite .se { color: #AA5D1F; font-weight: bold } /* Literal.String.Escape */
+.codehilite .sh { color: #BA2121 } /* Literal.String.Heredoc */
+.codehilite .si { color: #A45A77; font-weight: bold } /* Literal.String.Interpol */
+.codehilite .sx { color: #008000 } /* Literal.String.Other */
+.codehilite .sr { color: #A45A77 } /* Literal.String.Regex */
+.codehilite .s1 { color: #BA2121 } /* Literal.String.Single */
+.codehilite .ss { color: #19177C } /* Literal.String.Symbol */
+.codehilite .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.codehilite .fm { color: #00F } /* Name.Function.Magic */
+.codehilite .vc { color: #19177C } /* Name.Variable.Class */
+.codehilite .vg { color: #19177C } /* Name.Variable.Global */
+.codehilite .vi { color: #19177C } /* Name.Variable.Instance */
+.codehilite .vm { color: #19177C } /* Name.Variable.Magic */
+.codehilite .il { color: #666 } /* Literal.Number.Integer.Long */
+</style>
+
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <h3>이 장의 목차</h3>
+  <div class="toc">
+<ul>
+<li><a href="#11">1.1 웹은 어떻게 동작하는가</a><ul>
+<li><a href="#_1">도입</a></li>
+<li><a href="#_2">핵심 개념 설명</a></li>
+<li><a href="#_3">코드로 확인하기</a></li>
+<li><a href="#_4">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#12">1.2 브라우저와 렌더링 과정</a><ul>
+<li><a href="#_5">도입</a></li>
+<li><a href="#_6">핵심 개념 설명</a></li>
+<li><a href="#_9">코드로 확인하기</a></li>
+<li><a href="#_10">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#13">1.3 개발 환경 설정하기</a><ul>
+<li><a href="#_11">도입</a></li>
+<li><a href="#_12">핵심 개념 설명</a></li>
+<li><a href="#_14">코드로 확인하기</a></li>
+<li><a href="#_15">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#14">1.4 첫 번째 웹 페이지 만들기</a><ul>
+<li><a href="#_16">도입</a></li>
+<li><a href="#_17">핵심 개념 설명</a></li>
+<li><a href="#hello-world">코드로 확인하기: Hello, World! 출력하기</a></li>
+<li><a href="#_19">브라우저에서 결과 확인하기</a></li>
+<li><a href="#vs-live-server">비교 테이블: 파일 직접 열기 vs. Live Server</a></li>
+<li><a href="#_20">절 요약</a></li>
+</ul>
+</li>
+<li><a href="#faq">FAQ</a></li>
+<li><a href="#_21">장 요약</a><ul>
+<li><a href="#_22">핵심 키워드</a></li>
+<li><a href="#_23">다음 장 미리보기</a></li>
+</ul>
+</li>
+</ul>
+</div>
+
+</aside>
+<main class="main">
+  <div class="chapter-header">
+    <h1>01장: 웹과 프론트엔드 시작하기</h1>
+    <div class="meta">
+      <span class="difficulty difficulty-입문">입문</span>
+    </div>
+  </div>
+  <div class="content">
+    <h1 id="1">1장. 웹과 프론트엔드 시작하기<a class="headerlink" href="#1" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>학습 목표</strong>
+- 웹의 클라이언트-서버 구조와 HTTP 요청-응답 흐름을 설명할 수 있습니다
+- HTML, CSS, JavaScript 각각의 역할을 구분하여 이해할 수 있습니다
+- VS Code와 Live Server로 개발 환경을 구축할 수 있습니다
+- 첫 번째 HTML 페이지를 만들어 브라우저에서 실행할 수 있습니다</p>
+</blockquote>
+<hr />
+<h2 id="11">1.1 웹은 어떻게 동작하는가<a class="headerlink" href="#11" title="Permanent link">&para;</a></h2>
+<h3 id="_1">도입<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<p>웹 페이지를 만들기 전에, 먼저 웹이 어떻게 동작하는지 이해해야 합니다. 주소창에 <code>https://www.naver.com</code>을 입력하고 엔터를 누르는 순간 실제로 어떤 일이 벌어지는지 생각해 본 적이 있습니까? 이 절에서는 그 과정을 단계별로 살펴보고, 우리가 만들 코드가 어떤 역할을 하는지 이해합니다.</p>
+<h3 id="_2">핵심 개념 설명<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<h4 id="internet-vs-web">인터넷과 웹의 차이 (Internet vs. Web)<a class="headerlink" href="#internet-vs-web" title="Permanent link">&para;</a></h4>
+<p><strong>인터넷(Internet)</strong>과 <strong>웹(Web)</strong>은 자주 혼용되지만 서로 다른 개념입니다.</p>
+<p>인터넷은 전 세계 컴퓨터들이 연결된 거대한 통신 네트워크 인프라입니다. 쉽게 말해, 건물과 건물을 이어 주는 도로망과 같습니다. 웹은 그 도로 위에서 운행하는 버스나 택시처럼, 인터넷 위에서 동작하는 하나의 서비스입니다.</p>
+<p>인터넷이 만들어진 것은 1960년대이고, 웹은 1989년 팀 버너스리(Tim Berners-Lee)가 고안했습니다. 전자메일, FTP, 웹 등 여러 서비스가 인터넷을 기반으로 동작합니다.</p>
+<blockquote>
+<p><strong>정리</strong>: 인터넷은 도로망, 웹은 그 위에서 달리는 버스입니다.</p>
+</blockquote>
+<h4 id="-client-server-architecture">클라이언트-서버 구조 (Client-Server Architecture)<a class="headerlink" href="#-client-server-architecture" title="Permanent link">&para;</a></h4>
+<p>웹의 동작은 <strong>클라이언트(Client)</strong>와 <strong>서버(Server)</strong> 두 역할로 나뉩니다.</p>
+<ul>
+<li><strong>클라이언트</strong>: 웹 페이지를 <em>요청</em>하는 쪽입니다. 우리가 사용하는 웹 브라우저(Chrome, Edge, Firefox 등)가 클라이언트 역할을 합니다.</li>
+<li><strong>서버</strong>: 요청을 받아 페이지 파일을 <em>응답</em>으로 돌려주는 컴퓨터입니다.</li>
+</ul>
+<p>음식점에 비유하면 이렇습니다. 손님(클라이언트)이 메뉴를 주문하면 주방(서버)이 음식을 만들어 내줍니다. 손님은 음식 만드는 방법을 몰라도 됩니다. 결과물만 받으면 됩니다.</p>
+<blockquote>
+<p><strong>오해 바로잡기</strong>: 서버는 거대한 특수 장비가 아닙니다. 내 컴퓨터도 서버 소프트웨어를 실행하면 서버가 됩니다. Live Server 확장을 설치하면 여러분의 컴퓨터가 바로 서버 역할을 합니다.</p>
+</blockquote>
+<h4 id="url">주소창에 URL을 입력하면 일어나는 일<a class="headerlink" href="#url" title="Permanent link">&para;</a></h4>
+<p><strong>URL(Uniform Resource Locator)</strong>은 인터넷 상의 자원 위치를 나타내는 주소입니다. <code>https://www.example.com/about.html</code> 형태로 생겼습니다.</p>
+<p>URL을 입력하고 엔터를 누르면 다음 순서로 진행됩니다.</p>
+<ol>
+<li>브라우저가 URL을 분석하여 서버의 주소를 찾습니다 (DNS 조회).</li>
+<li>브라우저가 서버에 <strong>HTTP(S) 요청(Request)</strong>을 보냅니다.</li>
+<li>서버가 요청을 처리하여 HTML, CSS, JS 파일을 <strong>응답(Response)</strong>으로 돌려줍니다.</li>
+<li>브라우저가 받은 파일을 분석하여 화면에 그립니다.</li>
+</ol>
+<figure class="diagram">
+<img src="../chapters/ch_01/images/diagram_01.png" alt="브라우저가 GET 요청을 서버로 보내고 서버가 200 OK 응답과 파일을 돌려주는 HTTP 클라이언트-서버 흐름도" loading="lazy">
+<figcaption>HTTP 요청-응답 흐름 (클라이언트-서버 구조)</figcaption>
+</figure>
+
+<h4 id="http">요청과 응답: HTTP 이해하기<a class="headerlink" href="#http" title="Permanent link">&para;</a></h4>
+<p><strong>HTTP(HyperText Transfer Protocol)</strong>는 클라이언트와 서버가 데이터를 주고받는 규칙(프로토콜)입니다. 마치 택배 회사가 정한 포장 규격과 배송 절차처럼, 데이터를 어떤 형식으로 주고받을지 정해 둔 약속입니다.</p>
+<p>요청에는 <code>GET /index.html</code> 같은 형식으로 "이 파일을 보내달라"는 내용이 담깁니다. 응답에는 <code>200 OK</code> 같은 <strong>상태 코드(Status Code)</strong>와 함께 파일 내용이 담겨 옵니다.</p>
+<table>
+<thead>
+<tr>
+<th>상태 코드</th>
+<th>의미</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200 OK</td>
+<td>요청 성공, 파일을 응답으로 보냄</td>
+</tr>
+<tr>
+<td>404 Not Found</td>
+<td>요청한 파일이 서버에 없음</td>
+</tr>
+<tr>
+<td>500 Internal Server Error</td>
+<td>서버 내부 오류</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_3">코드로 확인하기<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<p>다음은 나중에 직접 만들 HTML 파일이 어떤 형태로 브라우저에 전달되는지 이해하기 위해, 가장 단순한 HTML 응답 예시를 살펴보는 코드입니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="cm">&lt;!-- 브라우저가 서버로부터 받는 응답의 내용 (가장 단순한 형태) --&gt;</span>
+<span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>나의 첫 페이지<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>안녕하세요, 웹 세계에 오신 것을 환영합니다!<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<p>브라우저 화면에는 다음과 같이 표시됩니다.</p>
+<div class="codehilite"><pre><span></span><code>안녕하세요, 웹 세계에 오신 것을 환영합니다!   ← 가장 큰 제목 형태로 표시
+</code></pre></div>
+
+<p>이 HTML 파일 하나가 서버에서 브라우저로 전달되는 것이 웹의 핵심입니다.</p>
+<h3 id="_4">절 요약<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li>인터넷은 통신 인프라이고, 웹은 그 위에서 동작하는 서비스입니다.</li>
+<li>브라우저(클라이언트)가 서버에 HTTP 요청을 보내면, 서버가 HTML 파일을 응답으로 보냅니다.</li>
+<li>URL은 서버 위의 자원 주소이며, HTTP는 주고받는 규칙(프로토콜)입니다.</li>
+</ul>
+<hr />
+<h2 id="12">1.2 브라우저와 렌더링 과정<a class="headerlink" href="#12" title="Permanent link">&para;</a></h2>
+<h3 id="_5">도입<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<p>서버에서 받은 파일들을 브라우저가 어떻게 아름다운 화면으로 바꾸는지 궁금하지 않습니까? 이 절에서는 웹 프론트엔드를 이루는 세 가지 언어인 HTML, CSS, JavaScript의 역할을 명확히 구분하고, 브라우저가 코드를 화면으로 그리는 과정을 이해합니다.</p>
+<h3 id="_6">핵심 개념 설명<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<h4 id="_7">프론트엔드를 이루는 세 가지 언어<a class="headerlink" href="#_7" title="Permanent link">&para;</a></h4>
+<p>웹 페이지 하나는 세 가지 언어가 협력하여 만들어집니다. 각 언어는 담당 역할이 명확하게 분리되어 있습니다.</p>
+<p>집을 짓는 데 비유하면 이렇습니다.</p>
+<ul>
+<li><strong>HTML</strong>: 집의 뼈대와 구조입니다. 방이 몇 개인지, 창문은 어디에 있는지를 정의합니다.</li>
+<li><strong>CSS</strong>: 인테리어와 페인트입니다. 벽 색깔, 가구 배치, 전체적인 분위기를 결정합니다.</li>
+<li><strong>JavaScript</strong>: 전기 배선과 스위치입니다. 전등을 켜고 끄거나 문을 자동으로 여닫는 동작을 담당합니다.</li>
+</ul>
+<figure class="diagram">
+<img src="../chapters/ch_01/images/diagram_02.png" alt="HTML은 구조, CSS는 표현, JavaScript는 동작을 담당하며 세 기술이 합쳐져 완성된 웹 페이지가 됨을 보여주는 역할 분담 다이어그램" loading="lazy">
+<figcaption>HTML · CSS · JavaScript의 역할 분담</figcaption>
+</figure>
+
+<h4 id="html-structure">HTML은 구조 (Structure)<a class="headerlink" href="#html-structure" title="Permanent link">&para;</a></h4>
+<p><strong>HTML(HyperText Markup Language)</strong>은 웹 페이지의 뼈대를 만드는 언어입니다. 제목, 단락, 이미지, 버튼 등 페이지에 들어갈 요소들을 정의합니다.</p>
+<p>HTML만으로는 특별한 디자인이 없는 텍스트 위주의 문서가 됩니다. 하지만 내용(콘텐츠)의 구조와 의미는 HTML이 담당합니다.</p>
+<h4 id="css-presentation">CSS는 표현 (Presentation)<a class="headerlink" href="#css-presentation" title="Permanent link">&para;</a></h4>
+<p><strong>CSS(Cascading Style Sheets)</strong>는 HTML 요소의 모양을 꾸미는 언어입니다. 글자 색, 배경색, 크기, 여백, 배치 방식 등을 지정합니다.</p>
+<p>CSS 없이 HTML만 있으면 브라우저 기본 스타일이 적용된 밋밋한 페이지가 됩니다. CSS를 추가하면 세련된 디자인으로 바뀝니다.</p>
+<h4 id="javascript-behavior">JavaScript는 동작 (Behavior)<a class="headerlink" href="#javascript-behavior" title="Permanent link">&para;</a></h4>
+<p><strong>JavaScript</strong>는 페이지에 동적인 기능을 추가하는 프로그래밍 언어입니다. 버튼 클릭 처리, 데이터 불러오기, 화면 변경 등 사용자 상호작용을 구현합니다.</p>
+<h4 id="_8">브라우저가 코드를 화면으로 그리는 과정<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h4>
+<p>브라우저는 HTML, CSS, JS 파일을 받으면 다음 과정을 거쳐 화면에 그립니다.</p>
+<ol>
+<li><strong>HTML 파싱(Parsing)</strong>: HTML 코드를 읽어 <strong>DOM(Document Object Model)</strong> 트리 구조를 만듭니다.</li>
+<li><strong>CSS 파싱</strong>: CSS 코드를 읽어 스타일 규칙을 해석합니다.</li>
+<li><strong>렌더 트리 구성</strong>: DOM과 CSS를 결합하여 실제로 화면에 그릴 트리를 만듭니다.</li>
+<li><strong>레이아웃(Layout)</strong>: 각 요소의 크기와 위치를 계산합니다.</li>
+<li><strong>페인팅(Painting)</strong>: 픽셀 단위로 화면에 그립니다.</li>
+<li><strong>JavaScript 실행</strong>: JS 코드가 DOM을 변경하면 일부 단계를 다시 수행합니다.</li>
+</ol>
+<p>이 전체 과정을 <strong>렌더링(Rendering)</strong>이라고 합니다.</p>
+<blockquote>
+<p><strong>팁</strong>: 브라우저마다 렌더링 엔진이 다릅니다. Chrome/Edge는 Blink, Firefox는 Gecko, Safari는 WebKit 엔진을 사용합니다. 대부분의 현대 브라우저에서 동일하게 동작하지만, 일부 최신 기능은 브라우저마다 지원 상황이 다를 수 있습니다.</p>
+</blockquote>
+<h3 id="_9">코드로 확인하기<a class="headerlink" href="#_9" title="Permanent link">&para;</a></h3>
+<p>세 가지 언어가 어떻게 협력하는지 직접 보겠습니다. 아래 코드를 텍스트 에디터에 붙여넣고 <code>hello.html</code>로 저장한 후 브라우저로 열어 보십시오.</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>세 언어의 협력<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+    <span class="cm">&lt;!-- CSS: 스타일을 직접 style 태그에 넣은 예시 (나중에는 외부 파일로 분리합니다) --&gt;</span>
+    <span class="p">&lt;</span><span class="nt">style</span><span class="p">&gt;</span>
+<span class="w">      </span><span class="nt">h1</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#2563eb</span><span class="p">;</span><span class="w">       </span><span class="c">/* 글자 색을 파란색으로 */</span>
+<span class="w">        </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="kt">rem</span><span class="p">;</span><span class="w">      </span><span class="c">/* 글자 크기 */</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">      </span><span class="nt">button</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">background-color</span><span class="p">:</span><span class="w"> </span><span class="mh">#2563eb</span><span class="p">;</span>
+<span class="w">        </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">white</span><span class="p">;</span>
+<span class="w">        </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="kt">px</span><span class="w"> </span><span class="mi">20</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">        </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="kc">none</span><span class="p">;</span>
+<span class="w">        </span><span class="k">border-radius</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="kt">px</span><span class="p">;</span>
+<span class="w">        </span><span class="k">cursor</span><span class="p">:</span><span class="w"> </span><span class="kc">pointer</span><span class="p">;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">&lt;/</span><span class="nt">style</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="cm">&lt;!-- HTML: 페이지 구조 --&gt;</span>
+    <span class="p">&lt;</span><span class="nt">h1</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;greeting&quot;</span><span class="p">&gt;</span>안녕하세요!<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>아래 버튼을 눌러 보세요.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">button</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;changeBtn&quot;</span><span class="p">&gt;</span>인사 바꾸기<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+
+    <span class="cm">&lt;!-- JavaScript: 동적 동작 --&gt;</span>
+    <span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">btn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;changeBtn&#39;</span><span class="p">);</span>
+<span class="w">      </span><span class="nx">btn</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;click&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;greeting&#39;</span><span class="p">).</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;반갑습니다, 웹 개발자님!&#39;</span><span class="p">;</span>
+<span class="w">      </span><span class="p">});</span>
+<span class="w">    </span><span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<p>브라우저에서 파일을 열면 다음과 같이 표시됩니다.</p>
+<div class="codehilite"><pre><span></span><code>안녕하세요!               ← 파란색 큰 제목
+아래 버튼을 눌러 보세요.
+[인사 바꾸기]             ← 파란 배경의 버튼
+</code></pre></div>
+
+<p>"인사 바꾸기" 버튼을 클릭하면 제목이 "반갑습니다, 웹 개발자님!"으로 바뀝니다. HTML이 구조를 만들고, CSS가 디자인을 입히고, JavaScript가 클릭 동작을 처리했습니다.</p>
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">9</td>
+<td><code>color: #2563eb;</code></td>
+<td>h1 글자 색을 16진수 색상 코드로 파란색으로 지정합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">14</td>
+<td><code>background-color: #2563eb;</code></td>
+<td>버튼 배경색을 파란색으로 지정합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">24</td>
+<td><code>&lt;h1 id="greeting"&gt;</code></td>
+<td>JavaScript에서 식별할 수 있도록 <code>id="greeting"</code> 속성을 붙인 제목 태그입니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">26</td>
+<td><code>&lt;button id="changeBtn"&gt;</code></td>
+<td>클릭 이벤트를 연결할 버튼에도 <code>id</code>를 부여합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">30</td>
+<td><code>const btn = document.getElementById(...)</code></td>
+<td><code>id</code>로 버튼 요소를 찾아 <code>btn</code> 변수에 저장합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">31</td>
+<td><code>btn.addEventListener('click', ...)</code></td>
+<td>버튼에 클릭 이벤트 리스너를 등록합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">32</td>
+<td><code>.textContent = '...'</code></td>
+<td>제목 요소의 텍스트 내용을 새 문장으로 교체합니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p><strong>주의</strong>: 이 예시는 세 언어의 협력을 한 파일에서 보여주기 위한 것입니다. 실제 프로젝트에서는 CSS와 JS를 별도 파일로 분리하는 것이 올바른 방식입니다. 이후 챕터에서 그 방법을 배웁니다.</p>
+</blockquote>
+<h3 id="_10">절 요약<a class="headerlink" href="#_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li>HTML은 구조, CSS는 표현, JavaScript는 동작을 담당하여 역할이 분리됩니다.</li>
+<li>브라우저는 HTML/CSS/JS를 받아 파싱 → 렌더 트리 → 레이아웃 → 페인팅 순서로 화면을 그립니다.</li>
+<li>이 과정 전체를 렌더링이라고 합니다.</li>
+</ul>
+<hr />
+<h2 id="13">1.3 개발 환경 설정하기<a class="headerlink" href="#13" title="Permanent link">&para;</a></h2>
+<h3 id="_11">도입<a class="headerlink" href="#_11" title="Permanent link">&para;</a></h3>
+<p>웹 페이지를 만들려면 두 가지만 있으면 됩니다. 코드를 작성할 <strong>에디터(Editor)</strong>와, 결과를 확인할 <strong>브라우저(Browser)</strong>입니다. 이 절에서는 무료이면서 강력한 VS Code를 설치하고, 파일 저장과 동시에 브라우저가 자동으로 새로고침되는 Live Server를 설정합니다.</p>
+<h3 id="_12">핵심 개념 설명<a class="headerlink" href="#_12" title="Permanent link">&para;</a></h3>
+<h4 id="code-editor">코드 에디터란 무엇인가 (Code Editor)<a class="headerlink" href="#code-editor" title="Permanent link">&para;</a></h4>
+<p><strong>코드 에디터(Code Editor)</strong>는 프로그래밍 코드를 작성하기 위해 최적화된 텍스트 편집 프로그램입니다. 일반 메모장과 달리 다음 기능을 제공합니다.</p>
+<ul>
+<li><strong>문법 강조(Syntax Highlighting)</strong>: 태그, 속성, 값 등을 색상으로 구분하여 읽기 쉽게 합니다.</li>
+<li><strong>자동 완성(Auto Completion)</strong>: <code>&lt;h</code>를 입력하면 <code>&lt;h1&gt;</code>, <code>&lt;h2&gt;</code> 등을 제안합니다.</li>
+<li><strong>에러 표시</strong>: 잘못된 코드에 밑줄이나 경고를 표시합니다.</li>
+<li><strong>확장(Extension)</strong>: 추가 기능을 설치하여 더욱 편리하게 사용할 수 있습니다.</li>
+</ul>
+<h4 id="vs-code">VS Code 설치하기<a class="headerlink" href="#vs-code" title="Permanent link">&para;</a></h4>
+<p><strong>VS Code(Visual Studio Code)</strong>는 Microsoft가 만든 무료 오픈소스 코드 에디터입니다. 가볍고 빠르며, 전 세계 개발자들이 가장 많이 사용하는 에디터입니다.</p>
+<p><strong>설치 방법:</strong></p>
+<ol>
+<li>브라우저에서 <code>https://code.visualstudio.com</code> 으로 이동합니다.</li>
+<li>운영체제(Windows/macOS/Linux)에 맞는 설치 파일을 다운로드합니다.</li>
+<li>설치 파일을 실행하고 기본 옵션으로 설치를 완료합니다.</li>
+<li>VS Code를 처음 열면 Welcome 탭이 표시됩니다.</li>
+</ol>
+<blockquote>
+<p><strong>팁</strong>: Windows 설치 시 "PATH에 추가"와 "Open with Code" 옵션을 체크하면 나중에 터미널에서 <code>code .</code> 명령으로 폴더를 바로 열 수 있어 편리합니다.</p>
+</blockquote>
+<h4 id="live-server">Live Server 확장 설치와 사용법<a class="headerlink" href="#live-server" title="Permanent link">&para;</a></h4>
+<p>HTML 파일을 그냥 더블클릭하여 브라우저로 열면 파일을 수정해도 브라우저를 직접 새로고침해야 합니다. <strong>Live Server</strong> 확장은 파일이 저장될 때 브라우저를 자동으로 새로고침해 주어 개발 속도를 크게 높여 줍니다.</p>
+<p><strong>설치 방법:</strong></p>
+<ol>
+<li>VS Code 왼쪽 사이드바에서 네모 블록 아이콘(확장)을 클릭합니다. 단축키는 <code>Ctrl+Shift+X</code>(Windows) / <code>Cmd+Shift+X</code>(macOS)입니다.</li>
+<li>검색창에 <code>Live Server</code>를 입력합니다.</li>
+<li>Ritwick Dey가 만든 "Live Server"를 찾아 <strong>Install</strong> 버튼을 클릭합니다.</li>
+<li>설치가 완료되면 VS Code 하단 상태 표시줄에 <strong>"Go Live"</strong> 버튼이 나타납니다.</li>
+</ol>
+<p><strong>사용 방법:</strong></p>
+<ol>
+<li>HTML 파일을 열어 둔 상태에서 하단의 <strong>"Go Live"</strong> 버튼을 클릭합니다.</li>
+<li>브라우저가 자동으로 열리고 <code>http://127.0.0.1:5500/index.html</code> 같은 주소로 페이지가 표시됩니다.</li>
+<li>VS Code에서 코드를 수정하고 저장(<code>Ctrl+S</code>)하면 브라우저가 즉시 새로고침됩니다.</li>
+</ol>
+<blockquote>
+<p><strong>정보</strong>: <code>127.0.0.1</code>은 내 컴퓨터 자신을 가리키는 IP 주소입니다. Live Server가 내 컴퓨터를 임시 서버로 만들어 실제 웹 서비스처럼 파일을 제공하는 것입니다.</p>
+</blockquote>
+<h4 id="_13">작업 폴더 구조 만들기<a class="headerlink" href="#_13" title="Permanent link">&para;</a></h4>
+<p>프로젝트마다 전용 폴더를 만드는 습관은 매우 중요합니다. 여러 파일이 한 폴더에 뒤섞이면 관리가 어려워집니다.</p>
+<p>이 교재에서는 다음 구조를 기본으로 사용합니다.</p>
+<div class="codehilite"><pre><span></span><code>my-web-project/           ← 프로젝트 최상위 폴더
+├── index.html            ← 메인 페이지 (진입점)
+├── css/
+│   └── style.css         ← 스타일시트
+├── js/
+│   └── main.js           ← JavaScript 파일
+└── images/               ← 이미지 파일 모음
+</code></pre></div>
+
+<p><strong>VS Code에서 폴더 열기:</strong></p>
+<ol>
+<li><code>파일(File)</code> → <code>폴더 열기(Open Folder)</code>를 선택합니다.</li>
+<li>작업할 프로젝트 폴더를 선택합니다.</li>
+<li>이후 VS Code의 탐색기(왼쪽 사이드바)에 폴더 구조가 표시됩니다.</li>
+</ol>
+<h3 id="_14">코드로 확인하기<a class="headerlink" href="#_14" title="Permanent link">&para;</a></h3>
+<p>VS Code에서 새 파일을 만드는 전체 흐름을 단계별로 확인합니다.</p>
+<p><strong>1단계: 프로젝트 폴더 생성</strong></p>
+<p>먼저 바탕화면이나 원하는 위치에 <code>my-first-web</code> 폴더를 만듭니다.</p>
+<p><strong>2단계: VS Code로 폴더 열기</strong></p>
+<p><code>파일 → 폴더 열기</code> 메뉴로 방금 만든 폴더를 선택합니다.</p>
+<p><strong>3단계: index.html 파일 생성</strong></p>
+<p>VS Code 탐색기에서 폴더 이름 옆의 <code>+</code> 아이콘을 클릭하거나 <code>파일 → 새 파일</code>을 선택합니다. 파일명을 <code>index.html</code>로 입력하고 엔터를 누릅니다.</p>
+<p><strong>4단계: HTML 기본 골격 자동 완성</strong></p>
+<p>빈 <code>index.html</code> 파일에서 <code>!</code>를 입력한 후 <code>Tab</code> 키를 누릅니다. VS Code Emmet 기능이 자동으로 HTML 기본 골격을 생성합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;en&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content</span><span class="o">=</span><span class="s">&quot;width=device-width, initial-scale=1.0&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>Document<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+
+  <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<p><code>lang="en"</code>을 <code>lang="ko"</code>로 바꾸고, <code>&lt;title&gt;</code> 태그 안의 <code>Document</code>를 원하는 제목으로 바꿉니다.</p>
+<blockquote>
+<p><strong>팁</strong>: <code>!</code> + <code>Tab</code> 단축키는 VS Code의 Emmet 기능입니다. HTML 코드 작성 시간을 크게 줄여 주는 강력한 도구입니다. <code>h1</code> + <code>Tab</code>을 입력하면 <code>&lt;h1&gt;&lt;/h1&gt;</code>이 자동 완성되는 식으로 활용할 수 있습니다.</p>
+<p><strong>베스트 프랙티스</strong>: 파일명은 영문 소문자와 하이픈(-)만 사용합니다. 한글이나 공백이 포함된 파일명은 URL에서 문제를 일으킬 수 있습니다. 메인 페이지 파일명은 반드시 <code>index.html</code>로 지정합니다. 서버는 폴더에 접근할 때 자동으로 <code>index.html</code>을 찾습니다.</p>
+</blockquote>
+<h3 id="_15">절 요약<a class="headerlink" href="#_15" title="Permanent link">&para;</a></h3>
+<ul>
+<li>VS Code는 무료이면서 가장 인기 있는 코드 에디터입니다.</li>
+<li>Live Server 확장을 설치하면 저장 즉시 브라우저가 새로고침됩니다.</li>
+<li>프로젝트마다 전용 폴더를 만들고 <code>index.html</code>을 진입점으로 사용합니다.</li>
+</ul>
+<hr />
+<h2 id="14">1.4 첫 번째 웹 페이지 만들기<a class="headerlink" href="#14" title="Permanent link">&para;</a></h2>
+<h3 id="_16">도입<a class="headerlink" href="#_16" title="Permanent link">&para;</a></h3>
+<p>드디어 실제로 코드를 작성할 시간입니다. 이 절에서는 지금까지 배운 내용을 바탕으로 첫 번째 HTML 파일을 완성하고 브라우저에서 직접 결과를 확인합니다. 완벽하지 않아도 됩니다. 화면에 내용이 뜨는 순간, 여러분은 웹 개발자가 됩니다.</p>
+<h3 id="_17">핵심 개념 설명<a class="headerlink" href="#_17" title="Permanent link">&para;</a></h3>
+<h4 id="html-html">HTML 파일(.html)이란<a class="headerlink" href="#html-html" title="Permanent link">&para;</a></h4>
+<p>HTML 파일은 확장자가 <code>.html</code>인 텍스트 파일입니다. 특별한 바이너리 포맷이 아니어서 메모장으로도 열고 편집할 수 있습니다. 다만 VS Code 같은 에디터를 사용하면 훨씬 편리합니다.</p>
+<p>브라우저는 <code>.html</code> 파일을 받으면 처음부터 끝까지 순서대로 읽어 내려가며 화면을 그립니다.</p>
+<h4 id="_18">기본 문서 골격 분해하기<a class="headerlink" href="#_18" title="Permanent link">&para;</a></h4>
+<p>모든 HTML 문서는 다음 구조로 시작합니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content</span><span class="o">=</span><span class="s">&quot;width=device-width, initial-scale=1.0&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>페이지 제목<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="cm">&lt;!-- 여기에 화면에 보이는 내용을 작성합니다 --&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1</td>
+<td><code>&lt;!DOCTYPE html&gt;</code></td>
+<td>이 파일이 HTML Living Standard(HTML5)로 작성되었음을 브라우저에 알립니다. 반드시 첫 줄에 위치해야 합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td><code>&lt;html lang="ko"&gt;</code></td>
+<td>HTML 문서의 최상위 루트 요소입니다. <code>lang="ko"</code>는 이 문서의 언어가 한국어임을 명시합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td><code>&lt;head&gt;</code></td>
+<td>브라우저에게 필요한 메타 정보를 담는 영역입니다. 화면에 직접 표시되지 않습니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">4</td>
+<td><code>&lt;meta charset="UTF-8"&gt;</code></td>
+<td>문자 인코딩을 UTF-8로 지정합니다. 한글이 깨지지 않도록 <strong>반드시</strong> 포함해야 합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">5</td>
+<td><code>&lt;meta name="viewport" ...&gt;</code></td>
+<td>모바일 기기에서 화면 너비를 올바르게 처리하도록 설정합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">6</td>
+<td><code>&lt;title&gt;</code></td>
+<td>브라우저 탭과 북마크에 표시될 페이지 제목을 지정합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">7</td>
+<td><code>&lt;/head&gt;</code></td>
+<td>head 영역을 닫습니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">8</td>
+<td><code>&lt;body&gt;</code></td>
+<td>화면에 실제로 표시될 콘텐츠를 담는 영역입니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">10</td>
+<td><code>&lt;/body&gt;</code></td>
+<td>body 영역을 닫습니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">11</td>
+<td><code>&lt;/html&gt;</code></td>
+<td>HTML 문서를 닫습니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="api-spec">
+<p><strong><code>&lt;!DOCTYPE html&gt;</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>설명</strong></td>
+<td>HTML Living Standard 문서임을 선언하는 지시자(Doctype Declaration)입니다</td>
+</tr>
+<tr>
+<td><strong>위치</strong></td>
+<td>HTML 파일의 첫 번째 줄 (앞에 어떤 내용도 없어야 합니다)</td>
+</tr>
+<tr>
+<td><strong>목적</strong></td>
+<td>브라우저가 표준 모드(Standards Mode)로 페이지를 렌더링하도록 합니다. 생략하면 Quirks Mode가 되어 예상치 못한 렌더링 문제가 발생할 수 있습니다</td>
+</tr>
+<tr>
+<td><strong>사용 예시</strong></td>
+<td><code>&lt;!DOCTYPE html&gt;</code> (대소문자 구분 없이 동작합니다)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="api-spec">
+<p><strong><code>&lt;meta charset="UTF-8"&gt;</code></strong></p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>설명</strong></td>
+<td>문서의 문자 인코딩 방식을 지정하는 메타 태그입니다</td>
+</tr>
+<tr>
+<td><strong>속성</strong></td>
+<td><code>charset</code>: 인코딩 방식 이름 (UTF-8 권장)</td>
+</tr>
+<tr>
+<td><strong>위치</strong></td>
+<td><code>&lt;head&gt;</code> 내부의 첫 번째 자식으로 배치하는 것이 권장됩니다</td>
+</tr>
+<tr>
+<td><strong>중요성</strong></td>
+<td>생략하면 한글, 중국어, 일본어 등 비ASCII 문자가 깨져 표시됩니다</td>
+</tr>
+<tr>
+<td><strong>사용 예시</strong></td>
+<td><code>&lt;meta charset="UTF-8"&gt;</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="hello-world">코드로 확인하기: Hello, World! 출력하기<a class="headerlink" href="#hello-world" title="Permanent link">&para;</a></h3>
+<p>프로그래밍을 처음 배울 때 관례적으로 "Hello, World!"를 출력하는 것부터 시작합니다. 웹에서도 같은 방식으로 시작해 보겠습니다.</p>
+<p>이 코드는 브라우저 화면에 "Hello, World!"와 자기소개 텍스트를 표시하는 완전한 HTML 문서입니다.</p>
+<div class="codehilite"><pre><span></span><code><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ko&quot;</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">name</span><span class="o">=</span><span class="s">&quot;viewport&quot;</span> <span class="na">content</span><span class="o">=</span><span class="s">&quot;width=device-width, initial-scale=1.0&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>나의 첫 웹 페이지<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>Hello, World!<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>저는 웹 개발을 배우고 있습니다.<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>이것이 제 첫 번째 웹 페이지입니다!<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+  <span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</code></pre></div>
+
+<p>브라우저 화면에는 다음과 같이 표시됩니다.</p>
+<div class="codehilite"><pre><span></span><code>Hello, World!                          ← 굵고 큰 제목 (h1 기본 스타일)
+
+저는 웹 개발을 배우고 있습니다.         ← 일반 문단
+이것이 제 첫 번째 웹 페이지입니다!      ← 일반 문단
+</code></pre></div>
+
+<div class="code-annotation">
+<p><strong>줄별 코드 설명</strong></p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">줄</th>
+<th>코드</th>
+<th>설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1</td>
+<td><code>&lt;!DOCTYPE html&gt;</code></td>
+<td>HTML Living Standard 문서 선언입니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td><code>&lt;html lang="ko"&gt;</code></td>
+<td>한국어 문서임을 선언하는 루트 요소입니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">4</td>
+<td><code>&lt;meta charset="UTF-8"&gt;</code></td>
+<td>한글이 깨지지 않도록 UTF-8 인코딩을 선언합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">5</td>
+<td><code>&lt;meta name="viewport" ...&gt;</code></td>
+<td>모바일 화면에서 올바르게 표시되도록 뷰포트를 설정합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">6</td>
+<td><code>&lt;title&gt;나의 첫 웹 페이지&lt;/title&gt;</code></td>
+<td>브라우저 탭에 "나의 첫 웹 페이지"가 표시됩니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">9</td>
+<td><code>&lt;h1&gt;Hello, World!&lt;/h1&gt;</code></td>
+<td>가장 큰 제목을 나타내는 h1 태그입니다. 브라우저가 굵고 크게 표시합니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">10</td>
+<td><code>&lt;p&gt;저는 웹 개발을...&lt;/p&gt;</code></td>
+<td>문단(paragraph)을 나타내는 p 태그입니다. 위아래로 여백이 자동으로 생깁니다</td>
+</tr>
+<tr>
+<td style="text-align: center;">11</td>
+<td><code>&lt;p&gt;이것이 제 첫...&lt;/p&gt;</code></td>
+<td>두 번째 문단입니다. p 태그는 각 문단을 독립된 블록으로 분리합니다</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="_19">브라우저에서 결과 확인하기<a class="headerlink" href="#_19" title="Permanent link">&para;</a></h3>
+<p>파일을 저장한 후 두 가지 방법으로 브라우저에서 확인할 수 있습니다.</p>
+<p><strong>방법 1: 파일 직접 열기</strong></p>
+<p>파일 탐색기에서 <code>index.html</code>을 더블클릭하거나, 브라우저에서 <code>파일 → 파일 열기</code>로 열 수 있습니다. 주소창에 <code>file:///C:/Users/...</code> 형태로 표시됩니다.</p>
+<p><strong>방법 2: Live Server 사용 (권장)</strong></p>
+<p>VS Code에서 파일을 열고 하단 "Go Live"를 클릭하면 <code>http://127.0.0.1:5500/index.html</code>로 자동 접속됩니다. 코드를 수정하고 저장할 때마다 브라우저가 자동으로 갱신됩니다.</p>
+<blockquote>
+<p><strong>베스트 프랙티스</strong>: 가능하면 Live Server를 사용하십시오. 파일을 직접 열면 <code>file://</code> 프로토콜이 사용되는데, 일부 JavaScript 기능은 실제 HTTP 환경에서만 정상 동작합니다. Live Server는 실제 웹 서버 환경을 시뮬레이션하므로 더 정확한 결과를 볼 수 있습니다.</p>
+</blockquote>
+<h3 id="vs-live-server">비교 테이블: 파일 직접 열기 vs. Live Server<a class="headerlink" href="#vs-live-server" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>파일 직접 열기</th>
+<th>Live Server</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>프로토콜</td>
+<td><code>file://</code></td>
+<td><code>http://</code></td>
+</tr>
+<tr>
+<td>자동 새로고침</td>
+<td>없음 (수동)</td>
+<td>저장 시 자동</td>
+</tr>
+<tr>
+<td>JavaScript 일부 기능</td>
+<td>제한 있음</td>
+<td>정상 동작</td>
+</tr>
+<tr>
+<td>설정 필요 여부</td>
+<td>불필요</td>
+<td>VS Code 확장 설치 필요</td>
+</tr>
+<tr>
+<td>권장 상황</td>
+<td>간단히 확인할 때</td>
+<td>개발 작업 전체</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_20">절 요약<a class="headerlink" href="#_20" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>&lt;!DOCTYPE html&gt;</code> 선언으로 HTML Living Standard 문서임을 명시합니다.</li>
+<li><code>&lt;head&gt;</code> 에는 메타 정보, <code>&lt;body&gt;</code> 에는 화면에 보이는 콘텐츠를 작성합니다.</li>
+<li><code>&lt;meta charset="UTF-8"&gt;</code>은 한글 깨짐을 방지하므로 반드시 포함합니다.</li>
+<li>Live Server를 사용하면 저장 즉시 브라우저에서 결과를 확인할 수 있습니다.</li>
+</ul>
+<hr />
+<h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h2>
+<p><strong>Q1: HTML, CSS, JavaScript를 반드시 모두 배워야 합니까?</strong></p>
+<p>A1: 웹 페이지를 만들려면 기본적으로 세 언어 모두 필요합니다. 하지만 각자 역할이 분리되어 있어 단계별로 배울 수 있습니다. 이 교재처럼 HTML로 구조를 익히고, 이후 CSS로 꾸미기, 그다음 JavaScript로 동적 기능을 추가하는 순서가 학습에 가장 효과적입니다.</p>
+<p><strong>Q2: 인터넷이 없어도 웹 페이지를 만들고 테스트할 수 있습니까?</strong></p>
+<p>A2: 네, 가능합니다. HTML 파일을 작성하고 브라우저에서 직접 열거나 Live Server를 실행하면 인터넷 연결 없이도 내 컴퓨터 안에서 완전히 동작합니다. 인터넷은 다른 사람이 만든 웹 서버에 접속하거나, 외부 API를 호출할 때만 필요합니다.</p>
+<p><strong>Q3: <code>&lt;!DOCTYPE html&gt;</code> 없이도 페이지가 보이던데, 꼭 써야 합니까?</strong></p>
+<p>A3: 대부분의 경우 페이지가 표시되기는 합니다. 하지만 DOCTYPE을 생략하면 브라우저가 "Quirks Mode(비표준 모드)"로 동작하여 예상치 못한 레이아웃이나 스타일 오류가 발생할 수 있습니다. 특히 박스 모델 계산이 달라져 CSS 학습에 방해가 됩니다. 항상 첫 줄에 <code>&lt;!DOCTYPE html&gt;</code>을 작성하는 습관을 들이십시오.</p>
+<p><strong>Q4: VS Code 외에 다른 에디터를 사용해도 됩니까?</strong></p>
+<p>A4: 물론입니다. Sublime Text, Atom, Notepad++ 등 다양한 에디터를 사용할 수 있습니다. 심지어 메모장으로도 HTML을 작성할 수 있습니다. 하지만 VS Code는 무료이면서 강력한 기능을 제공하고, 이 교재의 설명이 VS Code를 기준으로 작성되어 있으므로 가능하면 VS Code를 사용하기를 권장합니다.</p>
+<hr />
+<h2 id="_21">장 요약<a class="headerlink" href="#_21" title="Permanent link">&para;</a></h2>
+<p>이번 장에서는 웹 프론트엔드 개발의 출발점이 되는 핵심 개념들을 살펴보았습니다. 브라우저가 URL을 입력받으면 HTTP 요청으로 서버에서 파일을 받아오고, HTML·CSS·JavaScript 세 언어의 협력으로 화면이 그려지는 원리를 이해했습니다. VS Code와 Live Server로 개발 환경을 구축하고, 첫 번째 HTML 파일을 직접 브라우저에서 실행해 보았습니다. 이제 여러분은 웹 개발의 첫 발을 내딛었습니다.</p>
+<h3 id="_22">핵심 키워드<a class="headerlink" href="#_22" title="Permanent link">&para;</a></h3>
+<p><code>웹 동작 원리</code>, <code>클라이언트-서버</code>, <code>HTTP</code>, <code>URL</code>, <code>브라우저 렌더링</code>, <code>HTML</code>, <code>CSS</code>, <code>JavaScript</code>, <code>VS Code</code>, <code>Live Server</code>, <code>DOCTYPE</code>, <code>UTF-8</code></p>
+<h3 id="_23">다음 장 미리보기<a class="headerlink" href="#_23" title="Permanent link">&para;</a></h3>
+<p>다음 장에서는 HTML 문서의 구조를 더 깊이 파고듭니다. 태그, 요소, 속성의 정확한 개념을 익히고 제목, 단락, 목록으로 의미 있는 문서를 직접 작성해 봅니다.</p>
+  </div>
+  <section class="project-section">
+<h2>&#128736; 실습 프로젝트 (Hands-on Project)</h2>
+<div class="project-readme">
+<h1>나의 첫 웹 페이지 프로젝트</h1>
+<p>이 장에서 배운 개념을 실무 시나리오에 적용하는 프로젝트입니다.</p>
+<h2>초급: 나의 첫 웹 페이지 만들기</h2>
+<h3>시나리오</h3>
+<p>여러분은 이제 막 웹 개발을 시작한 입문자입니다. 자신을 소개하는 첫 번째 웹 페이지를 만들어서 친구나 가족에게 공유하려고 합니다. Hello, World! 전통을 따라 첫 페이지를 완성하고, 이름과 좋아하는 한 문장을 담아 브라우저에서 실행해 봅니다. 이 경험을 통해 HTML 기본 골격과 브라우저 실행 방법에 자신감을 얻습니다.</p>
+<h3>학습 목표</h3>
+<ul>
+<li>HTML 기본 골격(DOCTYPE, html, head, body)을 올바르게 작성할 수 있습니다</li>
+<li>h1, p 태그로 제목과 문단을 구성할 수 있습니다</li>
+<li>파일을 브라우저로 열거나 Live Server로 실행할 수 있습니다</li>
+</ul>
+<h3>진행 방법</h3>
+<ol>
+<li><code>project_starter.html</code>을 열고 TODO 주석을 찾습니다</li>
+<li>각 TODO를 이 장에서 배운 개념으로 완성합니다</li>
+<li>완성 후 브라우저에서 열어 결과를 확인합니다</li>
+</ol>
+<h3>실행 방법</h3>
+<div class="codehilite"><pre><span></span><code>브라우저에서 project_starter.html 파일을 직접 열거나,
+VS Code에서 파일을 열고 하단 &quot;Go Live&quot; 버튼을 클릭합니다.
+</code></pre></div>
+
+<hr />
+<h2>중급: 나를 소개하는 인터랙티브 페이지</h2>
+<h3>시나리오</h3>
+<p>초급 프로젝트에서 만든 자기소개 페이지를 발전시킵니다. 이번에는 CSS로 페이지를 꾸미고, JavaScript로 인터랙티브 기능(버튼 클릭 시 메시지 변경)을 추가합니다. HTML/CSS/JavaScript 세 언어가 한 페이지에서 협력하는 경험을 통해 각 언어의 역할을 몸으로 익힙니다.</p>
+<h3>학습 목표</h3>
+<ul>
+<li>CSS를 style 태그 안에 작성하여 페이지 디자인을 적용할 수 있습니다</li>
+<li>JavaScript로 버튼 클릭 이벤트를 처리하고 페이지 내용을 동적으로 변경할 수 있습니다</li>
+<li>HTML/CSS/JS 세 언어의 역할 분리를 직접 체험할 수 있습니다</li>
+</ul>
+<h3>진행 방법</h3>
+<ol>
+<li><code>project_advanced_starter.html</code>을 열고 TODO 주석을 찾습니다</li>
+<li>초급에서 연습한 HTML 골격 지식을 바탕으로 CSS와 JavaScript 부분을 완성합니다</li>
+<li>완성 후 브라우저에서 열어 버튼 클릭 동작을 확인합니다</li>
+</ol>
+<h3>실행 방법</h3>
+<div class="codehilite"><pre><span></span><code>브라우저에서 project_advanced_starter.html 파일을 직접 열거나,
+VS Code에서 파일을 열고 하단 &quot;Go Live&quot; 버튼을 클릭합니다.
+</code></pre></div>
+
+<h3>확장 아이디어</h3>
+<ul>
+<li>CSS로 배경색, 글자 색, 여백을 더 꾸며 나만의 스타일을 만들어 보세요</li>
+<li>버튼을 추가하여 다른 메시지를 표시하는 기능을 구현해 보세요</li>
+<li>h2 소제목을 추가하여 "좋아하는 것", "꿈" 등의 섹션을 더 만들어 보세요</li>
+</ul>
+</div>
+<details class="project-file">
+<summary>&#128221; project_starter.html (스타터 코드 - 직접 완성해보세요)</summary>
+<pre><code class="language-html"><span class="ln"> 1</span>&lt;!--
+<span class="ln"> 2</span>  [초급] 나의 첫 웹 페이지 - 스타터 코드
+<span class="ln"> 3</span>  챕터: 1장. 웹과 프론트엔드 시작하기
+<span class="ln"> 4</span>  난이도: 입문
+<span class="ln"> 5</span>
+<span class="ln"> 6</span>  [목표]
+<span class="ln"> 7</span>  Hello, World! 와 자신의 이름, 좋아하는 한 문장을 담은
+<span class="ln"> 8</span>  HTML 페이지를 완성하고 브라우저에서 실행하세요.
+<span class="ln"> 9</span>
+<span class="ln">10</span>  [진행 방법]
+<span class="ln">11</span>  아래 TODO 주석을 찾아 각 항목을 완성하세요.
+<span class="ln">12</span>  완성 후 브라우저에서 열거나 VS Code Live Server로 실행합니다.
+<span class="ln">13</span>
+<span class="ln">14</span>  [완성 기준]
+<span class="ln">15</span>  - 브라우저 탭에 &quot;나의 첫 웹 페이지&quot;가 표시됨
+<span class="ln">16</span>  - 화면에 &quot;Hello, World!&quot; 제목이 표시됨
+<span class="ln">17</span>  - 자신의 이름이 표시됨
+<span class="ln">18</span>  - 좋아하는 한 문장이 표시됨
+<span class="ln">19</span>--&gt;
+<span class="ln">20</span>
+<span class="ln">21</span>&lt;!-- TODO 1: HTML 기본 골격 첫 줄에 DOCTYPE 선언을 추가하세요 --&gt;
+<span class="ln">22</span>
+<span class="ln">23</span>&lt;!-- TODO 2: 아래 html 태그에 한국어 lang 속성을 추가하세요 --&gt;
+<span class="ln">24</span>&lt;html&gt;
+<span class="ln">25</span>  &lt;head&gt;
+<span class="ln">26</span>    &lt;!-- TODO 3: 한글 깨짐 방지를 위한 charset meta 태그를 추가하세요 --&gt;
+<span class="ln">27</span>    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+<span class="ln">28</span>    &lt;!-- TODO 4: title 태그에 &quot;나의 첫 웹 페이지&quot;를 입력하세요 --&gt;
+<span class="ln">29</span>    &lt;title&gt;&lt;/title&gt;
+<span class="ln">30</span>  &lt;/head&gt;
+<span class="ln">31</span>  &lt;body&gt;
+<span class="ln">32</span>    &lt;!-- TODO 5: h1 태그에 &quot;Hello, World!&quot;를 입력하세요 --&gt;
+<span class="ln">33</span>    &lt;h1&gt;&lt;/h1&gt;
+<span class="ln">34</span>
+<span class="ln">35</span>    &lt;!-- TODO 6: p 태그에 자신의 이름을 소개하는 문장을 입력하세요 --&gt;
+<span class="ln">36</span>    &lt;!-- 예시: &quot;저는 홍길동입니다.&quot; --&gt;
+<span class="ln">37</span>    &lt;p&gt;&lt;/p&gt;
+<span class="ln">38</span>
+<span class="ln">39</span>    &lt;!-- TODO 7: p 태그에 좋아하는 한 문장을 입력하세요 --&gt;
+<span class="ln">40</span>    &lt;!-- 예시: &quot;저는 웹 개발을 배우고 있습니다.&quot; --&gt;
+<span class="ln">41</span>    &lt;p&gt;&lt;/p&gt;
+<span class="ln">42</span>  &lt;/body&gt;
+<span class="ln">43</span>&lt;/html&gt;
+<span class="ln">44</span></code></pre>
+</details>
+<details class="project-file">
+<summary>&#9989; project_complete.html (완성 코드)</summary>
+<pre><code class="language-html"><span class="ln"> 1</span>&lt;!--
+<span class="ln"> 2</span>  [초급] 나의 첫 웹 페이지 - 완성 코드
+<span class="ln"> 3</span>  챕터: 1장. 웹과 프론트엔드 시작하기
+<span class="ln"> 4</span>  난이도: 입문
+<span class="ln"> 5</span>
+<span class="ln"> 6</span>  [완성 코드 설명]
+<span class="ln"> 7</span>  - DOCTYPE 선언으로 HTML Living Standard 문서임을 명시
+<span class="ln"> 8</span>  - lang=&quot;ko&quot;로 한국어 문서 선언
+<span class="ln"> 9</span>  - charset=&quot;UTF-8&quot;로 한글 깨짐 방지
+<span class="ln">10</span>  - h1, p 태그로 Hello World 메시지와 자기소개 구성
+<span class="ln">11</span>  - content.md 본문의 &quot;Hello, World! 출력하기&quot; 코드를 기반으로 완성
+<span class="ln">12</span>
+<span class="ln">13</span>  실행 방법: 브라우저에서 이 파일을 직접 열거나 Live Server로 실행합니다.
+<span class="ln">14</span>--&gt;
+<span class="ln">15</span>&lt;!DOCTYPE html&gt;
+<span class="ln">16</span>&lt;!-- HTML Living Standard 문서 선언: 반드시 파일 첫 줄에 위치 --&gt;
+<span class="ln">17</span>&lt;!-- lang=&quot;ko&quot;: 이 문서가 한국어로 작성되었음을 브라우저와 스크린 리더에 알림 --&gt;
+<span class="ln">18</span>&lt;html lang=&quot;ko&quot;&gt;
+<span class="ln">19</span>  &lt;head&gt;
+<span class="ln">20</span>    &lt;!-- 한글 깨짐 방지를 위한 UTF-8 인코딩 선언: head의 첫 번째 자식으로 배치 --&gt;
+<span class="ln">21</span>    &lt;meta charset=&quot;UTF-8&quot;&gt;
+<span class="ln">22</span>    &lt;!-- 모바일 기기에서 올바른 화면 크기로 표시되도록 뷰포트 설정 --&gt;
+<span class="ln">23</span>    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+<span class="ln">24</span>    &lt;!-- 브라우저 탭에 &quot;나의 첫 웹 페이지&quot;가 표시됨 --&gt;
+<span class="ln">25</span>    &lt;title&gt;나의 첫 웹 페이지&lt;/title&gt;
+<span class="ln">26</span>  &lt;/head&gt;
+<span class="ln">27</span>  &lt;body&gt;
+<span class="ln">28</span>    &lt;!-- h1: 가장 큰 제목 태그. 브라우저가 굵고 크게 표시 --&gt;
+<span class="ln">29</span>    &lt;h1&gt;Hello, World!&lt;/h1&gt;
+<span class="ln">30</span>
+<span class="ln">31</span>    &lt;!-- p: 문단 태그. 위아래로 여백이 자동으로 생김 --&gt;
+<span class="ln">32</span>    &lt;p&gt;저는 웹 개발을 배우고 있습니다.&lt;/p&gt;
+<span class="ln">33</span>
+<span class="ln">34</span>    &lt;!-- 두 번째 문단: 좋아하는 한 문장 --&gt;
+<span class="ln">35</span>    &lt;p&gt;이것이 제 첫 번째 웹 페이지입니다!&lt;/p&gt;
+<span class="ln">36</span>
+<span class="ln">37</span>    &lt;!--
+<span class="ln">38</span>      브라우저 화면 출력:
+<span class="ln">39</span>        Hello, World!                          (굵고 큰 제목)
+<span class="ln">40</span>
+<span class="ln">41</span>        저는 웹 개발을 배우고 있습니다.         (일반 문단)
+<span class="ln">42</span>        이것이 제 첫 번째 웹 페이지입니다!      (일반 문단)
+<span class="ln">43</span>    --&gt;
+<span class="ln">44</span>  &lt;/body&gt;
+<span class="ln">45</span>&lt;/html&gt;
+<span class="ln">46</span></code></pre>
+</details>
+<details class="project-file">
+<summary>&#128221; project_advanced_starter.html (스타터 코드 - 직접 완성해보세요)</summary>
+<pre><code class="language-html"><span class="ln"> 1</span>&lt;!--
+<span class="ln"> 2</span>  [중급] 나를 소개하는 인터랙티브 페이지 - 스타터 코드
+<span class="ln"> 3</span>  챕터: 1장. 웹과 프론트엔드 시작하기
+<span class="ln"> 4</span>  난이도: 입문+
+<span class="ln"> 5</span>
+<span class="ln"> 6</span>  [목표]
+<span class="ln"> 7</span>  HTML 기본 골격 위에 CSS 스타일과 JavaScript 인터랙션을 추가하여
+<span class="ln"> 8</span>  &quot;인사 바꾸기&quot; 버튼 클릭 시 메시지가 바뀌는 페이지를 완성하세요.
+<span class="ln"> 9</span>
+<span class="ln">10</span>  [진행 방법]
+<span class="ln">11</span>  아래 TODO 주석을 찾아 각 항목을 완성하세요.
+<span class="ln">12</span>  HTML 골격은 이미 완성되어 있습니다.
+<span class="ln">13</span>  CSS 스타일 영역과 JavaScript 이벤트 처리 부분을 채우세요.
+<span class="ln">14</span>
+<span class="ln">15</span>  [완성 기준]
+<span class="ln">16</span>  - h1 제목이 파란색 (#2563eb)으로 표시됨
+<span class="ln">17</span>  - 버튼이 파란 배경에 흰 글자로 표시됨
+<span class="ln">18</span>  - 버튼 클릭 시 h1 텍스트가 &quot;반갑습니다, 웹 개발자님!&quot;으로 바뀜
+<span class="ln">19</span>
+<span class="ln">20</span>  실행 방법: 브라우저에서 이 파일을 직접 열거나 Live Server로 실행합니다.
+<span class="ln">21</span>--&gt;
+<span class="ln">22</span>&lt;!DOCTYPE html&gt;
+<span class="ln">23</span>&lt;html lang=&quot;ko&quot;&gt;
+<span class="ln">24</span>  &lt;head&gt;
+<span class="ln">25</span>    &lt;meta charset=&quot;UTF-8&quot;&gt;
+<span class="ln">26</span>    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+<span class="ln">27</span>    &lt;title&gt;나를 소개하는 인터랙티브 페이지&lt;/title&gt;
+<span class="ln">28</span>    &lt;style&gt;
+<span class="ln">29</span>      /* 페이지 기본 스타일 (이미 완성됨) */
+<span class="ln">30</span>      body {
+<span class="ln">31</span>        font-family: sans-serif;
+<span class="ln">32</span>        max-width: 600px;
+<span class="ln">33</span>        margin: 60px auto;
+<span class="ln">34</span>        padding: 0 20px;
+<span class="ln">35</span>      }
+<span class="ln">36</span>
+<span class="ln">37</span>      /* TODO 1: h1 글자 색을 #2563eb (파란색)으로 설정하세요 */
+<span class="ln">38</span>      h1 {
+<span class="ln">39</span>        /* 여기에 color 속성을 추가하세요 */
+<span class="ln">40</span>        font-size: 2rem;
+<span class="ln">41</span>      }
+<span class="ln">42</span>
+<span class="ln">43</span>      /* TODO 2: 버튼 스타일을 완성하세요 */
+<span class="ln">44</span>      /* 요구 사항:
+<span class="ln">45</span>         - background-color: #2563eb (파란 배경)
+<span class="ln">46</span>         - color: white (흰 글자)
+<span class="ln">47</span>         - padding: 8px 20px
+<span class="ln">48</span>         - border: none
+<span class="ln">49</span>         - border-radius: 6px
+<span class="ln">50</span>         - cursor: pointer */
+<span class="ln">51</span>      button {
+<span class="ln">52</span>        /* 여기에 스타일 속성들을 추가하세요 */
+<span class="ln">53</span>        font-size: 1rem;
+<span class="ln">54</span>      }
+<span class="ln">55</span>    &lt;/style&gt;
+<span class="ln">56</span>  &lt;/head&gt;
+<span class="ln">57</span>  &lt;body&gt;
+<span class="ln">58</span>    &lt;!-- id=&quot;greeting&quot;: JavaScript에서 이 요소를 찾기 위한 식별자 --&gt;
+<span class="ln">59</span>    &lt;h1 id=&quot;greeting&quot;&gt;안녕하세요!&lt;/h1&gt;
+<span class="ln">60</span>    &lt;p&gt;저는 웹 개발을 배우고 있습니다.&lt;/p&gt;
+<span class="ln">61</span>    &lt;p&gt;아래 버튼을 눌러 보세요.&lt;/p&gt;
+<span class="ln">62</span>    &lt;!-- id=&quot;changeBtn&quot;: JavaScript에서 클릭 이벤트를 연결할 버튼 --&gt;
+<span class="ln">63</span>    &lt;button id=&quot;changeBtn&quot;&gt;인사 바꾸기&lt;/button&gt;
+<span class="ln">64</span>
+<span class="ln">65</span>    &lt;script&gt;
+<span class="ln">66</span>      // TODO 3: 버튼 클릭 이벤트를 처리하는 코드를 작성하세요
+<span class="ln">67</span>      // 1) const로 id가 &quot;changeBtn&quot;인 버튼 요소를 가져오세요
+<span class="ln">68</span>      // 2) 버튼에 addEventListener('click', 화살표 함수) 를 사용해 클릭 이벤트를 등록하세요
+<span class="ln">69</span>      // 3) 클릭 시 id가 &quot;greeting&quot;인 요소의 textContent를
+<span class="ln">70</span>      //    &quot;반갑습니다, 웹 개발자님!&quot;으로 변경하세요
+<span class="ln">71</span>      //
+<span class="ln">72</span>      // 힌트:
+<span class="ln">73</span>      //   const 변수명 = document.getElementById('id이름');
+<span class="ln">74</span>      //   변수명.addEventListener('click', () =&gt; {
+<span class="ln">75</span>      //     document.getElementById('다른id').textContent = '새 텍스트';
+<span class="ln">76</span>      //   });
+<span class="ln">77</span>
+<span class="ln">78</span>      // 여기에 코드를 작성하세요
+<span class="ln">79</span>
+<span class="ln">80</span>    &lt;/script&gt;
+<span class="ln">81</span>  &lt;/body&gt;
+<span class="ln">82</span>&lt;/html&gt;
+<span class="ln">83</span></code></pre>
+</details>
+<details class="project-file">
+<summary>&#9989; project_advanced_complete.html (완성 코드)</summary>
+<pre><code class="language-html"><span class="ln">  1</span>&lt;!--
+<span class="ln">  2</span>  [중급] 나를 소개하는 인터랙티브 페이지 - 완성 코드
+<span class="ln">  3</span>  챕터: 1장. 웹과 프론트엔드 시작하기
+<span class="ln">  4</span>  난이도: 입문+
+<span class="ln">  5</span>
+<span class="ln">  6</span>  [완성 코드 설명]
+<span class="ln">  7</span>  - content.md [1.2 브라우저와 렌더링 과정 - 코드로 확인하기]의 예제 기반
+<span class="ln">  8</span>  - HTML로 구조 작성, CSS로 디자인, JavaScript로 클릭 이벤트 처리
+<span class="ln">  9</span>  - 세 언어가 한 파일에서 협력하는 방식으로 구성
+<span class="ln"> 10</span>  - 이후 챕터에서 CSS와 JS를 별도 파일로 분리하는 방법을 학습함
+<span class="ln"> 11</span>
+<span class="ln"> 12</span>  실행 방법: 브라우저에서 이 파일을 직접 열거나 Live Server로 실행합니다.
+<span class="ln"> 13</span>--&gt;
+<span class="ln"> 14</span>&lt;!DOCTYPE html&gt;
+<span class="ln"> 15</span>&lt;html lang=&quot;ko&quot;&gt;
+<span class="ln"> 16</span>  &lt;head&gt;
+<span class="ln"> 17</span>    &lt;meta charset=&quot;UTF-8&quot;&gt;
+<span class="ln"> 18</span>    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+<span class="ln"> 19</span>    &lt;title&gt;나를 소개하는 인터랙티브 페이지&lt;/title&gt;
+<span class="ln"> 20</span>
+<span class="ln"> 21</span>    &lt;!-- CSS: 스타일을 style 태그에 포함 (나중에는 외부 .css 파일로 분리) --&gt;
+<span class="ln"> 22</span>    &lt;style&gt;
+<span class="ln"> 23</span>      /* 페이지 기본 스타일 */
+<span class="ln"> 24</span>      body {
+<span class="ln"> 25</span>        font-family: sans-serif;
+<span class="ln"> 26</span>        max-width: 600px;
+<span class="ln"> 27</span>        margin: 60px auto;
+<span class="ln"> 28</span>        padding: 0 20px;
+<span class="ln"> 29</span>        line-height: 1.7;
+<span class="ln"> 30</span>        color: #1e293b;
+<span class="ln"> 31</span>      }
+<span class="ln"> 32</span>
+<span class="ln"> 33</span>      /* h1 제목: 파란색 (#2563eb)으로 눈에 띄게 */
+<span class="ln"> 34</span>      h1 {
+<span class="ln"> 35</span>        color: #2563eb;       /* 파란색 글자 */
+<span class="ln"> 36</span>        font-size: 2rem;      /* 기본 크기의 2배 */
+<span class="ln"> 37</span>      }
+<span class="ln"> 38</span>
+<span class="ln"> 39</span>      /* 버튼: 파란 배경에 흰 글자 */
+<span class="ln"> 40</span>      button {
+<span class="ln"> 41</span>        background-color: #2563eb;  /* 파란 배경 */
+<span class="ln"> 42</span>        color: white;               /* 흰 글자 */
+<span class="ln"> 43</span>        padding: 8px 20px;          /* 안쪽 여백 */
+<span class="ln"> 44</span>        border: none;               /* 기본 테두리 제거 */
+<span class="ln"> 45</span>        border-radius: 6px;         /* 모서리 둥글게 */
+<span class="ln"> 46</span>        cursor: pointer;            /* 손 커서 */
+<span class="ln"> 47</span>        font-size: 1rem;
+<span class="ln"> 48</span>        margin-top: 8px;
+<span class="ln"> 49</span>      }
+<span class="ln"> 50</span>
+<span class="ln"> 51</span>      /* 버튼 마우스 오버 효과 */
+<span class="ln"> 52</span>      button:hover {
+<span class="ln"> 53</span>        background-color: #1d4ed8;  /* 더 진한 파란색으로 */
+<span class="ln"> 54</span>      }
+<span class="ln"> 55</span>    &lt;/style&gt;
+<span class="ln"> 56</span>  &lt;/head&gt;
+<span class="ln"> 57</span>  &lt;body&gt;
+<span class="ln"> 58</span>
+<span class="ln"> 59</span>    &lt;!-- HTML 구조: h1에 id 부여하여 JavaScript에서 식별 가능하게 함 --&gt;
+<span class="ln"> 60</span>    &lt;h1 id=&quot;greeting&quot;&gt;안녕하세요!&lt;/h1&gt;
+<span class="ln"> 61</span>
+<span class="ln"> 62</span>    &lt;!-- p: 자기소개 문단 --&gt;
+<span class="ln"> 63</span>    &lt;p&gt;저는 웹 개발을 배우고 있습니다.&lt;/p&gt;
+<span class="ln"> 64</span>    &lt;p&gt;아래 버튼을 눌러 보세요.&lt;/p&gt;
+<span class="ln"> 65</span>
+<span class="ln"> 66</span>    &lt;!-- button: id 부여하여 JavaScript에서 클릭 이벤트 연결 --&gt;
+<span class="ln"> 67</span>    &lt;button id=&quot;changeBtn&quot;&gt;인사 바꾸기&lt;/button&gt;
+<span class="ln"> 68</span>
+<span class="ln"> 69</span>    &lt;!-- JavaScript: 동적 동작 처리 (body 끝에 배치하여 HTML 로드 후 실행) --&gt;
+<span class="ln"> 70</span>    &lt;script&gt;
+<span class="ln"> 71</span>      // id로 버튼 요소를 찾아 const 변수에 저장 (var 사용 금지)
+<span class="ln"> 72</span>      const btn = document.getElementById('changeBtn');
+<span class="ln"> 73</span>
+<span class="ln"> 74</span>      // 버튼에 클릭 이벤트 리스너 등록 (화살표 함수 사용)
+<span class="ln"> 75</span>      btn.addEventListener('click', () =&gt; {
+<span class="ln"> 76</span>        // id가 &quot;greeting&quot;인 요소의 텍스트 내용을 새 문장으로 교체
+<span class="ln"> 77</span>        document.getElementById('greeting').textContent = '반갑습니다, 웹 개발자님!';
+<span class="ln"> 78</span>
+<span class="ln"> 79</span>        // 콘솔 출력: 버튼이 클릭되었습니다.
+<span class="ln"> 80</span>        console.log('인사 바꾸기 버튼이 클릭되었습니다.');
+<span class="ln"> 81</span>      });
+<span class="ln"> 82</span>
+<span class="ln"> 83</span>      // 콘솔 출력: 이벤트 리스너가 등록되었습니다.
+<span class="ln"> 84</span>      console.log('이벤트 리스너가 등록되었습니다.');
+<span class="ln"> 85</span>    &lt;/script&gt;
+<span class="ln"> 86</span>
+<span class="ln"> 87</span>    &lt;!--
+<span class="ln"> 88</span>      브라우저 화면 출력 (초기 상태):
+<span class="ln"> 89</span>        안녕하세요!               (파란색 큰 제목)
+<span class="ln"> 90</span>        저는 웹 개발을 배우고 있습니다.
+<span class="ln"> 91</span>        아래 버튼을 눌러 보세요.
+<span class="ln"> 92</span>        [인사 바꾸기]             (파란 배경 버튼)
+<span class="ln"> 93</span>
+<span class="ln"> 94</span>      &quot;인사 바꾸기&quot; 버튼 클릭 후:
+<span class="ln"> 95</span>        반갑습니다, 웹 개발자님!  (h1 텍스트가 바뀜)
+<span class="ln"> 96</span>
+<span class="ln"> 97</span>      이것이 HTML(구조) + CSS(표현) + JavaScript(동작)의 협력입니다.
+<span class="ln"> 98</span>    --&gt;
+<span class="ln"> 99</span>  &lt;/body&gt;
+<span class="ln">100</span>&lt;/html&gt;
+<span class="ln">101</span></code></pre>
+</details>
+</section>
+
+  <nav class="chapter-nav"><a href="index.html" class="nav-home">목차</a><a href="ch_02.html" class="nav-next">HTML 기초: 문서 구조와 텍스트 &rarr;</a></nav>
+</main>
+</div>
+</body>
+</html>
