@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>장바구니</title>
+  <style>
+    body { font-family: sans-serif; max-width: 460px; margin: 40px auto; }
+    #cart { list-style: none; padding: 0; }
+    .cart-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 8px;
+    }
+    .cart-item .name { flex: 1; }
+    .cart-item button { width: 28px; height: 28px; cursor: pointer; border: 1px solid #ccc; background: #fafafa; border-radius: 4px; }
+    .cart-item .qty { min-width: 24px; text-align: center; }
+    .cart-item .subtotal { min-width: 90px; text-align: right; font-weight: bold; }
+    .cart-item .del { width: auto; padding: 0 10px; color: #e74c3c; }
+    #total { margin-top: 14px; font-size: 1.05rem; font-weight: bold; text-align: right; }
+  </style>
+</head>
+<body>
+  <h2>장바구니</h2>
+  <ul id="cart"></ul>
+  <p id="total"></p>
+
+
+  <script>
+    // 카트(cart) 데이터 : 서버에서 온 데이터(원래는)
+    let cart = [
+        {id:1, name:"기계식 키보드", price:89000 , qty:1},
+        {id:2, name:"무선 마우스", price:35000 , qty:2},
+        {id:3, name:"허브", price:19000 , qty:1}
+    ];
+
+    const cartEl = document.querySelector("#cart");
+    const totalEl = document.querySelector("#total");
+    const won = (price) => price.toLocaleString("ko-KR") + "원";
+
+    // 목록 전체를 그리는 함수
+    function renderCart() {
+      cartEl.innerHTML = "";                          // 기존 목록 비우기
+      const fragment = document.createDocumentFragment(); // 임시 컨테이너
+      cart.forEach((item) => {
+        const li = document.createElement("li");      // 상품 행 생성
+        li.classList.add("cart-item");
+        li.dataset.id = item.id;                      // 행에 상품 id 심기 (클릭 때 어떤 상품인지 식별). data-id 만듦
+
+        const name = document.createElement("span");  // 상품명
+        name.classList.add("name");
+        name.textContent = item.name;
+
+        const minus = document.createElement("button"); // 수량 - 버튼
+        minus.textContent = "−";
+        minus.dataset.action = "minus";               // 버튼 역할을 data-action에 명시
+
+        const qty = document.createElement("span");   // 현재 수량 표시
+        qty.classList.add("qty");
+        qty.textContent = item.qty;
+
+        const plus = document.createElement("button"); // 수량 + 버튼
+        plus.textContent = "+";
+        plus.dataset.action = "plus";
+
+        const sub = document.createElement("span");    // 소계 (단가 × 수량)
+        sub.classList.add("subtotal");
+        sub.textContent = won(item.price * item.qty);
+
+        const del = document.createElement("button");  // 삭제 버튼
+        del.classList.add("del");
+        del.textContent = "삭제";
+        del.dataset.action = "delete";
+
+        li.append(name, minus, qty, plus, sub, del);  // 여러 자식을 한 번에 추가
+        fragment.append(li);
+      });
+      cartEl.append(fragment);                        // DOM에 한 번에 추가
+
+      const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0); // 전체 합계 누적
+      const count = cart.reduce((sum, i) => sum + i.qty, 0);           // 총 수량 누적
+      totalEl.textContent = `총 ${count}개 · 합계 ${won(total)}`;
+    }
+    // [이벤트 위임] ul 하나에서 +/-/삭제 버튼 모두 처리(동적 항목도 자동 대응)
+    cartEl.addEventListener("click", (event)=> {
+        const action = event.target.dataset.action;     // 클릭된 버튼의 역할 파악
+        if(!action) return;                             // 버튼이 아닌 빈 공간 클릭은 무시
+        // event.target : 이벤트를 발생시킨 버튼
+        // closest(".cart-item") : 상위로 올라가서 .cart-item 찾아라.
+        // 핵심: .cart-item에 있는 id 찾기(가장 중요.)
+        const li = event.target.closest(".cart-item");  // closest 가장 가까운 행(li) 찾기
+        const id = Number(li.dataset.id)                // 클릭이 일어난 행의 상품 id(문자열 -> 숫자)
+
+        if(action === "plus") { // 수량 1 증가
+            // i : {id:1, name:"기계식 키보드", price:89000 , qty:1}
+            cart = cart.map((i) => i.id === id ? {...i, qty:i.qty+1}:i);    // ...i : i 복사(윗줄 참고), 복사본에서 qty에 qty+1 대입. 복사본 반환. 맨 뒤 :i는 id가 같지 않으면 그냥 i 반환.
+        }else if(action === "minus") {
+            cart = cart.map((i) => i.id === id ? {...i, qty:i.qty-1}:i)    // 3개 li 있는 배열 반환. 좀 더 쉽게도 할 수 있음. 인덱싱으로 하면 쉬운데 중간이 삭제되면 id와 index 달라짐. 복사(...i)가 안전함.
+                .filter((i) => i.qty > 0);  // 2개 li 있는 배열 반환
+        }else if(action === "delete") {
+            cart = cart.filter((i) => i.id != id);
+        }
+        renderCart();
+    });
+    renderCart();
+  </script>
+</body>
+</html>

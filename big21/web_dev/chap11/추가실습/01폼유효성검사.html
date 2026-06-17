@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>폼 유효성 검사</title>
+  <style>
+    body { font-family: sans-serif; max-width: 400px; margin: 40px auto; }
+    .field { margin-bottom: 14px; display: flex; flex-direction: column; gap: 4px; }
+    input { padding: 9px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
+    input.invalid { border-color: #e74c3c; background: #fff5f5; }  /* 에러 시 빨간 테두리 */
+    .error { color: #e74c3c; font-size: 0.82rem; min-height: 1em; }
+    button { padding: 10px; width: 100%; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+    #form-status { margin-top: 12px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>회원가입</h2>
+  <form id="signup-form" novalidate>    <!-- 사용자 정의 validate 위해 기존 validate 제거 -->
+    <div class="field">
+      <input name="email" placeholder="이메일" />
+      <span class="error" data-for="email"></span>  <!-- dataset -->
+    </div>
+    <div class="field">
+      <input name="password" type="password" placeholder="비밀번호 (8자 이상)" />
+      <span class="error" data-for="password"></span>
+    </div>
+    <button type="submit">가입하기</button>
+  </form>
+  <p id="form-status"></p>
+  <script>
+    // 폼(form), 제출 결과(p) 변수 선언
+    const form = document.querySelector("#signup-form");
+    const statusEl = document.querySelector("#form-status");
+
+    // 검증 규칙 별도 관리
+    // [검증규칙] 필드명 -> {검사함수, 에러 메시지}
+    const rules = {
+        email:{
+            // 정규식 : @와 .이 있고, 공백 없으면 통과
+            // aaa([^\s@]+)@(@)bbb(@[^\s@]+).(\.)com(@[^\s@]+)
+            test: (value)=> /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+            message: "올바른 이메일 형식이 아닙니다."
+        },
+        password: {
+            test: (value)=> value.length >= 8, //8자 이상이면 true, 아니면 false
+            message: "비밀번호는 8자 이상"
+        }
+    };
+
+    // 사용자가 입력한 값을 검증, 통과하면 true
+    function validateField(field){      // field는 input          
+        const rule = rules[field.name]; // field.name   email,password
+        if(!rule) return true;          // 검증 안하는 필드면 true
+        const valid = rule.test(field.value);   //field.value: 사용자가 입력한 값
+        // 이 필드에 대응하는 에러 표시 칸을 data-for 속성으로 찾는다
+        const errorEl = form.querySelector(`.error[data-for="${field.name}"]`)
+        if(valid){  // true : 정상 입력, 빨간 색 지정x. 에러메시지 x
+            field.classList.remove("invalid");  // 빨간 테두리 제거
+            errorEl.textContent = "";           // 에러 메시지도 제거
+        } else {
+            field.classList.add("invalid");     // 빨간 테두리 지정
+            errorEl.textContent = rule.message;
+        }
+        return valid;
+    }
+
+    // 사용자가 입력할 때 발생하는 이벤트 : input (이벤트 위임?)
+    // [이벤트 위임]
+    // form에 건다.
+    form.addEventListener("input", (event) => {          // 위임할 때는 event 받아야. 누군지 확인하려면 event.target 써야 함.
+        if(event.target.matches("input")) validateField(event.target);   // form 안의 요소 중 input 찾기. 입력 요소에서 난 이벤트만 검증(event.target.matches("input"))
+    });
+    // [제출] 기본 동작을 막고 전체 검증. 새로고침 했을 때 제출을 막는다.
+    form.addEventListener("submit", (event) => {
+        event.preventDefault();    // 이게 없으면 즉시 제출(submit). & 새로고침 일어남
+        const fields = form.querySelectorAll("input");  // 2개 들어있는 배열로.
+        let allValid = true;
+        fields.forEach((field) => {
+            if(!validateField(field)) allValid = false;
+        });
+        if(allValid) {
+            statusEl.textContent = "가입 요청 전송 완료"
+            // 실무 : 이 자리에서 fetch()로 서버에 전송.
+        } else {
+            statusEl.textContent = "입력값을 확인해 주세요."
+        }
+    });
+  </script>
+</body>
+</html>

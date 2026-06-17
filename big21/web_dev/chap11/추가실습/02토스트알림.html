@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>토스트 알림</title>
+  <style>
+    body { font-family: sans-serif; padding: 40px; }
+    button { padding: 9px 14px; margin-right: 8px; cursor: pointer; }
+    /* 토스트를 화면 우측 하단에 쌓는다 */
+    #toast-container {
+      position: fixed; right: 20px; bottom: 20px;
+      display: flex; flex-direction: column; gap: 10px; z-index: 9999; /* z-index 큰 게 보임. 9999는 무조건 보이게 하겠다는 뜻. */
+    }
+    .toast {
+      display: flex; align-items: center; gap: 12px;
+      min-width: 220px; padding: 12px 14px; border-radius: 8px;
+      color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+    }
+    .toast-success { background: #2ecc71; }
+    .toast-error   { background: #e74c3c; }
+    .toast-info    { background: #34495e; }
+    .toast-msg { flex: 1; }
+    .toast-close { flex: 0 0 auto; background: transparent; border: none; color: #fff; font-size: 15px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <button id="success-btn">성공 알림</button>
+  <button id="error-btn">에러 알림</button>
+  <div id="toast-container"></div>
+
+
+  <script>
+    const container = document.querySelector("#toast-container");
+
+    // [생성] 토스트 하나를 만들어 화면에 띄우고, duration 뒤 자동 제거
+    function showToast(message, type="info", duration=3000){
+        const toast = document.createElement("div");    // 토스트 박스 생성
+        toast.classList.add("toast", `toast-${type}`);  // toast는 공통 클래스
+
+        const msgSpan = document.createElement("span"); // 메시지 영역 만듦.
+        msgSpan.classList.add("toast-msg");
+        msgSpan.textContent = message;                  // 메시지 입력
+
+        // 닫기 버튼 생성
+        const closeBtn = document.createElement("button");
+        closeBtn.classList.add("toast-msg", "toast-close");
+        closeBtn.textContent = "X";
+        closeBtn.dataset.action = "close";
+
+        toast.append(msgSpan, closeBtn);
+        container.append(toast);
+        // setTimeout(function, 정해진 시간)
+        const timer = setTimeout(() => removeToast(toast), duration);    // duration 뒤 자동 제거 예약.
+        toast.dataset.timer = timer;    // 타이머를 요소에 저장(수동 닫을 때 취소용)
+        return toast;
+    } 
+
+    // [제거]  자동/수동 공통 제거 함수
+    function removeToast(toast) {
+        if(!toast.isConnected) return ; // 이미 삭제된 상태이면 밑 코드 또 제거하면 안되니 방지
+        clearTimeout(Number(toast.dataset.timer));  // 예약된 자동 제거 취소
+        toast.remove();                             // 요소 자신을 DOM에서 제거
+    }
+
+    // [이벤트 위임] 토스트마다 리스너를 달지 않고, 컨테이너 하나로 모든 닫기 버튼 처리
+    container.addEventListener("click", (event) => {
+        if(event.target.dataset.action != "close") return;      // 닫기 버튼 클릭만 처리
+        removeToast(event.target.closest(".toast"));
+    });
+
+    // 성공, 에러 알림 버튼에 이벤트 등록
+    document.querySelector("#success-btn")
+    .addEventListener("click", () => showToast("성공적으로 처리되었습니다.", "success", 2500));
+    document.querySelector("#error-btn").addEventListener("click", () => showToast("오류 발생", "error", 2500));
+  </script>
+</body>
+</html>

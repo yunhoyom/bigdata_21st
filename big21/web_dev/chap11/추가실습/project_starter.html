@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<!--
+  [초급 스타터] 기본 투두 리스트
+  챕터: DOM 조작과 이벤트 처리 (ch_11)
+
+  지시사항:
+  // TODO 주석을 찾아 해당 코드를 작성하세요.
+  이 파일은 스켈레톤 코드로, TODO 없이도 에러 없이 실행됩니다.
+  (현재 상태: 빈 목록이 보이고 버튼이 있지만 동작하지 않습니다)
+-->
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>투두 리스트 - 초급</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      max-width: 480px;
+      margin: 40px auto;
+      padding: 0 20px;
+      color: #2c3e50;
+      background: #f0f2f5;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.6rem;
+      margin-bottom: 24px;
+      color: #2c3e50;
+    }
+    .app-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    /* 입력 영역 */
+    #input-area {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    #todo-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+    #todo-input:focus {
+      border-color: #3498db;
+      outline: none;
+    }
+    #add-btn {
+      padding: 10px 18px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+    #add-btn:hover { background: #2980b9; }
+
+    /* 할 일 목록 */
+    #todo-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border: 1px solid #f0f0f0;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      background: #fafafa;
+      transition: background 0.15s;
+    }
+    .todo-item:hover { background: #f5f5f5; }
+    .todo-item.done { background: #f9f9f9; }
+    .todo-item.done .todo-text {
+      text-decoration: line-through;
+      color: #aaa;
+    }
+    .todo-text { flex: 1; font-size: 1rem; }
+    .complete-btn, .delete-btn {
+      padding: 5px 11px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: white;
+    }
+    .complete-btn { background: #2ecc71; }
+    .complete-btn:hover { background: #27ae60; }
+    .delete-btn { background: #e74c3c; }
+    .delete-btn:hover { background: #c0392b; }
+
+    /* 카운터 */
+    #counter {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: #95a5a6;
+      text-align: right;
+    }
+    #empty-msg {
+      text-align: center;
+      color: #bdc3c7;
+      padding: 24px;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>나의 투두 리스트</h1>
+
+  <div class="app-card">
+    <!-- 입력 영역 -->
+    <div id="input-area">
+      <input type="text" id="todo-input"
+             placeholder="할 일을 입력하세요..." maxlength="80">
+      <button id="add-btn">추가</button>
+    </div>
+
+    <!-- 할 일 목록 -->
+    <ul id="todo-list">
+      <li id="empty-msg">할 일을 추가해보세요!</li>
+    </ul>
+
+    <!-- 남은 항목 카운터 -->
+    <p id="counter"></p>
+  </div>
+
+  <script>
+    // DOM 참조를 변수에 저장합니다
+    const todoInput = document.querySelector('#todo-input');
+    const addBtn    = document.querySelector('#add-btn');
+    const todoList  = document.querySelector('#todo-list');
+    const counter   = document.querySelector('#counter');
+
+    // 남은 항목 수를 계산하여 카운터를 업데이트합니다
+    const updateCounter = () => {
+      const total     = todoList.querySelectorAll('.todo-item').length;
+      const doneCount = todoList.querySelectorAll('.todo-item.done').length;
+      const remaining = total - doneCount;
+
+      if (total === 0) {
+        counter.textContent = '';
+        return;
+      }
+      // TODO 3에서 완성할 textContent 업데이트가 여기서 사용됩니다
+      counter.textContent = `전체 ${total}개 | 완료 ${doneCount}개 | 남은 항목 ${remaining}개`;
+    };
+
+    // ============================================================
+    // TODO 1: addTodo 함수를 완성하세요
+    //
+    // 할 일:
+    // a. todoInput.value.trim()으로 텍스트를 읽습니다
+    // b. 텍스트가 비어있으면 함수를 종료합니다 (return)
+    // ?c. #empty-msg li가 있으면 제거합니다
+    // d. <li class="todo-item"> 요소를 createElement로 생성합니다
+    // e. <span class="todo-text">에 textContent로 텍스트를 설정합니다
+    // f. <button class="complete-btn"> "완료"를 생성합니다
+    //    - 클릭 시 li에 'done' 클래스를 토글하고 updateCounter()를 호출합니다
+    //    - 완료 상태면 버튼 텍스트를 "취소", 아니면 "완료"로 변경합니다
+    // g. <button class="delete-btn"> "삭제"를 생성합니다
+    //    - 클릭 시 li.remove()를 실행하고 updateCounter()를 호출합니다
+    // h. li에 span, completeBtn, deleteBtn을 append합니다
+    // i. todoList에 li를 append합니다
+    // j. todoInput.value를 ''로 초기화합니다
+    // k. todoInput에 focus를 줍니다
+    // l. updateCounter()를 호출합니다
+    // ============================================================
+    const addTodo = () => {
+      // TODO 1: 이곳에 코드를 작성하세요
+      if(todoInput.value.trim() === "") return;
+
+      const li = document.createElement("li");
+      li.classList.add("todo-item");
+
+      const spanTodo = document.createElement("span");
+      spanTodo.classList.add("todo-text");
+      spanTodo.textContent = todoInput.value;
+
+      const completeBtn = document.createElement("button");
+      completeBtn.classList.add("complete-btn");
+      if(li.classList.contains("done")) {
+        completeBtn.textContent = "취소";
+      } else {
+        completeBtn.textContent = "완료";
+      }
+
+      buttonComplete.addEventListener("click", (event) => {
+        const li = event.target.closest("todo-item");
+        li.classList.toggle('done');
+        updateCounter();
+      });
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.classList.add("delete-btn");
+      deleteBtn.addEventListener("click", (event) => {
+        const li = event.target.closest("todo-item");
+        li.remove();
+        updateCounter();
+      });
+
+      li.append(spanTodo, completeBtn, deleteBtn);
+      // 스켈레톤: 현재는 아무것도 하지 않습니다
+      return;
+    };
+
+    // ============================================================
+    // TODO 2: addBtn에 클릭 이벤트를 연결하여 addTodo를 호출하세요
+    // ============================================================
+    // TODO 2: 이곳에 코드를 작성하세요
+
+
+    // ============================================================
+    // TODO 3: todoInput에서 Enter 키 입력 시 addTodo를 호출하세요
+    //   힌트: keydown 이벤트, event.key === 'Enter'
+    // ============================================================
+    // TODO 3: 이곳에 코드를 작성하세요
+
+  </script>
+</body>
+</html>
