@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Fetch 에러 처리</title>
+</head>
+<body>
+<script>
+async function fetchWithErrorHandling(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            const message = `요청 실패(상태 코드: ${response.status} ${response.statusText})`;
+            throw new Error(message);
+        }
+        return await response.json();
+    } catch (error) {
+        if (error instanceof TypeError) {
+            console.error('네트워크 오류:', error.message);
+        } else {
+            console.error('요청 오류:', error.message);
+        }
+        return null;
+    }
+}
+
+
+fetchWithErrorHandling('https://jsonplaceholder.typicode.com/posts/1')
+    .then((data) => data && console.log('게시글 제목:', data.title));
+
+
+fetchWithErrorHandling('https://jsonplaceholder.typicode.com/posts/99999')
+    .then((data) => data && console.log('데이터:', data));
+</script>
+</body>
+</html>

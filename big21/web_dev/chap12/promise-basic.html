@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>promise 기초</title>
+</head>
+<body>
+    <script>
+        // 1. Promise 객체만 생성(아직 실행은 x) : 2초 뒤 성공 or 실패 반환
+        const fetchData = new Promise((resolve, reject)=> {
+            setTimeout(() => {
+                const success = false;   // 기본 true, 실패 시 false
+                if(success) {   // 회원 정보 추출 성공했을 때
+                    resolve({id:1, name:"홍길동"}); // 성공 시 호출될 함수
+                } else {
+                    reject(new Error("회원 정보 데이터 로드 실패!"));
+                }
+            }, 2000);
+        });
+
+        // 진짜 실행 fetchData 실행
+        fetchData
+            .then((data)=>{     // 성공 시 data에 resolve({id:1, name:"홍길동"});
+                console.log("성공: ", data.name);
+                return data.id;
+            })
+            .then((id)=>{   // 위 then 성공 시 데이터 받아옴.
+                console.log("ID 확인", id);
+            })
+            .catch((error)=> {   // reject(new Error("회원 정보 데이터 로드 실패!"))/ success = false or then에서 오류 발생 시 실행됨.
+                console.error("오류: ", error.message);
+            })
+            .finally(()=> {
+                console.log("항상 실행됨.");
+            });
+
+        console.log("Promise 상태 확인 (pending)", fetchData);
+    </script>
+</body>
+</html>

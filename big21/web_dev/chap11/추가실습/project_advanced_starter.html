@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<!--
+  [중급 스타터] 필터 + 로컬 저장소 투두 리스트
+  챕터: DOM 조작과 이벤트 처리 (ch_11)
+
+  지시사항:
+  // TODO 주석을 찾아 해당 코드를 작성하세요.
+  이 파일은 스켈레톤 코드로, TODO 없이도 에러 없이 실행됩니다.
+  (현재 상태: 빈 화면이 표시되고 버튼이 있지만 동작하지 않습니다)
+-->
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>투두 리스트 - 중급</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      max-width: 520px;
+      margin: 40px auto;
+      padding: 0 20px;
+      background: #f0f2f5;
+      color: #2c3e50;
+    }
+    h1 { text-align: center; font-size: 1.6rem; margin-bottom: 24px; }
+
+    .app-card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    /* 입력 영역 */
+    #input-area { display: flex; gap: 8px; margin-bottom: 16px; }
+    #todo-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    #todo-input:focus { border-color: #3498db; outline: none; }
+    #add-btn {
+      padding: 10px 18px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    #add-btn:hover { background: #2980b9; }
+
+    /* 필터 탭 */
+    #filter-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+      list-style: none;
+      padding: 0;
+    }
+    .filter-tab {
+      padding: 6px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      background: #f0f0f0;
+      border: none;
+      transition: background 0.15s;
+    }
+    .filter-tab.active {
+      background: #3498db;
+      color: white;
+    }
+
+    /* 할 일 목록 */
+    #todo-list { list-style: none; padding: 0; margin: 0; }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border: 1px solid #f0f0f0;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      background: #fafafa;
+    }
+    .todo-item.done .todo-text { text-decoration: line-through; color: #aaa; }
+    .todo-text { flex: 1; font-size: 1rem; }
+    .complete-btn, .delete-btn {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: white;
+    }
+    .complete-btn { background: #2ecc71; }
+    .delete-btn   { background: #e74c3c; }
+    .complete-btn:hover { background: #27ae60; }
+    .delete-btn:hover   { background: #c0392b; }
+
+    /* 하단 영역 */
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+    }
+    #counter { font-size: 0.85rem; color: #95a5a6; }
+    #clear-all-btn {
+      padding: 6px 12px;
+      background: #95a5a6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    #clear-all-btn:hover { background: #7f8c8d; }
+    #empty-msg {
+      text-align: center;
+      color: #bdc3c7;
+      padding: 24px;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>나의 투두 리스트</h1>
+
+  <div class="app-card">
+    <!-- 입력 영역 -->
+    <div id="input-area">
+      <input type="text" id="todo-input"
+             placeholder="할 일을 입력하세요..." maxlength="80">
+      <button id="add-btn">추가</button>
+    </div>
+
+    <!-- 필터 탭 (이벤트 위임 적용 대상) -->
+    <ul id="filter-tabs">
+      <li class="filter-tab active" data-filter="all">전체</li>
+      <li class="filter-tab" data-filter="active">진행중</li>
+      <li class="filter-tab" data-filter="done">완료</li>
+    </ul>
+
+    <!-- 할 일 목록 (이벤트 위임 적용 대상) -->
+    <ul id="todo-list"></ul>
+
+    <!-- 하단 카운터 + 전체 삭제 -->
+    <div class="footer-row">
+      <span id="counter">0개</span>
+      <button id="clear-all-btn">전체 삭제</button>
+    </div>
+  </div>
+
+  <script>
+    // ── 상태(State) ───────────────────────────────────────────────
+    // 모든 할 일 항목을 담는 배열입니다 (UI의 단일 진실 공급원)
+    let items  = [];
+    let nextId = 1;
+    // 현재 활성 필터입니다 ('all' | 'active' | 'done')
+    let currentFilter = 'all';
+
+    // ── DOM 참조 ─────────────────────────────────────────────────
+    const todoInput  = document.querySelector('#todo-input');
+    const addBtn     = document.querySelector('#add-btn');
+    const todoList   = document.querySelector('#todo-list');
+    const filterTabs = document.querySelector('#filter-tabs');
+    const counter    = document.querySelector('#counter');
+    const clearAllBtn = document.querySelector('#clear-all-btn');
+
+    // ============================================================
+    // TODO 1: renderList 함수를 완성하세요
+    //
+    // 할 일:
+    // a. currentFilter에 따라 표시할 항목을 필터링합니다
+    //    - 'all'    → items 전체
+    //    - 'active' → items 중 done이 false인 것만
+    //    - 'done'   → items 중 done이 true인 것만
+    // b. todoList.innerHTML = '' 으로 목록을 비웁니다
+    // c. 필터된 항목이 없으면 #empty-msg li를 생성하여 표시합니다
+    // d. DocumentFragment를 사용하여 항목들을 생성합니다
+    //    - <li class="todo-item"> 생성, done이면 'done' 클래스 추가
+    //    - li.dataset.id = item.id 설정
+    //    - <span class="todo-text">에 textContent로 텍스트 설정
+    //    - <button class="complete-btn" data-action="done">
+    //      텍스트: item.done ? '취소' : '완료'
+    //    - <button class="delete-btn" data-action="delete"> "삭제"
+    //    - li에 span, 두 버튼을 append
+    //    - fragment에 li를 append
+    // e. todoList에 fragment를 append합니다
+    // f. counter를 업데이트합니다 (진행중 항목 수)
+    // ============================================================
+    const renderList = () => {
+      // TODO 1: 이곳에 코드를 작성하세요
+      
+      
+      // 스켈레톤: 현재는 빈 목록을 표시합니다
+      todoList.innerHTML = '';
+      const msg = document.createElement('li');
+      msg.id = 'empty-msg';
+      msg.style.cssText = 'text-align:center;color:#bdc3c7;padding:24px;';
+      msg.textContent = '할 일을 추가해보세요!';
+      todoList.append(msg);
+      counter.textContent = '0개';
+    };
+
+    // ============================================================
+    // TODO 2: addTodo 함수를 완성하세요
+    //
+    // 할 일:
+    // a. todoInput.value.trim()으로 텍스트를 읽고 빈 입력이면 return
+    // b. items 배열에 { id: nextId++, text, done: false }를 추가합니다
+    // c. todoInput.value를 ''로 초기화하고 focus를 줍니다
+    // d. renderList()를 호출합니다
+    // e. localStorage에 저장합니다 (saveToStorage 호출)
+    // ============================================================
+    const addTodo = () => {
+      // TODO 2: 이곳에 코드를 작성하세요
+      return;
+    };
+
+    // ============================================================
+    // TODO 3: todoList에 이벤트 위임을 설정하세요
+    //
+    // 부모 todoList에 단 하나의 click 리스너를 등록합니다:
+    // a. event.target.dataset.action을 읽습니다
+    //    action이 없으면 return
+    // b. event.target.closest('.todo-item')으로 li를 찾습니다
+    // c. Number(li.dataset.id)로 id를 읽습니다
+    // d. action이 'done'이면: items 배열에서 해당 id의 done을 토글합니다
+    //    (Array.map + 스프레드 연산자 { ...item, done: !item.done } 패턴)
+    // e. action이 'delete'면: items.filter로 해당 id를 제외한 새 배열을 만듭니다
+    // f. renderList()와 saveToStorage()를 호출합니다
+    // ============================================================
+    // TODO 3: 이곳에 코드를 작성하세요
+
+
+    // ============================================================
+    // TODO 4: filterTabs에 이벤트 위임을 설정하세요
+    //
+    // 부모 filterTabs에 단 하나의 click 리스너를 등록합니다:
+    // a. event.target.matches('.filter-tab')이 아니면 return
+    // b. currentFilter = event.target.dataset.filter
+    // c. 모든 .filter-tab에서 'active' 클래스를 제거합니다
+    // d. 클릭된 탭에 'active' 클래스를 추가합니다
+    // e. renderList()를 호출합니다
+    // ============================================================
+    // TODO 4: 이곳에 코드를 작성하세요
+
+
+    // ============================================================
+    // TODO 5: clearAllBtn 클릭 시 모든 항목을 삭제하세요
+    //   - items = []으로 초기화
+    //   - renderList()와 saveToStorage() 호출
+    // ============================================================
+    // TODO 5: 이곳에 코드를 작성하세요
+
+
+    // ── 로컬 저장소 유틸리티 ─────────────────────────────────────
+    // ============================================================
+    // TODO 6: saveToStorage 함수를 완성하세요
+    //   - localStorage.setItem('todos', JSON.stringify(items))
+    //   - localStorage.setItem('nextId', nextId.toString())
+    // ============================================================
+    const saveToStorage = () => {
+      // TODO 6: 이곳에 코드를 작성하세요
+    };
+
+    // ============================================================
+    // TODO 7: loadFromStorage 함수를 완성하세요
+    //   - localStorage.getItem('todos')로 저장된 데이터를 읽습니다
+    //   - 데이터가 있으면 JSON.parse로 파싱하여 items에 할당합니다
+    //   - localStorage.getItem('nextId')로 nextId를 복원합니다
+    // ============================================================
+    const loadFromStorage = () => {
+      // TODO 7: 이곳에 코드를 작성하세요
+    };
+
+    // 버튼 클릭 연결
+    addBtn.addEventListener('click', addTodo);
+    todoInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addTodo();
+    });
+
+    // 앱 초기화: 저장된 데이터를 불러와 렌더링합니다
+    loadFromStorage();
+    renderList();
+  </script>
+</body>
+</html>

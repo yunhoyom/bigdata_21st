@@ -183,8 +183,11 @@
       // TODO 1: 이곳에 코드를 작성하세요
       if(todoInput.value.trim() === "") return;
 
-
-
+      const emptyMsg = document.querySelector("#empty-msg");
+      if(emptyMsg) {
+        emptyMsg.remove();
+      }
+      
       const li = document.createElement("li");
       li.classList.add("todo-item");
 
