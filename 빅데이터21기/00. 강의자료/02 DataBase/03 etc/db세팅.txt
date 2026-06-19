@@ -1,0 +1,4 @@
+win+r -> winver(윈도우 버전 확인)
+
+win11 pro 기준으로 진행
+
