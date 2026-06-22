@@ -1,0 +1,26 @@
+# docker-compose.yml
+services:
+  web:
+     image: nginx:latest
+     container_name: web_server
+     ports:
+      - "8080:8080"
+     volumes:
+      - ./html:/usr/share/nginx/html
+     restart: always
+     depends_on:
+      - db
+  db:
+    image: postgres:16
+    container_name: pg_test
+    ports:
+      - "5555:5432"
+    environment:
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_USER=appuser
+      - POSTGRES_DB=appdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+volumes:
+  pgdata:
