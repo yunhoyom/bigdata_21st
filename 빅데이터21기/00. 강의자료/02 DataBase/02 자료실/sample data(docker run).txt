@@ -1,0 +1,9 @@
+\big21\database\data 안에 01_seed_large.sql 넣기
+
+
+docker run -d --name shop-lab `
+>> -e POSTGRES_PASSWORD=1234 `
+>> -e POSTGRES_USER=appuser `
+>> -e POSTGRES_DB=shop `
+>> -v C:\big21\database\data:/docker-entrypoint-initdb.d `
+>> -p 5555:5432 postgres:16

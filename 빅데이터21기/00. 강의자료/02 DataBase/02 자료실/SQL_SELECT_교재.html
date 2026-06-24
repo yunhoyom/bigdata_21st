@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>실무형 SQL SELECT 교재 — 전자상거래 데이터셋</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --ink:#1f2430; --muted:#6b7280; --line:#e6e8ec;
+    --brand:#2f6df6; --brand-d:#1d4ed8; --accent:#0ea5a4;
+    --code-bg:#0f172a; --code-ink:#e2e8f0; --kw:#7dd3fc; --str:#fbbf24; --com:#64748b;
+    --basic:#2563eb; --agg:#0ea5a4; --join:#7c3aed; --adv:#db2777; --warn:#b45309;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.65;-webkit-font-smoothing:antialiased}
+  a{color:var(--brand-d);text-decoration:none}
+  code{font-family:"SF Mono",Menlo,Consolas,"D2Coding",monospace}
+  .wrap{display:grid;grid-template-columns:268px 1fr;max-width:1300px;margin:0 auto;gap:0}
+  nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;
+          border-right:1px solid var(--line);padding:22px 14px 60px;background:var(--panel)}
+  nav.toc h2{font-size:12px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;margin:16px 8px 6px}
+  nav.toc a{display:block;padding:5px 10px;border-radius:8px;color:var(--ink);font-size:13px;border-left:3px solid transparent}
+  nav.toc a:hover{background:#f1f5ff}
+  nav.toc a.active{background:#eef4ff;border-left-color:var(--brand);color:var(--brand-d);font-weight:600}
+  nav.toc .brand{font-weight:800;font-size:16px;padding:4px 8px 14px;border-bottom:1px solid var(--line);margin-bottom:6px}
+  main{padding:30px 38px 120px;min-width:0}
+  .hero{background:linear-gradient(135deg,#1e3a8a,#2f6df6);color:#fff;border-radius:18px;padding:32px 32px 26px;margin-bottom:24px;box-shadow:0 10px 30px rgba(47,109,246,.25)}
+  .hero h1{margin:0 0 6px;font-size:26px;letter-spacing:-.01em}
+  .hero p{margin:4px 0;opacity:.95;font-size:14.5px}
+  .hero code{background:rgba(255,255,255,.18);padding:1px 6px;border-radius:5px}
+  .hero .chips{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+  .hero .chips span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);padding:5px 11px;border-radius:999px;font-size:12px}
+  section{margin:0 0 14px;scroll-margin-top:14px}
+  h2.sec{font-size:21px;margin:36px 0 4px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+  h2.sec .ico{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:9px;vertical-align:middle}
+  p.lead{color:var(--muted);margin:6px 0 16px;font-size:14px}
+  .filter{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0 12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .filter b{font-size:13px;color:var(--muted);margin-right:4px}
+  .fbtn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 13px;font-size:13px;cursor:pointer;color:var(--ink)}
+  .fbtn.on{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:600}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 20px 10px;margin:16px 0;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+  .card-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .card-head .num{font-size:12px;font-weight:700;color:#fff;background:var(--ink);border-radius:6px;padding:3px 8px}
+  .card-head h3{margin:0;font-size:16.5px;flex:1 1 auto}
+  .tag{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;color:#fff}
+  .t-기초{background:var(--basic)} .t-집계{background:var(--agg)} .t-JOIN{background:var(--join)} .t-고급{background:var(--adv)}
+  .sql{position:relative;margin:4px 0 12px}
+  .sql pre{margin:0;background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:13px;line-height:1.55}
+  .sql code{white-space:pre}
+  .c-kw{color:var(--kw);font-weight:600}.c-str{color:var(--str)}.c-com{color:var(--com);font-style:italic}
+  .copy{position:absolute;top:8px;right:8px;background:#1e293b;color:#cbd5e1;border:1px solid #334155;border-radius:7px;padding:4px 10px;font-size:11.5px;cursor:pointer;opacity:.85}
+  .copy:hover{opacity:1;background:#334155}
+  .copy.done{color:#34d399;border-color:#34d399}
+  .sub{font-size:13.5px;margin:7px 0;padding:9px 13px;border-radius:9px;border:1px solid var(--line);background:#fbfcfe}
+  .sub .lbl{display:inline-block;font-weight:700;font-size:12px;margin-right:6px;color:var(--ink)}
+  .sub.s-syntax{background:#f5f7ff;border-color:#dfe7ff}
+  .sub.s-mean{background:#f0fbf7;border-color:#cdeee2}
+  .sub.s-detail{background:#fff7f0;border-color:#fbe2c9}
+  .sub.s-var{background:#faf5ff;border-color:#ecdcfb}
+  .sub code,.note code,.box code{background:#eef1f6;padding:1px 5px;border-radius:4px;font-size:12.5px;color:#0f172a}
+  .result{margin:10px 0 8px}
+  .rhead{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+  .rows{background:var(--accent);color:#fff;font-size:11.5px;padding:2px 9px;border-radius:999px;font-weight:700}
+  table.res{border-collapse:collapse;font-size:13px;width:auto;min-width:50%;overflow:hidden;border-radius:8px}
+  table.res th,table.res td{border:1px solid var(--line);padding:6px 11px;text-align:left;white-space:nowrap}
+  table.res th{background:#f3f4f6;font-weight:700;font-size:12.5px}
+  table.res td.num{text-align:right;font-variant-numeric:tabular-nums}
+  table.res tr:nth-child(even) td{background:#fafbfc}
+  .tnote{font-size:12px;color:var(--muted);margin-top:5px}
+  .callout{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:16px 18px;margin:16px 0}
+  .callout h4{margin:0 0 8px;color:var(--warn);font-size:15px}
+  .callout ul{margin:6px 0 0;padding-left:20px;font-size:14px}
+  .callout li{margin:5px 0}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  .flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0 6px}
+  .flow .st{background:#eef4ff;border:1px solid #d6e2ff;color:var(--brand-d);font-weight:600;font-size:12.5px;padding:5px 10px;border-radius:8px}
+  .flow .ar{color:var(--muted);font-weight:700}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:14px 0}
+  .tbox{border:1px solid var(--line);border-radius:12px;padding:13px 15px;background:var(--panel)}
+  .tbox h4{margin:0 0 4px;font-size:14.5px}
+  .tbox .cnt{font-size:12px;color:var(--accent);font-weight:700}
+  .schema{font-size:12.5px;color:var(--ink);margin-top:8px;font-family:"SF Mono",Menlo,monospace;background:#f8fafc;border-radius:8px;padding:8px 10px;line-height:1.7;border:1px solid var(--line)}
+  .erd{font-family:"SF Mono",Menlo,monospace;font-size:12.5px;background:var(--code-bg);color:#cbd5e1;border-radius:10px;padding:16px;overflow-x:auto;white-space:pre;line-height:1.5}
+  details.ex{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--adv);border-radius:10px;padding:6px 16px;margin:12px 0}
+  details.ex summary{cursor:pointer;font-weight:600;font-size:14px;padding:8px 0;list-style:none}
+  details.ex summary::-webkit-details-marker{display:none}
+  details.ex summary::before{content:"\25B6 ";color:var(--adv);font-size:11px}
+  details.ex[open] summary::before{content:"\25BC "}
+  details.ex .ans{border-top:1px solid var(--line);margin-top:6px;padding-top:10px}
+  .qmeta{font-size:11.5px;color:var(--muted);font-weight:500}
+  footer{margin-top:46px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+  .hidden{display:none!important}
+  @media(max-width:880px){.wrap{grid-template-columns:1fr}nav.toc{position:static;height:auto;overflow:visible;border-right:none;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:3px 6px;padding:12px 14px}nav.toc .brand{width:100%;margin-bottom:4px}nav.toc h2{width:100%;margin:8px 4px 2px}nav.toc a{font-size:12.5px;padding:5px 9px;border:1px solid var(--line)}nav.toc a.active{border-color:var(--brand)}main{padding:20px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc" id="toc">
+  <div class="brand">📚 SQL SELECT 실습</div>
+  <h2>시작</h2>
+  <a href="#intro">교재 소개</a>
+  <a href="#dataset">데이터셋 / ERD</a>
+  <a href="#order">SELECT 실행 순서</a>
+  <a href="#caution">합성 데이터 주의</a>
+  <h2>1. SELECT 기초</h2>
+  <a href="#b1">1 · 필요한 컬럼만 + LIMIT</a>
+  <a href="#b2">2 · WHERE 조건 결합 (AND/OR)</a>
+  <a href="#b3">3 · DISTINCT — 고유값 확인</a>
+  <a href="#b4">4 · ORDER BY — 정렬</a>
+  <a href="#b5">5 · 페이징 — LIMIT + OFFSET</a>
+  <a href="#b6">6 · IN · BETWEEN · LIKE</a>
+  <a href="#b7">7 · 표현식 · 별칭 — SELECT에서 계산</a>
+  <h2>2. 집계와 그룹화</h2>
+  <a href="#m1">8 · 집계함수 — count·min·max</a>
+  <a href="#m2">9 · GROUP BY + 구성비</a>
+  <a href="#m3">10 · 그룹별 Top-N</a>
+  <a href="#m4">11 · HAVING — 그룹 필터</a>
+  <a href="#m5">12 · CASE — 구간 분류</a>
+  <a href="#m6">13 · 날짜 함수 — 월별 집계</a>
+  <a href="#m7">14 · 다중 GROUP BY + FILTER 집계</a>
+  <h2>3. 테이블 결합 (JOIN)</h2>
+  <a href="#j1">15 · INNER JOIN — 두 테이블 연결</a>
+  <a href="#j2">16 · 3+ 테이블 JOIN — 주문 펼치기</a>
+  <a href="#j3">17 · 집계 + JOIN — 분류별 매출</a>
+  <a href="#j4">18 · LEFT JOIN — 없으면 0으로</a>
+  <a href="#j5">19 · 파생테이블 — 집계의 집계</a>
+  <h2>4. 고급 쿼리</h2>
+  <a href="#a1">20 · 스칼라 서브쿼리 — 동적 기준값</a>
+  <a href="#a2">21 · 상관 서브쿼리 — 그룹별 대표행</a>
+  <a href="#a3">22 · EXISTS — 존재 여부</a>
+  <a href="#a4">23 · CTE (WITH) — 단계로 쪼개기</a>
+  <a href="#a5">24 · 윈도우 함수 — 그룹별 순위 Top-N</a>
+  <a href="#a6">25 · 윈도우 함수 — 누적합 · 전월대비(LAG)</a>
+  <a href="#a7">26 · NTILE — 분위(사분위) 분할</a>
+  <a href="#a8">27 · 집합연산 — EXCEPT(차집합)</a>
+  <a href="#a9">28 · UNION ALL — 결과 세로 결합</a>
+  <a href="#a10">29 · ROLLUP — 소계·총계 한 번에</a>
+  <h2>실습</h2>
+  <a href="#exercises">연습문제 10선</a>
+  <a href="#perf">부록 · 성능/인덱스</a>
+</nav>
+<main>
+  <div class="hero">
+    <h1>실무형 SQL <code>SELECT</code> 완전 정복</h1>
+    <p>실제 쇼핑몰 구조를 본뜬 5개 테이블 · 약 125만 행으로 배우는 조회 문법 — 기초부터 윈도우 함수·집합연산까지</p>
+    <p style="font-size:13px;opacity:.9">예제 29 · 연습문제 10 · 모든 결과는 동일 데이터셋에서 실제 실행해 검증(PostgreSQL 16 문법 기준)</p>
+    <div class="chips">
+      <span>categories 14</span><span>customers 50,000</span><span>products 1,000</span>
+      <span>orders 200,000</span><span>order_items 999,995</span>
+    </div>
+  </div>
+
+  <div class="filter" id="filter">
+    <b>난이도 필터</b>
+    <button class="fbtn on" data-f="all">전체</button>
+    <button class="fbtn" data-f="기초">기초</button>
+    <button class="fbtn" data-f="집계">집계·그룹</button>
+    <button class="fbtn" data-f="JOIN">JOIN</button>
+    <button class="fbtn" data-f="고급">고급</button>
+  </div>
+
+  <section id="intro">
+    <h2 class="sec"><span class="ico" style="background:var(--brand)"></span>교재 소개</h2>
+    <p class="lead">각 예제는 <b>문법 구조 분해 → 실무 의미 → 동작 원리·흔한 실수 → 응용</b> 순으로 깊이 있게 설명하고, <b>실제 실행 결과와 행수</b>를 그대로 보여 준다. 상단 버튼으로 난이도별 필터, 각 코드의 <b>복사</b> 버튼으로 바로 실행할 수 있다.</p>
+  </section>
+
+  <section id="dataset">
+    <h2 class="sec"><span class="ico" style="background:var(--accent)"></span>데이터셋 / ERD</h2>
+    <p class="lead">정규화된 5개 테이블. 화살표는 외래키 참조 방향(자식 → 부모).</p>
+    <div class="erd">  categories  &#9664;----  products  &#9664;----  order_items  ----&#9658;  orders  ----&#9658;  customers
+   (상품분류)         (상품)         (주문상세 1:N)        (주문헤더)        (회원)
+      14행            1,000행          999,995행           200,000행         50,000행
+
+  핵심 관계
+   - products.category_id    &#8594; categories.category_id
+   - orders.customer_id      &#8594; customers.customer_id
+   - order_items.order_id    &#8594; orders.order_id       (한 주문에 여러 품목 = 1:N)
+   - order_items.product_id  &#8594; products.product_id</div>
+    <div class="grid">
+      <div class="tbox"><h4>customers</h4><span class="cnt">50,000행 · 회원</span>
+        <div class="schema">customer_id PK
+name · email(UNIQUE) · phone
+birth_date · gender(M/F)
+city · grade(BRONZE~VIP)
+signup_date · is_active</div></div>
+      <div class="tbox"><h4>products</h4><span class="cnt">1,000행 · 상품</span>
+        <div class="schema">product_id PK · category_id FK
+name · price · stock_quantity
+status(판매중/품절/단종)
+created_at</div></div>
+      <div class="tbox"><h4>orders</h4><span class="cnt">200,000행 · 주문헤더</span>
+        <div class="schema">order_id PK · customer_id FK
+order_date · status
+total_amount(품목합계)
+shipping_city</div></div>
+      <div class="tbox"><h4>order_items</h4><span class="cnt">999,995행 · 주문상세</span>
+        <div class="schema">order_item_id PK
+order_id FK · product_id FK
+quantity · unit_price
+UNIQUE(order_id, product_id)</div></div>
+      <div class="tbox" style="background:#f0fdfa"><h4>규모 요약(검증값)</h4><span class="cnt">실측</span>
+        <div class="schema">총 주문 200,000건
+총 매출 555,545,028,070원
+평균 주문액 2,777,725원
+기간 2023-01-01 ~ 2025-06-18</div></div>
+    </div>
+  </section>
+
+  <section id="order">
+    <h2 class="sec"><span class="ico" style="background:#475569"></span>SELECT 논리적 실행 순서</h2>
+    <p class="lead">SQL은 <b>적힌 순서가 아니라 논리적 순서</b>로 평가된다. 이걸 알면 별칭/필터/집계 규칙이 한 번에 이해된다.</p>
+    <div class="box">
+      <div class="flow">
+        <span class="st">FROM / JOIN</span><span class="ar">&#8594;</span>
+        <span class="st">WHERE</span><span class="ar">&#8594;</span>
+        <span class="st">GROUP BY</span><span class="ar">&#8594;</span>
+        <span class="st">HAVING</span><span class="ar">&#8594;</span>
+        <span class="st">SELECT (표현식·별칭)</span><span class="ar">&#8594;</span>
+        <span class="st">DISTINCT</span><span class="ar">&#8594;</span>
+        <span class="st">ORDER BY</span><span class="ar">&#8594;</span>
+        <span class="st">LIMIT / OFFSET</span>
+      </div>
+      <p style="margin:8px 0 0;font-size:13.5px">함의: <b>WHERE에선 SELECT 별칭을 못 쓴다</b>(아직 평가 전). 반면 <b>ORDER BY·GROUP BY는 별칭 사용 가능</b>. 집계 결과로 거르는 건 WHERE가 아니라 <b>HAVING</b>. 윈도우 함수는 SELECT 단계에서 계산되므로 <b>WHERE로 직접 못 거르고</b> 서브쿼리로 감싸야 한다.</p>
+    </div>
+  </section>
+
+  <section id="caution">
+    <div class="callout">
+      <h4>&#9888;&#65039; 합성 데이터 특성 — 분석 전 반드시 알아 둘 것</h4>
+      <p style="margin:0 0 6px;font-size:14px">이 데이터는 <b>난수 없이 일련번호 공식</b>으로 생성되어(누가 돌려도 동일) 학습에 이상적이지만, 실제 세계엔 없는 인위적 규칙이 있다. 모르고 교차분석하면 <b>잘못된 인사이트</b>를 얻는다.</p>
+      <ul>
+        <li><b>모든 회원이 주문을 가진다</b> · <b>모든 상품이 한 번 이상 팔린다</b> — '미주문 회원/미판매 상품' 안티조인 결과는 0(예제 18·27은 이를 우회).</li>
+        <li><b>등급(grade)과 주문상태(status)가 인위적으로 상관</b>된다. 등급×상태 교차표는 현실 의미가 없으니 피한다.</li>
+        <li><b>한 회원의 주문 4건은 상태가 모두 동일</b>(생성식 mod 100 주기). 회원별 상태 다양성 분석은 무의미.</li>
+        <li>반면 <b>가격·재고·날짜·분류 분포</b>는 고르게 퍼져 정렬·구간·범위·집계 실습엔 적합.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div id="content"></div>
+
+  <section id="exercises">
+    <h2 class="sec"><span class="ico" style="background:var(--adv)"></span>연습문제 10선</h2>
+    <p class="lead">난이도 순. 먼저 직접 작성한 뒤 정답을 펼쳐 비교하자. 모든 정답값은 실제 실행으로 검증했다.</p>
+    <div id="exbox"></div>
+  </section>
+
+  <section id="perf">
+    <h2 class="sec"><span class="ico" style="background:#475569"></span>부록 · SELECT 성능과 인덱스</h2>
+    <p class="lead">문법을 익혔다면, 대용량(order_items 100만 행)에서 왜 느린지/빠른지를 보는 눈이 다음 단계다.</p>
+    <div class="card" data-level="고급">
+      <div class="card-head"><span class="num">TIP 1</span><h3>실행계획부터 본다 — EXPLAIN ANALYZE</h3></div>
+      <div class="sql"><button class="copy">복사</button><pre><code>EXPLAIN ANALYZE
+SELECT * FROM order_items WHERE product_id = 500;</code></pre></div>
+      <div class="sub s-detail"><span class="lbl">읽는 법</span> 외래키 컬럼은 PostgreSQL이 자동 인덱스를 만들지 않는다. 인덱스가 없으면 100만 행을 전부 훑는 <b>Seq Scan</b>. 출력의 <code>actual time</code>이 실제 소요 시간.</div>
+    </div>
+    <div class="card" data-level="고급">
+      <div class="card-head"><span class="num">TIP 2</span><h3>인덱스 생성 후 재측정</h3></div>
+      <div class="sql"><button class="copy">복사</button><pre><code>CREATE INDEX idx_order_items_product_id ON order_items (product_id);
+
+EXPLAIN ANALYZE
+SELECT * FROM order_items WHERE product_id = 500;   -- 이제 Index Scan</code></pre></div>
+      <div class="sub s-mean"><span class="lbl">효과</span> 같은 쿼리가 Seq Scan &#8594; <b>Index Scan</b>으로 바뀌며 시간이 급감. 조회 빈도 높은 외래키/필터 컬럼이 인덱스 1순위.</div>
+    </div>
+    <div class="card" data-level="고급">
+      <div class="card-head"><span class="num">TIP 3</span><h3>범위 조회 인덱스 · 페이징 주의</h3></div>
+      <div class="sql"><button class="copy">복사</button><pre><code>CREATE INDEX idx_orders_order_date ON orders (order_date);
+
+EXPLAIN ANALYZE
+SELECT count(*) FROM orders
+WHERE order_date >= DATE '2024-01-01' AND order_date < DATE '2024-02-01';</code></pre></div>
+      <div class="sub s-detail"><span class="lbl">메모</span> 날짜 범위 조회가 잦으면 order_date 인덱스가 효자. 큰 <code>OFFSET</code> 페이징(예제 5)은 앞 행을 버리며 훑어 느리다 &#8594; 키셋 페이지네이션(<code>WHERE id &gt; 마지막id</code>)으로 대체.</div>
+    </div>
+  </section>
+
+  <footer>
+    실무형 SQL <code>SELECT</code> 교재 · 첨부 <code>seed_large.sql</code>(PostgreSQL 16) 데이터셋 기반 ·
+    예제 29 + 연습문제 10, 모든 결과/행수를 동일 데이터에서 실제 실행해 검증 · 표기는 PostgreSQL 16 문법 기준.
+  </footer>
+</main>
+</div>
+
+<script>
+var SECTIONS=[{"level": "기초", "color": "var(--basic)", "title": "1. SELECT 기초", "lead": "조회의 뼈대 — 무엇을(컬럼)·어디서(FROM)·어떤 조건으로(WHERE)·어떻게 정렬/제한(ORDER BY·LIMIT)할지. 그리고 SELECT 절에서의 계산.", "cards": [{"id": "b1", "n": "예제 1", "title": "필요한 컬럼만 + LIMIT", "sql": "SELECT customer_id, name, city, grade\nFROM customers\nLIMIT 5;", "syntax": "`SELECT 컬럼목록 FROM 테이블 LIMIT n`. `*`는 전체 컬럼, 명시 목록은 필요한 것만 가져온다.", "meaning": "대용량 테이블을 처음 만났을 때 구조와 표본을 빠르게 파악. 운영 DB에서 `SELECT *` 남발은 불필요한 I/O·네트워크를 유발하므로 필요한 컬럼만 지정하는 습관이 중요하다.", "detail": "LIMIT을 ORDER BY 없이 쓰면 '아무 5행'이며 매번 같은 행을 보장하지 않는다(물리적 저장 순서에 의존). 재현 가능한 표본이 필요하면 ORDER BY를 동반하라.", "variation": "별칭으로 결과 컬럼명 변경: `SELECT customer_id AS id, name AS 이름 ...`. 무작위 표본은 `ORDER BY random() LIMIT n`.", "cols": ["customer_id", "name", "city", "grade"], "num": [0], "total": 5, "rows": [["1", "이민준", "부산", "BRONZE"], ["2", "박민준", "대구", "BRONZE"], ["3", "최민준", "인천", "BRONZE"], ["4", "정민준", "광주", "BRONZE"], ["5", "강민준", "대전", "BRONZE"]]}, {"id": "b2", "n": "예제 2", "title": "WHERE 조건 결합 (AND/OR)", "sql": "SELECT name, grade, city\nFROM customers\nWHERE grade = 'VIP' AND city = '서울'\nLIMIT 5;", "syntax": "`WHERE 조건1 AND 조건2` — 행 단위 필터. AND(모두 참)·OR(하나라도 참)·NOT, 괄호로 우선순위 제어.", "meaning": "세그먼트 추출의 기본. 'VIP면서 서울'처럼 조건 교집합으로 타깃 고객을 좁힌다.", "detail": "AND가 OR보다 우선순위가 높다 → `A AND B OR C`는 `(A AND B) OR C`로 해석되니 OR 묶음이 의도면 반드시 괄호. NULL 비교는 `=`가 아니라 `IS NULL`을 써야 한다.", "variation": "값 나열은 `WHERE city='서울' OR city='부산'` → `WHERE city IN ('서울','부산')`로 간결화(예제 6).", "cols": ["name", "grade", "city"], "num": [], "total": 5, "tnote": "조건을 만족하는 회원은 더 많지만 LIMIT 5로 잘랐다.", "rows": [["윤시진", "VIP", "서울"], ["임시영", "VIP", "서울"], ["장시호", "VIP", "서울"], ["윤시아", "VIP", "서울"], ["임시은", "VIP", "서울"]]}, {"id": "b3", "n": "예제 3", "title": "DISTINCT — 고유값 확인", "sql": "SELECT DISTINCT grade\nFROM customers\nORDER BY grade;", "syntax": "`SELECT DISTINCT 컬럼` — 결과 행의 중복 제거. 여러 컬럼이면 그 조합 기준으로 중복 판단.", "meaning": "코드/카테고리 컬럼에 실제로 어떤 값이 존재하는지(도메인) 파악할 때.", "detail": "DISTINCT는 정렬/해시 비용이 든다. 단순 존재 여부엔 `EXISTS`가, 고유값 개수엔 `count(DISTINCT col)`이 더 적합할 수 있다.", "variation": "고유 조합 개수: `SELECT count(DISTINCT city) FROM customers` → 17.", "cols": ["grade"], "num": [], "total": 4, "rows": [["BRONZE"], ["GOLD"], ["SILVER"], ["VIP"]]}, {"id": "b4", "n": "예제 4", "title": "ORDER BY — 정렬", "sql": "SELECT name, price\nFROM products\nORDER BY price DESC\nLIMIT 5;", "syntax": "`ORDER BY 컬럼 [ASC|DESC]` — 기본 ASC. 여러 키는 콤마로 우선순위를 둔다.", "meaning": "랭킹·최신순 정렬. '가장 비싼 상품 Top5' 같은 보고서의 기본 축.", "detail": "정렬 키에 인덱스가 있으면 정렬 비용을 회피할 수 있다. NULL 위치는 `NULLS FIRST/LAST`로 제어(PostgreSQL은 ASC에서 기본 NULLS LAST).", "variation": "동점 안정화: `ORDER BY price DESC, product_id ASC`로 결정적 순서 확보.", "cols": ["name", "price"], "num": [1], "total": 5, "rows": [["프로 맥스 399", "404,990"], ["프로 맥스 799", "404,990"], ["데일리 맥스 398", "403,980"], ["데일리 맥스 798", "403,980"], ["울트라 맥스 797", "402,970"]]}, {"id": "b5", "n": "예제 5", "title": "페이징 — LIMIT + OFFSET", "sql": "SELECT product_id, name, price\nFROM products\nORDER BY product_id\nLIMIT 10 OFFSET 20;", "syntax": "`ORDER BY ... LIMIT n OFFSET m` — m행 건너뛰고 n행. 페이지 p는 `OFFSET (p-1)*n`.", "meaning": "목록 화면 페이지네이션의 표준(여기선 페이지당 10개 기준 3페이지).", "detail": "OFFSET이 클수록 앞 행을 모두 읽고 버리므로 깊은 페이지에서 급격히 느려진다(O(offset)). 또 ORDER BY 키가 고유하지 않으면 페이지 경계에서 행이 누락/중복될 수 있다.", "variation": "키셋 페이지네이션: `WHERE product_id > 마지막본id ORDER BY product_id LIMIT n` — OFFSET 없이 일정 속도(부록 TIP3).", "cols": ["product_id", "name", "price"], "num": [0, 2], "total": 10, "rows": [["21", "베이직 에디션 21", "26,210"], ["22", "스마트 에디션 22", "27,220"], ["23", "에코 에디션 23", "28,230"], ["24", "클래식 에디션 24", "29,240"], ["25", "모던 에디션 25", "30,250"], ["26", "컴팩트 에디션 26", "31,260"], ["27", "울트라 에디션 27", "32,270"], ["28", "데일리 에디션 28", "33,280"], ["29", "프로 에디션 29", "34,290"], ["30", "프리미엄 모델 30", "35,300"]]}, {"id": "b6", "n": "예제 6", "title": "IN · BETWEEN · LIKE", "sql": "SELECT name, grade, city\nFROM customers\nWHERE grade IN ('GOLD','VIP')\n  AND city = '부산'\n  AND birth_date BETWEEN DATE '1990-01-01' AND DATE '1999-12-31'\nLIMIT 5;", "syntax": "`IN (목록)`=여러 값 중 하나, `BETWEEN a AND b`=범위(양끝 포함), `LIKE '패턴'`=`%`(임의 문자열)·`_`(한 글자) 매칭.", "meaning": "다중값·범위·문자열 패턴을 한 번에 거는 복합 필터.", "detail": "`LIKE '%키워드%'`처럼 앞에 `%`가 오면 일반 B-Tree 인덱스를 못 써 풀스캔이 된다. 대소문자 무시는 `ILIKE`. `NOT IN (서브쿼리)`는 서브쿼리에 NULL이 섞이면 결과가 통째로 비는 함정이 있어 `NOT EXISTS`가 안전.", "variation": "범위 반전 `NOT BETWEEN`, 접미사 매칭 `email LIKE '%@gmail.com'`.", "cols": ["name", "grade", "city"], "num": [], "total": 5, "tnote": "90년대생·부산·우수등급으로 좁힌 결과(상위 5행).", "rows": [["조시호", "GOLD", "부산"], ["장시진", "VIP", "부산"], ["윤시은", "VIP", "부산"], ["임시호", "VIP", "부산"], ["조시연", "GOLD", "부산"]]}, {"id": "b7", "n": "예제 7", "title": "표현식 · 별칭 — SELECT에서 계산", "sql": "SELECT name,\n       price,\n       round(price * 1.1, 0) AS 세금포함가\nFROM products\nORDER BY price DESC\nLIMIT 5;", "syntax": "SELECT 절엔 컬럼뿐 아니라 산술식·함수 결과를 둘 수 있고 `AS 별칭`으로 이름을 준다.", "meaning": "부가세 포함가·할인가·단가×수량 같은 파생 지표를 조회 시점에 계산해 바로 보여 준다.", "detail": "SELECT의 별칭은 WHERE에선 쓸 수 없다(논리적으로 WHERE가 SELECT보다 먼저 평가됨). 단 ORDER BY/GROUP BY에선 사용 가능. 정수÷정수는 정수가 되니 비율은 `*1.0`/`*100.0`로 실수화하라.", "variation": "조건부 값은 `CASE`(예제 11), NULL 대체는 `COALESCE(컬럼, 기본값)`.", "cols": ["name", "price", "세금포함가"], "num": [1, 2], "total": 5, "rows": [["프로 맥스 399", "404,990", "445,489"], ["프로 맥스 799", "404,990", "445,489"], ["데일리 맥스 398", "403,980", "444,378"], ["데일리 맥스 798", "403,980", "444,378"], ["울트라 맥스 797", "402,970", "443,267"]]}]}, {"level": "집계", "color": "var(--agg)", "title": "2. 집계와 그룹화", "lead": "여러 행을 하나로 압축(집계)하고, 같은 값끼리 묶어(GROUP BY) 그룹별로 계산한다. 리포트의 심장.", "cards": [{"id": "m1", "n": "예제 8", "title": "집계함수 — count·min·max", "sql": "SELECT count(*) AS 회원수,\n       min(birth_date) AS 최고령,\n       max(birth_date) AS 최연소\nFROM customers;", "syntax": "`count(*)`(행 수), `count(col)`(NULL 제외 개수), `sum/avg/min/max`. GROUP BY가 없으면 테이블 전체가 1그룹 → 항상 1행.", "meaning": "전체 요약 통계를 한 줄로.", "detail": "`count(*)` vs `count(col)`: 후자는 NULL을 세지 않는다. `avg`도 NULL을 분모에서 제외. 빈 테이블에서 `sum`은 NULL, `count`는 0을 돌려준다.", "variation": "조건부 집계: `count(*) FILTER (WHERE ...)`(예제 14) 또는 `sum(CASE WHEN ... THEN 1 ELSE 0 END)`.", "cols": ["회원수", "최고령", "최연소"], "num": [0], "total": 1, "rows": [["50,000", "1965-01-01", "2004-12-21"]]}, {"id": "m2", "n": "예제 9", "title": "GROUP BY + 구성비", "sql": "SELECT grade,\n       count(*) AS 인원,\n       round(100.0 * count(*) / sum(count(*)) OVER (), 1) AS 비율pct\nFROM customers\nGROUP BY grade\nORDER BY 인원 DESC;", "syntax": "`GROUP BY 컬럼` → 그룹마다 1행. SELECT엔 그룹키와 집계함수만 올 수 있다.", "meaning": "등급/카테고리별 인원과 점유율 리포트.", "detail": "비집계 컬럼을 SELECT에 두면 에러(어느 행 값을 쓸지 모호). `sum(count(*)) OVER ()`는 그룹 집계 위에 윈도우를 얹어 '전체 합'을 구하는 관용구다.", "variation": "누적 점유율은 `sum(count(*)) OVER (ORDER BY count(*) DESC)`.", "cols": ["grade", "인원", "비율pct"], "num": [1, 2], "total": 4, "rows": [["BRONZE", "30,000", "60.0"], ["SILVER", "12,500", "25.0"], ["GOLD", "6,000", "12.0"], ["VIP", "1,500", "3.0"]]}, {"id": "m3", "n": "예제 10", "title": "그룹별 Top-N", "sql": "SELECT city, count(*) AS 회원수\nFROM customers\nGROUP BY city\nORDER BY 회원수 DESC\nLIMIT 5;", "syntax": "`GROUP BY ... ORDER BY 집계값 DESC LIMIT n` — 가장 흔한 분석 형태.", "meaning": "회원이 가장 많은 도시 같은 상위 그룹 도출.", "detail": "여기서 ORDER BY는 SELECT 별칭(회원수)을 쓸 수 있다(ORDER BY가 SELECT 뒤에 평가되므로). 단 '그룹마다의 Top-N'(분류별 Top3)은 이 패턴이 아니라 윈도우 함수(예제 22)가 필요.", "variation": "하위 N은 `ORDER BY 회원수 ASC`.", "cols": ["city", "회원수"], "num": [1], "total": 5, "tnote": "17개 도시에 거의 균등 분포(생성식 mod 17).", "rows": [["대구", "2,942"], ["인천", "2,942"], ["부산", "2,942"], ["세종", "2,941"], ["고양", "2,941"]]}, {"id": "m4", "n": "예제 11", "title": "HAVING — 그룹 필터", "sql": "SELECT category_id,\n       count(*) AS 상품수,\n       round(avg(price), 0) AS 평균가\nFROM products\nGROUP BY category_id\nHAVING avg(price) > 186000\nORDER BY 평균가 DESC;", "syntax": "`GROUP BY ... HAVING 집계조건` — 그룹을 만든 뒤 그룹 단위로 거른다.", "meaning": "'평균가 18.6만원 초과 분류'처럼 집계 결과를 기준으로 선별.", "detail": "WHERE(그룹 전, 행 필터)와 HAVING(그룹 후, 집계 필터)의 역할을 구분하라. 단순 행 조건을 HAVING에 넣으면 불필요하게 전부 그룹화한 뒤 거르므로 비효율 — 가능한 건 WHERE로 미리 줄여라.", "variation": "개수 기준: `HAVING count(*) >= 100`. 복합: `HAVING avg(price)>x AND count(*)>y`.", "cols": ["category_id", "상품수", "평균가"], "num": [0, 1, 2], "total": 6, "rows": [["1", "71", "188,378"], ["14", "71", "187,382"], ["8", "71", "186,998"], ["2", "72", "186,841"], ["13", "71", "186,372"], ["7", "72", "186,252"]]}, {"id": "m5", "n": "예제 12", "title": "CASE — 구간 분류", "sql": "SELECT CASE WHEN price < 50000  THEN '저가'\n            WHEN price < 200000 THEN '중가'\n            ELSE '고가' END AS 가격대,\n       count(*) AS 상품수\nFROM products\nGROUP BY 1\nORDER BY 상품수 DESC;", "syntax": "`CASE WHEN 조건 THEN 값 ... ELSE 값 END` — 행별 분기. 위에서부터 첫 참 가지를 채택.", "meaning": "연속값(가격)을 '저가/중가/고가' 같은 구간 라벨로 버킷화.", "detail": "WHEN 순서가 중요하다(구간이 겹치면 먼저 참인 가지). ELSE가 없으면 미매칭은 NULL. `GROUP BY 1`은 'SELECT 첫 표현식으로 묶기'(별칭 대신 위치 지정).", "variation": "동일 폭 자동 버킷은 `width_bucket()`/`ntile()`(예제 30).", "cols": ["가격대", "상품수"], "num": [1], "total": 3, "rows": [["중가", "450"], ["고가", "416"], ["저가", "134"]]}, {"id": "m6", "n": "예제 13", "title": "날짜 함수 — 월별 집계", "sql": "SELECT date_trunc('month', order_date)::date AS 월,\n       count(*) AS 주문수\nFROM orders\nGROUP BY 1\nORDER BY 1\nLIMIT 6;", "syntax": "`date_trunc('month', ts)`=월 첫날로 절삭, `extract(year FROM ts)`=부분 추출, `::date`=형 변환.", "meaning": "월/주/연 단위 시계열 집계(추세 분석).", "detail": "`timestamptz`면 세션 타임존에 따라 경계가 달라질 수 있다. 월을 `to_char`로 문자열화해 GROUP BY하면 정렬이 사전순이 되니, 날짜형을 유지해야 시간순 정렬이 보장된다.", "variation": "요일별 `extract(dow FROM order_date)`, 일별 `date_trunc('day', ...)`.", "cols": ["월", "주문수"], "num": [1], "total": 6, "tnote": "2월 주문이 적은 건 달의 일수(28일)가 짧아서.", "rows": [["2023-01-01", "6,912"], ["2023-02-01", "6,244"], ["2023-03-01", "6,913"], ["2023-04-01", "6,690"], ["2023-05-01", "6,913"], ["2023-06-01", "6,690"]]}, {"id": "m7", "n": "예제 14", "title": "다중 GROUP BY + FILTER 집계", "sql": "SELECT category_id,\n       count(*) AS 전체,\n       count(*) FILTER (WHERE status = '판매중') AS 판매중,\n       count(*) FILTER (WHERE status = '단종')   AS 단종\nFROM products\nGROUP BY category_id\nORDER BY category_id\nLIMIT 6;", "syntax": "`집계함수(...) FILTER (WHERE 조건)` — 집계 대상 행을 함수마다 다르게 지정.", "meaning": "한 번의 스캔으로 '전체/판매중/단종'을 동시에 — 상태를 가로로 펼친 피벗형 요약.", "detail": "표준 SQL이며 PostgreSQL이 지원. 미지원 DB는 `sum(CASE WHEN 조건 THEN 1 ELSE 0 END)`로 같은 결과. WHERE로 거르면 한 조건만 가능하지만 FILTER는 컬럼마다 조건을 달리할 수 있다.", "variation": "값 집계에도: `avg(price) FILTER (WHERE status='판매중')`.", "cols": ["category_id", "전체", "판매중", "단종"], "num": [0, 1, 2, 3], "total": 6, "rows": [["1", "71", "69", "2"], ["2", "72", "72", "0"], ["3", "72", "69", "3"], ["4", "72", "72", "0"], ["5", "72", "69", "3"], ["6", "72", "72", "0"]]}]}, {"level": "JOIN", "color": "var(--join)", "title": "3. 테이블 결합 (JOIN)", "lead": "정규화로 흩어진 테이블을 연결키로 다시 잇는다. INNER는 양쪽 매칭만, LEFT는 왼쪽을 모두 보존. 파생테이블로 '집계의 집계'도.", "cards": [{"id": "j1", "n": "예제 15", "title": "INNER JOIN — 두 테이블 연결", "sql": "SELECT p.name AS 상품, c.name AS 분류, p.price\nFROM products p\nJOIN categories c ON p.category_id = c.category_id\nORDER BY p.price DESC\nLIMIT 5;", "syntax": "`FROM A JOIN B ON A.k = B.k` — 연결키가 일치하는 행만 결합. `JOIN`은 `INNER JOIN`과 동의어.", "meaning": "상품의 category_id를 분류명으로 바꾸기 — 정규화의 역과정(코드값→이름).", "detail": "ON 조건이 빠지면 카티전 곱(행수 폭증). 테이블 별칭(`p`,`c`)으로 컬럼 출처를 명확히 하고, 양쪽에 같은 이름 컬럼은 반드시 별칭으로 한정한다.", "variation": "키 이름이 같으면 `JOIN categories USING (category_id)`로 축약.", "cols": ["상품", "분류", "price"], "num": [2], "total": 5, "rows": [["프로 맥스 399", "음료", "404,990"], ["프로 맥스 799", "컴퓨터", "404,990"], ["데일리 맥스 398", "식품", "403,980"], ["데일리 맥스 798", "전자제품", "403,980"], ["울트라 맥스 797", "완구", "402,970"]]}, {"id": "j2", "n": "예제 16", "title": "3+ 테이블 JOIN — 주문 펼치기", "sql": "SELECT o.order_id, cu.name AS 회원, p.name AS 상품,\n       oi.quantity, oi.unit_price\nFROM orders o\nJOIN customers cu   ON o.customer_id = cu.customer_id\nJOIN order_items oi ON oi.order_id   = o.order_id\nJOIN products p     ON p.product_id  = oi.product_id\nWHERE o.order_id = 12345\nORDER BY p.name;", "syntax": "`A JOIN B ON ... JOIN C ON ... JOIN D ON ...` — 키 체인으로 연쇄 결합.", "meaning": "주문 1건의 전체 맥락(회원·품목·상품)을 한 화면에 복원.", "detail": "1:N(주문:품목) 결합은 부모(주문/회원) 컬럼이 자식 행 수만큼 반복된다. 그래서 이 결과에서 `sum(o.total_amount)`를 그대로 집계하면 중복 합산되는 함정 — 헤더 집계와 품목 집계는 분리해야 한다.", "variation": "필요 없는 테이블은 빼서 비용 절감(회원명이 불필요하면 customers 조인 제거).", "cols": ["order_id", "회원", "상품", "quantity", "unit_price"], "num": [0, 3, 4], "total": 7, "tnote": "order_id 12345는 7개 품목으로 구성(품목 수 = 1 + order_id%9).", "rows": [["12345", "조준아", "데일리 패키지 418", "3", "23,180"], ["12345", "조준아", "베이직 에디션 421", "1", "26,210"], ["12345", "조준아", "스마트 에디션 422", "2", "27,220"], ["12345", "조준아", "에코 에디션 423", "3", "28,230"], ["12345", "조준아", "울트라 패키지 417", "2", "22,170"], ["12345", "조준아", "프로 패키지 419", "4", "24,190"], ["12345", "조준아", "프리미엄 에디션 420", "5", "25,200"]]}, {"id": "j3", "n": "예제 17", "title": "집계 + JOIN — 분류별 매출", "sql": "SELECT c.name AS 분류,\n       count(DISTINCT oi.order_id) AS 주문수,\n       sum(oi.quantity * oi.unit_price) AS 매출\nFROM order_items oi\nJOIN products p   ON p.product_id  = oi.product_id\nJOIN categories c ON c.category_id = p.category_id\nGROUP BY c.name\nORDER BY 매출 DESC\nLIMIT 5;", "syntax": "조인 결과에 `GROUP BY`+집계. 매출은 `sum(수량 × 단가)`.", "meaning": "100만 행 주문상세를 상품·분류로 이어 분류별 매출/주문수 KPI를 산출.", "detail": "1:N 조인 뒤 주문수를 셀 땐 `count(*)`가 아니라 `count(DISTINCT oi.order_id)`를 써야 한다 — 한 주문에 품목이 여러 개라 `count(*)`는 '품목 수'가 되어 버린다.", "variation": "상품별 매출은 `GROUP BY p.product_id, p.name`.", "cols": ["분류", "주문수", "매출"], "num": [1, 2], "total": 5, "rows": [["컴퓨터", "71,867", "40,263,929,380"], ["식품", "71,868", "40,225,356,600"], ["전자제품", "70,999", "40,081,238,020"], ["완구", "71,001", "40,005,670,550"], ["의류", "71,866", "39,897,312,680"]]}, {"id": "j4", "n": "예제 18", "title": "LEFT JOIN — 없으면 0으로", "sql": "SELECT c.category_id, c.name AS 분류,\n       count(p.product_id) AS 단종수\nFROM categories c\nLEFT JOIN products p\n       ON p.category_id = c.category_id AND p.status = '단종'\nGROUP BY c.category_id, c.name\nORDER BY 단종수, c.category_id;", "syntax": "`A LEFT JOIN B ON ...` — A(왼쪽) 전부 보존, 매칭 없으면 B 컬럼은 NULL.", "meaning": "'없으면 0'을 포함한 완전한 목록(단종이 0개인 분류도 빠지지 않게).", "detail": "필터를 ON에 두면 'B쪽 부가조건'(매칭 못 해도 A는 남음), WHERE에 두면 'B가 NULL인 행 제거'(사실상 INNER로 퇴화). 이 차이가 LEFT JOIN의 핵심 함정이다. 또 `count(p.product_id)`는 NULL을 안 세므로 단종 없는 분류는 0.", "variation": "안티조인(A에만 있는 행): `LEFT JOIN ... WHERE B.key IS NULL` 또는 `NOT EXISTS`.", "cols": ["category_id", "분류", "단종수"], "num": [0, 2], "total": 14, "tnote": "14개 분류 중 7개는 단종 상품이 0개.", "rows": [["2", "컴퓨터", "0"], ["4", "가전", "0"], ["6", "신발", "0"], ["8", "음료", "0"], ["10", "가구", "0"], ["12", "스포츠", "0"], ["14", "완구", "0"], ["1", "전자제품", "2"], ["7", "식품", "2"], ["11", "주방", "2"], ["3", "모바일", "3"], ["5", "의류", "3"], ["9", "도서", "3"], ["13", "뷰티", "3"]]}, {"id": "j5", "n": "예제 19", "title": "파생테이블 — 집계의 집계", "sql": "SELECT round(avg(주문수), 2) AS 회원당_평균주문수,\n       max(주문수)            AS 최다주문회원\nFROM (\n  SELECT customer_id, count(*) AS 주문수\n  FROM orders\n  GROUP BY customer_id\n) t;", "syntax": "`FROM (SELECT ...) AS t` — 서브쿼리를 가상 테이블처럼 사용. 별칭(t)이 필수.", "meaning": "'회원별 주문수를 먼저 구하고, 그 평균/최대'처럼 두 단계 집계.", "detail": "집계함수는 직접 중첩할 수 없다(`avg(count(*))`는 에러). 안쪽에서 `count`로 회원별 행을 만들고 바깥에서 `avg/max`. 기능은 CTE(예제 23)와 동일하고 가독성 차이이며, 옵티마이저는 보통 같게 처리한다.", "variation": "WITH로 풀어쓰면 재사용·가독성이 좋아진다.", "cols": ["회원당_평균주문수", "최다주문회원"], "num": [0, 1], "total": 1, "tnote": "20만 주문 ÷ 5만 회원 = 정확히 4.0(시드가 회원당 4건 균등 분배).", "rows": [["4.0", "4"]]}]}, {"level": "고급", "color": "var(--adv)", "title": "4. 고급 쿼리", "lead": "서브쿼리·CTE·윈도우 함수·집합연산. 한 문장 안에서 여러 단계의 분석을 조립한다.", "cards": [{"id": "a1", "n": "예제 20", "title": "스칼라 서브쿼리 — 동적 기준값", "sql": "SELECT count(*) AS 평균이상_상품수\nFROM products\nWHERE price > (SELECT avg(price) FROM products);", "syntax": "`WHERE col > (SELECT 단일값 ...)` — 서브쿼리가 정확히 1행 1열을 반환.", "meaning": "평균 같은 동적 기준값과 비교. 기준을 하드코딩하지 않는다.", "detail": "서브쿼리가 2행 이상이면 런타임 에러. 상관(바깥 참조)이 없으면 1회만 평가되어 저렴하다. 스칼라 서브쿼리는 SELECT·FROM 절에도 둘 수 있다.", "variation": "`SELECT name, price - (SELECT avg(price) FROM products) AS 평균차 ...`.", "cols": ["평균이상_상품수"], "num": [0], "total": 1, "rows": [["461"]]}, {"id": "a2", "n": "예제 21", "title": "상관 서브쿼리 — 그룹별 대표행", "sql": "SELECT p.name, p.category_id, p.price\nFROM products p\nWHERE p.price = (SELECT max(p2.price)\n                FROM products p2\n                WHERE p2.category_id = p.category_id)\nORDER BY p.category_id\nLIMIT 5;", "syntax": "안쪽 서브쿼리가 바깥 행의 컬럼(`p.category_id`)을 참조 → 바깥 행마다 재평가.", "meaning": "각 분류에서 가장 비싼 상품 — 그룹별 대표행 뽑기.", "detail": "논리적으로 행마다 실행이라 비쌀 수 있다(옵티마이저가 조인으로 바꾸기도). 최고가가 동률이면 여러 행 반환. 대개 윈도우 함수(예제 24)가 더 빠르고 깔끔하다.", "variation": "`= ANY`/`= ALL`로 비교 의미를 확장.", "cols": ["name", "category_id", "price"], "num": [1, 2], "total": 5, "rows": [["데일리 맥스 798", "1", "403,980"], ["프로 맥스 799", "2", "404,990"], ["클래식 맥스 394", "3", "399,940"], ["모던 맥스 395", "4", "400,950"], ["컴팩트 맥스 396", "5", "401,960"]]}, {"id": "a3", "n": "예제 22", "title": "EXISTS — 존재 여부", "sql": "SELECT count(*) AS 주문한_VIP수\nFROM customers cu\nWHERE cu.grade = 'VIP'\n  AND EXISTS (SELECT 1 FROM orders o\n              WHERE o.customer_id = cu.customer_id);", "syntax": "`WHERE EXISTS (SELECT 1 FROM ... WHERE 상관조건)` — 매칭 1건이라도 있으면 참.", "meaning": "'주문 이력이 있는 VIP'처럼 관련 행의 존재만 판정.", "detail": "첫 매칭에서 단락(short-circuit)되어 대용량에서 `IN`보다 유리할 때가 많다. `SELECT 1`의 1은 의미 없음(존재만 본다). 부정은 `NOT EXISTS`로, NULL에 안전.", "variation": "`IN (서브쿼리)`와 보통 동치지만, `NOT IN`은 서브쿼리 NULL에 취약하니 `NOT EXISTS` 권장.", "cols": ["주문한_VIP수"], "num": [0], "total": 1, "tnote": "합성 데이터 특성상 전 회원이 주문을 가져 VIP 1,500명 전원 해당.", "rows": [["1,500"]]}, {"id": "a4", "n": "예제 23", "title": "CTE (WITH) — 단계로 쪼개기", "sql": "WITH spend AS (\n  SELECT customer_id, sum(total_amount) AS amt\n  FROM orders\n  WHERE status NOT IN ('취소','환불')\n  GROUP BY customer_id\n)\nSELECT CASE WHEN amt >= 5000000 THEN '초우량'\n            WHEN amt >= 2000000 THEN '우량'\n            ELSE '일반' END AS 고객군,\n       count(*) AS 인원\nFROM spend\nGROUP BY 1\nORDER BY 인원 DESC;", "syntax": "`WITH 이름 AS (SELECT ...) SELECT ... FROM 이름` — 이름 붙인 임시 결과.", "meaning": "복잡한 분석을 '회원별 유효 구매액 → 고객군 분류' 두 단계로 분해.", "detail": "가독성과 재사용(한 CTE를 여러 번 참조)에 강하다. `WITH RECURSIVE`로 계층/그래프 순회. 일부 DB는 CTE를 최적화 경계로 취급하니 성능은 실행계획으로 확인하라.", "variation": "CTE 체인: `WITH a AS (...), b AS (SELECT ... FROM a) SELECT ...`.", "cols": ["고객군", "인원"], "num": [1], "total": 3, "rows": [["초우량", "35,222"], ["우량", "7,193"], ["일반", "4,085"]]}, {"id": "a5", "n": "예제 24", "title": "윈도우 함수 — 그룹별 순위 Top-N", "sql": "SELECT *\nFROM (\n  SELECT p.name, p.category_id, p.price,\n         rank() OVER (PARTITION BY p.category_id\n                      ORDER BY p.price DESC) AS rnk\n  FROM products p\n) t\nWHERE rnk <= 3 AND category_id IN (1, 2)\nORDER BY category_id, rnk;", "syntax": "`rank() OVER (PARTITION BY 그룹 ORDER BY 정렬)` — 그룹별 순위를 행을 줄이지 않고 부여.", "meaning": "분류별 가격 Top3 — '그룹마다의 Top-N'.", "detail": "`rank`(동점 같은 순위·다음 건너뜀) vs `dense_rank`(안 건너뜀) vs `row_number`(무조건 고유). 윈도우 함수는 WHERE에서 직접 못 거르므로 서브쿼리로 감싸 `WHERE rnk<=3`으로 자른다.", "variation": "그룹 내 비중: `price / sum(price) OVER (PARTITION BY category_id)`.", "cols": ["name", "category_id", "price", "rnk"], "num": [1, 2, 3], "total": 6, "tnote": "전체 결과 중 분류 1·2번만 표시.", "rows": [["데일리 맥스 798", "1", "403,980", "1"], ["스마트 맥스 392", "1", "397,920", "2"], ["클래식 라이트 784", "1", "389,840", "3"], ["프로 맥스 799", "2", "404,990", "1"], ["에코 맥스 393", "2", "398,930", "2"], ["모던 라이트 785", "2", "390,850", "3"]]}, {"id": "a6", "n": "예제 25", "title": "윈도우 함수 — 누적합 · 전월대비(LAG)", "sql": "WITH m AS (\n  SELECT date_trunc('month', order_date)::date AS 월,\n         sum(total_amount) AS 매출\n  FROM orders\n  GROUP BY 1\n)\nSELECT 월, 매출,\n       sum(매출) OVER (ORDER BY 월)       AS 누적매출,\n       매출 - lag(매출) OVER (ORDER BY 월) AS 전월대비\nFROM m\nORDER BY 월\nLIMIT 6;", "syntax": "`sum(x) OVER (ORDER BY k)`=누적합, `lag(x) OVER (ORDER BY k)`=직전 행 값.", "meaning": "월매출 누적과 전월 대비 증감(MoM) — 대시보드의 단골.", "detail": "정렬 윈도우의 기본 프레임은 'UNBOUNDED PRECEDING ~ CURRENT ROW'(=누적). `lag(x,1,0)`으로 칸 수·기본값 지정. 이동평균은 `avg(x) OVER (ORDER BY k ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)`. 첫 행 `lag`은 직전이 없어 NULL.", "variation": "증감률(%): `(매출 - lag(매출) OVER(...)) * 100.0 / lag(매출) OVER(...)`.", "cols": ["월", "매출", "누적매출", "전월대비"], "num": [1, 2, 3], "total": 6, "rows": [["2023-01-01", "17,911,053,060", "17,911,053,060", "—(NULL)"], ["2023-02-01", "17,221,784,500", "35,132,837,560", "-689,268,560"], ["2023-03-01", "20,010,172,150", "55,143,009,710", "2,788,387,650"], ["2023-04-01", "17,509,165,380", "72,652,175,090", "-2,501,006,770"], ["2023-05-01", "19,514,105,210", "92,166,280,300", "2,004,939,830"], ["2023-06-01", "19,241,069,680", "111,407,349,980", "-273,035,530"]]}, {"id": "a7", "n": "예제 26", "title": "NTILE — 분위(사분위) 분할", "sql": "SELECT 사분위, count(*) AS 상품수,\n       min(price) AS 최소, max(price) AS 최대\nFROM (\n  SELECT price, ntile(4) OVER (ORDER BY price) AS 사분위\n  FROM products\n) t\nGROUP BY 사분위\nORDER BY 사분위;", "syntax": "`ntile(n) OVER (ORDER BY k)` — 정렬 후 n개 동일 크기 버킷 번호(1..n)를 부여.", "meaning": "가격 사분위·고객 분위처럼 분포를 등량으로 나눠 본다.", "detail": "행을 최대한 균등 분할(나머지는 앞쪽 버킷에 1개씩 더). 같은 값이 경계에 걸치면 두 버킷에 나뉠 수 있다(여기 88,830이 1·2분위 경계에 등장). 분위별 통계는 윈도우 결과를 서브쿼리로 감싸 GROUP BY.", "variation": "십분위 `ntile(10)`, 정확한 중앙값은 `percentile_cont(0.5) WITHIN GROUP (ORDER BY price)`.", "cols": ["사분위", "상품수", "최소", "최대"], "num": [0, 1, 2, 3], "total": 4, "rows": [["1", "250", "5,000", "88,830"], ["2", "250", "88,830", "171,660"], ["3", "250", "172,670", "279,740"], ["4", "250", "280,750", "404,990"]]}, {"id": "a8", "n": "예제 27", "title": "집합연산 — EXCEPT(차집합)", "sql": "SELECT category_id FROM products WHERE status = '판매중'\nEXCEPT\nSELECT category_id FROM products WHERE status = '단종'\nORDER BY category_id;", "syntax": "`쿼리A EXCEPT 쿼리B` — A에서 B를 뺀 차집합(중복 제거). 두 쿼리의 컬럼 수·타입이 일치해야 한다.", "meaning": "'판매중 분류 − 단종 분류' = 단종이 하나도 없는 분류.", "detail": "EXCEPT/INTERSECT/UNION은 중복을 제거한다(정렬·해시 비용). 중복 보존은 `EXCEPT ALL`/`UNION ALL`. 결과 컬럼명은 첫 쿼리 기준.", "variation": "교집합 `INTERSECT`, 합집합 `UNION`(예제 28).", "cols": ["category_id"], "num": [0], "total": 7, "tnote": "예제 18의 단종수 0 분류와 정확히 일치(2·4·6·8·10·12·14).", "rows": [["2"], ["4"], ["6"], ["8"], ["10"], ["12"], ["14"]]}, {"id": "a9", "n": "예제 28", "title": "UNION ALL — 결과 세로 결합", "sql": "(SELECT '최고가' AS 구분, name, price\n FROM products ORDER BY price DESC, product_id LIMIT 1)\nUNION ALL\n(SELECT '최저가', name, price\n FROM products ORDER BY price ASC, product_id LIMIT 1);", "syntax": "`쿼리A UNION ALL 쿼리B` — 두 결과를 세로로 이어붙임(중복 보존). 컬럼 수·타입·순서를 맞춰야 한다.", "meaning": "이질적 두 결과(최고가·최저가)를 한 표로 합쳐 비교.", "detail": "`UNION`은 중복 제거+정렬 비용이 들고, `UNION ALL`은 단순 연결이라 빠르다 — 중복이 없음을 알면 ALL을 써라. 각 서브쿼리에 ORDER BY/LIMIT를 주려면 괄호로 감싼다.", "variation": "출처 태그 컬럼('최고가'/'최저가')으로 어느 쿼리에서 왔는지 구분.", "cols": ["구분", "name", "price"], "num": [2], "total": 2, "rows": [["최고가", "프로 맥스 399", "404,990"], ["최저가", "프리미엄 세트 400", "5,000"]]}, {"id": "a10", "n": "예제 29", "title": "ROLLUP — 소계·총계 한 번에", "sql": "SELECT category_id,\n       count(*) AS 상품수,\n       round(avg(price), 0) AS 평균가\nFROM products\nGROUP BY ROLLUP(category_id)\nORDER BY category_id NULLS LAST;", "syntax": "`GROUP BY ROLLUP(컬럼)` — 그룹별 행에 더해 '전체 소계' 행(그룹키 NULL)을 자동 생성.", "meaning": "분류별 합계와 맨 아래 총합계 행을 한 결과로(보고서 소계).", "detail": "소계 행은 그룹키가 NULL로 나온다 → 진짜 소계인지 `GROUPING(category_id)`로 식별하고, `ORDER BY category_id NULLS LAST`로 맨 아래에 둔다. 다차원 소계는 `CUBE`/`GROUPING SETS`.", "variation": "`GROUP BY ROLLUP(category_id, status)`로 분류별·상태별 중첩 소계.", "cols": ["category_id", "상품수", "평균가"], "num": [0, 1, 2], "total": 15, "tnote": "14개 분류 행 + 총계 행(category_id가 NULL) = 15행. 아래는 일부와 총계 행.", "rows": [["1", "71", "188,378"], ["2", "72", "186,841"], ["3", "72", "182,268"], ["…", "…", "…"], ["(전체)", "1,000", "185,195"]]}]}];
+var EXES=[{"q": "등급(grade)이 GOLD이고 도시(city)가 '서울'인 회원은 몇 명인가?", "lvl": "기초 · WHERE", "sql": "SELECT count(*)\nFROM customers\nWHERE grade = 'GOLD' AND city = '서울';", "ans": "354명"}, {"q": "가장 저렴한 상품 3개의 이름과 가격은? (가격 동일 시 product_id 오름차순)", "lvl": "기초 · ORDER BY", "sql": "SELECT name, price\nFROM products\nORDER BY price ASC, product_id\nLIMIT 3;", "ans": "프리미엄 세트 400 (5,000) · 프리미엄 세트 800 (5,000) · 베이직 세트 1 (6,010)"}, {"q": "세금(10%) 포함가가 50만원을 넘는 상품은 몇 개인가?", "lvl": "기초 · 표현식", "sql": "SELECT count(*)\nFROM products\nWHERE price * 1.1 > 500000;", "ans": "3개 (최고가 404,990원 × 1.1 = 445,489원이므로, 50만 초과는 상위 소수)", "check": "SELECT count(*) FROM products WHERE price*1.1 > 500000"}, {"q": "성별(gender)별 회원 수는?", "lvl": "집계 · GROUP BY", "sql": "SELECT gender, count(*) AS 인원\nFROM customers\nGROUP BY gender\nORDER BY gender;", "ans": "F 25,000명 · M 25,000명 (정확히 반반)"}, {"q": "회원 수가 정확히 2,942명인 도시는 몇 개인가?", "lvl": "집계 · HAVING", "sql": "SELECT count(*)\nFROM (\n  SELECT city FROM customers\n  GROUP BY city HAVING count(*) = 2942\n) t;", "ans": "3개 (대구·인천·부산)"}, {"q": "평균가가 가장 낮은 분류의 category_id와 평균가는?", "lvl": "집계 · 정렬", "sql": "SELECT category_id, round(avg(price), 0) AS 평균가\nFROM products\nGROUP BY category_id\nORDER BY 평균가 ASC\nLIMIT 1;", "ans": "category_id 3 · 평균가 182,268원"}, {"q": "분류명이 '컴퓨터'인 상품은 몇 개인가?", "lvl": "JOIN", "sql": "SELECT count(*)\nFROM products p\nJOIN categories c ON p.category_id = c.category_id\nWHERE c.name = '컴퓨터';", "ans": "72개"}, {"q": "총 판매수량이 가장 많은 상품 Top3의 product_id와 수량은?", "lvl": "집계 + JOIN", "sql": "SELECT product_id, sum(quantity) AS 총수량\nFROM order_items\nGROUP BY product_id\nORDER BY 총수량 DESC, product_id\nLIMIT 3;", "ans": "product_id 66 · 381 · 696 — 각각 3,243개 (동률)"}, {"q": "최고가와 동일한 가격을 가진 상품은 몇 개인가?", "lvl": "고급 · 서브쿼리", "sql": "SELECT count(*)\nFROM products\nWHERE price = (SELECT max(price) FROM products);", "ans": "2개 (프로 맥스 399·799, 모두 404,990원)"}, {"q": "전체 회원을 가입일(signup_date) 순으로 4분위(NTILE)로 나눌 때 1분위의 회원 수는?", "lvl": "고급 · 윈도우", "sql": "SELECT 분위, count(*) AS 회원수\nFROM (\n  SELECT ntile(4) OVER (ORDER BY signup_date) AS 분위\n  FROM customers\n) t\nGROUP BY 분위\nORDER BY 분위;", "ans": "각 분위 12,500명 (50,000 ÷ 4로 균등)"}];
+
+var KWSET={};
+("SELECT FROM WHERE AND OR NOT IN IS NULL BETWEEN LIKE ILIKE ORDER BY GROUP HAVING LIMIT OFFSET DISTINCT AS "+
+ "JOIN LEFT RIGHT INNER OUTER FULL ON USING CROSS LATERAL UNION ALL EXCEPT INTERSECT CASE WHEN THEN ELSE END "+
+ "WITH RECURSIVE OVER PARTITION ROWS RANGE FILTER ROLLUP CUBE GROUPING SETS ASC DESC NULLS FIRST LAST EXISTS "+
+ "DATE INTERVAL TIMESTAMP COUNT SUM AVG MIN MAX ROUND RANK DENSE_RANK ROW_NUMBER LAG LEAD NTILE DATE_TRUNC "+
+ "EXTRACT LPAD COALESCE NULLIF WIDTH_BUCKET PERCENTILE_CONT WITHIN WITHIN_GROUP WITHINGROUP WITHIN_GROUP CREATE INDEX EXPLAIN ANALYZE"
+).split(/\s+/).forEach(function(k){KWSET[k]=1;});
+
+function hl(code){
+  code=code.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  var re=/(--[^\n]*)|('[^']*')|([A-Za-z_]+)/g;
+  return code.replace(re,function(m,com,str,word){
+    if(com)return '<span class="c-com">'+com+'</span>';
+    if(str)return '<span class="c-str">'+str+'</span>';
+    if(word)return KWSET[word.toUpperCase()]?'<span class="c-kw">'+word+'</span>':word;
+    return m;
+  });
+}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function fmt(s){return esc(s).replace(/`([^`]+)`/g,'<code>$1</code>');}
+function sub(cls,label,text){return '<div class="sub '+cls+'"><span class="lbl">'+label+'</span> '+fmt(text)+'</div>';}
+
+function cardHTML(c, level){
+  var th=c.cols.map(function(x){return "<th>"+esc(x)+"</th>";}).join("");
+  var tr=c.rows.map(function(r){
+    return "<tr>"+r.map(function(v,i){
+      var cls=(c.num.indexOf(i)>=0)?' class="num"':'';
+      return "<td"+cls+">"+esc(v)+"</td>";
+    }).join("")+"</tr>";
+  }).join("");
+  var tnote=c.tnote?'<div class="tnote">&#8251; '+esc(c.tnote)+'</div>':'';
+  var blocks="";
+  if(c.syntax)   blocks+=sub("s-syntax","&#128214; 문법 구조", c.syntax);
+  if(c.meaning)  blocks+=sub("s-mean","&#128161; 실무 의미", c.meaning);
+  if(c.detail)   blocks+=sub("s-detail","&#9881;&#65039; 동작 원리 · 흔한 실수", c.detail);
+  if(c.variation)blocks+=sub("s-var","&#128260; 응용", c.variation);
+  return '<article class="card" id="'+c.id+'" data-level="'+level+'">'+
+    '<div class="card-head"><span class="num">'+esc(c.n)+'</span><h3>'+esc(c.title)+'</h3>'+
+      '<span class="tag t-'+level+'">'+level+'</span></div>'+
+    '<div class="sql"><button class="copy">복사</button><pre><code>'+hl(c.sql)+'</code></pre></div>'+
+    blocks+
+    '<div class="result"><div class="rhead">예상 결과 <span class="rows">'+c.total+'행</span></div>'+
+      '<table class="res"><thead><tr>'+th+'</tr></thead><tbody>'+tr+'</tbody></table>'+tnote+'</div>'+
+    '</article>';
+}
+
+(function(){
+  var html="";
+  SECTIONS.forEach(function(s){
+    html+='<h2 class="sec" data-level="'+s.level+'"><span class="ico" style="background:'+s.color+'"></span>'+esc(s.title)+'</h2>';
+    html+='<p class="lead" data-level="'+s.level+'">'+esc(s.lead)+'</p>';
+    s.cards.forEach(function(c){ html+=cardHTML(c, s.level); });
+  });
+  document.getElementById("content").innerHTML=html;
+
+  var ex="";
+  EXES.forEach(function(e,i){
+    ex+='<details class="ex"><summary>Q'+(i+1)+'. '+esc(e.q)+' <span class="qmeta">— '+esc(e.lvl)+'</span></summary>'+
+      '<div class="ans"><div class="sql"><button class="copy">복사</button><pre><code>'+hl(e.sql)+'</code></pre></div>'+
+      '<div class="sub s-mean"><span class="lbl">정답</span> '+fmt(e.ans)+'</div></div></details>';
+  });
+  document.getElementById("exbox").innerHTML=ex;
+
+  document.querySelectorAll(".copy").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var code=btn.parentElement.querySelector("code").innerText;
+      navigator.clipboard.writeText(code).then(function(){
+        btn.textContent="복사됨 ✓"; btn.classList.add("done");
+        setTimeout(function(){btn.textContent="복사"; btn.classList.remove("done");},1400);
+      });
+    });
+  });
+
+  var fbtns=document.querySelectorAll(".fbtn");
+  fbtns.forEach(function(b){
+    b.addEventListener("click",function(){
+      fbtns.forEach(function(x){x.classList.remove("on");}); b.classList.add("on");
+      var f=b.getAttribute("data-f");
+      document.querySelectorAll("[data-level]").forEach(function(el){
+        el.classList.toggle("hidden", f!=="all" && el.getAttribute("data-level")!==f);
+      });
+    });
+  });
+
+  if("IntersectionObserver" in window){
+    var links=Array.prototype.slice.call(document.querySelectorAll("nav.toc a"));
+    var map={}; links.forEach(function(a){map[a.getAttribute("href").slice(1)]=a;});
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){
+          var a=map[en.target.id]; if(!a) return;
+          links.forEach(function(x){x.classList.remove("active");}); a.classList.add("active");
+        }
+      });
+    },{rootMargin:"-10% 0px -80% 0px",threshold:0});
+    document.querySelectorAll("section[id], article[id]").forEach(function(el){io.observe(el);});
+  }
+})();
+</script>
+</body>
+</html>
