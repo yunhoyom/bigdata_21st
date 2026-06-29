@@ -178,3 +178,21 @@ select p."name", round(avg(oi.quantity), 2) as qty
 ;
 
 -- 64. 한 번도 팔리지 않은 상품 수
+select count(*)
+  from products p 
+  left join order_items oi 
+    on p.product_id = oi.product_id
+ where oi.product_id is null
+ 
+select count(*)
+  from products p 
+ where not exists (
+ 	select 1 from order_items oi where oi.product_id=p.product_id
+ )
+ 
+-- 65. 주문 1건당 평균 품목 수
+select avg(t.cnt) 
+  from (
+	select count(product_id) as cnt
+	  from order_items oi 
+	 group by oi.order_id) t
