@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10장: 코드 리뷰 받기·대응하기 - Claude Code 신입 개발자 온보딩 — 첫 기능부터 첫 PR까지</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+<style>
+
+/* 디자인 토큰 — 브랜드 변경 시 여기만 수정 */
+:root {
+  --primary: #1976D2;
+  --primary-light: #E3F2FD;
+  --accent: #FF6F00;
+  --success: #2E7D32;
+  --warning: #F57F17;
+  --danger: #C62828;
+  --bg: #FAFAFA;
+  --text: #212121;
+  --text-secondary: #616161;
+  --border: #E0E0E0;
+  --code-bg: #2d2d2d;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.8; font-size: 16px;
+}
+.container { max-width: 1400px; margin: 0 auto; }
+.main-content { max-width: 1000px; padding: 40px 48px; margin: 0 auto; }
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white; padding: 48px 40px; border-radius: 16px; margin-bottom: 40px;
+}
+.chapter-header .chapter-number {
+  font-size: 14px; opacity: 0.8; text-transform: uppercase; letter-spacing: 2px;
+}
+.chapter-header h1 { font-size: 32px; margin: 8px 0 16px; font-weight: 800; }
+.chapter-header .chapter-meta { font-size: 14px; opacity: 0.9; }
+
+/* 학습 목표 */
+.learning-objectives {
+  background: var(--primary-light); border-left: 4px solid var(--primary);
+  padding: 24px 28px; border-radius: 0 12px 12px 0; margin-bottom: 36px;
+}
+.learning-objectives h3 { color: var(--primary); font-size: 16px; margin-bottom: 12px; }
+.learning-objectives li { margin: 8px 0; padding-left: 8px; }
+
+/* 섹션 / 본문 기본 요소 */
+h1 { font-size: 28px; margin: 36px 0 16px; color: var(--text); }
+h2 {
+  font-size: 26px; color: var(--primary); margin: 48px 0 20px;
+  padding-bottom: 10px; border-bottom: 2px solid var(--primary-light);
+}
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+p { margin: 12px 0; }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin: 6px 0; }
+a { color: var(--primary); }
+img { max-width: 100%; height: auto; border-radius: 12px; }
+blockquote {
+  border-left: 4px solid var(--primary); background: var(--primary-light);
+  padding: 12px 20px; margin: 16px 0; border-radius: 0 12px 12px 0;
+}
+blockquote p:last-child { margin-bottom: 0; }
+/* 인라인 코드 (pre 밖) */
+:not(pre) > code {
+  background: #f0f0f0; padding: 2px 6px; border-radius: 4px;
+  font-size: 0.9em; color: var(--danger);
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+}
+
+/* 코드 블록 (.code-block-wrapper) */
+.code-block-wrapper {
+  margin: 24px 0; border-radius: 12px; overflow: hidden;
+  box-shadow: var(--card-shadow); border: 1px solid var(--border);
+}
+.code-block-header {
+  background: #1a1a2e; color: #a0a0b0; padding: 10px 20px; font-size: 13px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+.code-block-header .lang-badge {
+  background: var(--primary); color: white; padding: 2px 10px;
+  border-radius: 10px; font-size: 11px; font-weight: 700;
+}
+pre[class*="language-"] {
+  margin: 0 !important; border-radius: 0 !important;
+  font-size: 14px !important; line-height: 1.6 !important; padding: 20px !important;
+}
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important; padding-right: 8px !important;
+}
+.code-explanation {
+  background: #f8f9fa; border-top: 1px solid var(--border); padding: 16px 20px;
+  font-size: 14px; color: var(--text-secondary); line-height: 1.7;
+}
+.code-explanation strong { color: var(--text); }
+.code-explanation .explain-title {
+  display: inline-block; background: var(--accent); color: white; font-size: 11px;
+  font-weight: 700; padding: 2px 10px; border-radius: 10px; margin-bottom: 8px;
+}
+.code-output {
+  background: #1e1e1e; color: #4EC9B0; padding: 12px 20px;
+  font-family: monospace; font-size: 13px; border-top: 1px dashed #444;
+}
+.code-output::before {
+  content: "▶ 실행 결과"; display: block; color: #808080;
+  font-size: 11px; margin-bottom: 4px;
+}
+
+/* 특수 박스 (info-box 5종) */
+.info-box { padding: 14px 20px; border-radius: 12px; margin: 16px 0; border-left: 4px solid; }
+.info-box p:last-child, .info-box ul:last-child { margin-bottom: 0; }
+.info-box.tip { background: #E8F5E9; border-color: var(--success); }
+.info-box.warning { background: #FFF8E1; border-color: var(--warning); }
+.info-box.danger { background: #FFEBEE; border-color: var(--danger); }
+.info-box.beginner { background: #F3E5F5; border-color: #7B1FA2; }
+.info-box.best-practice { background: #E0F2F1; border-color: #00695C; }
+.info-box .box-header {
+  display: flex; align-items: center; margin-bottom: 12px;
+  padding-bottom: 10px; border-bottom: 1px solid rgba(123,31,162,0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* 표 */
+.api-reference h3, .library-section h3 {
+  background: var(--primary); color: white; padding: 12px 20px;
+  border-radius: 8px 8px 0 0; margin-bottom: 0; font-size: 16px;
+}
+hr.section-divider, hr {
+  border: none; border-top: 2px solid var(--border); margin: 36px 0;
+}
+.table-responsive { overflow-x: auto; margin: 16px 0; border-radius: 8px; box-shadow: var(--card-shadow); }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+table thead { background: #f5f5f5; }
+table th { padding: 12px 16px; text-align: left; font-weight: 700; border-bottom: 2px solid var(--border); }
+table td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table tr:hover { background: #fafafa; }
+table code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 13px; color: var(--danger); }
+.api-signature {
+  background: var(--code-bg); color: #e0e0e0; padding: 8px 16px; border-radius: 6px;
+  font-family: monospace; font-size: 13px; margin: 4px 0; overflow-x: auto;
+}
+
+/* 다이어그램 */
+.diagram-container { margin: 28px 0; text-align: center; }
+.diagram-container img { max-width: 100%; border-radius: 12px; box-shadow: var(--card-shadow); }
+.diagram-container img.screenshot { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.diagram-container .caption { margin-top: 10px; font-size: 13px; color: var(--text-secondary); font-style: italic; }
+.diagram-container .svg-diagram { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; }
+.diagram-container .svg-diagram svg { max-width: 100%; height: auto; }
+.missing-diagram { color: var(--danger); font-style: italic; padding: 1rem; background: #FFEBEE; border-radius: 8px; }
+.mermaid { margin: 24px auto; text-align: center; }
+
+/* 연습 문제 & 프로젝트 */
+.exercise-box { background: #FFF3E0; border: 2px solid var(--accent); border-radius: 12px; padding: 24px; margin: 28px 0; }
+.exercise-box h4 { color: var(--accent); }
+.project-box { background: linear-gradient(135deg, #E8EAF6, #C5CAE9); border-radius: 12px; padding: 28px; margin: 36px 0; }
+.project-box h3 { color: #283593; margin-bottom: 12px; }
+.project-readme { background: rgba(255,255,255,0.7); border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; }
+.project-file { margin: 12px 0; border-radius: 8px; overflow: hidden; }
+.project-file summary { background: rgba(255,255,255,0.7); padding: 12px 16px; cursor: pointer; font-weight: 600; border-radius: 8px; }
+.project-file pre { margin: 0; }
+
+/* FAQ */
+.faq-section details { border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; }
+.faq-section summary { padding: 14px 20px; cursor: pointer; font-weight: 600; color: var(--primary); background: #fafafa; border-radius: 8px; }
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+.faq-section .faq-answer { padding: 16px 20px; color: var(--text-secondary); }
+
+/* 챕터 네비게이션 */
+.chapter-nav { display: flex; justify-content: space-between; margin: 48px 0 24px; gap: 16px; }
+.chapter-nav a {
+  flex: 1; display: block; padding: 16px 20px; background: white;
+  border: 1px solid var(--border); border-radius: 12px; text-decoration: none;
+  color: var(--text); transition: all 0.2s;
+}
+.chapter-nav a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+
+/* ── 인덱스 페이지 ── */
+.index-container { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+.book-header { text-align: center; margin-bottom: 40px; }
+.book-header h1 { font-size: 36px; color: var(--primary); border: none; margin: 0 0 8px; }
+.book-header p { color: var(--text-secondary); font-size: 18px; }
+.chapter-list { list-style: none; margin: 0; }
+.chapter-list li { margin-bottom: 12px; }
+.chapter-list a {
+  display: flex; align-items: center; gap: 16px; padding: 16px 24px;
+  background: white; border: 1px solid var(--border); border-radius: 12px;
+  text-decoration: none; color: var(--text); transition: all 0.2s;
+}
+.chapter-list a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+.chapter-list .ch-num { font-weight: 700; color: var(--primary); min-width: 3.5rem; }
+.difficulty-group { margin-top: 32px; }
+.difficulty-group h2 { font-size: 18px; border: none; }
+.difficulty { display: inline-block; padding: 2px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; }
+.difficulty-입문 { background: #E8F5E9; color: #166534; }
+.difficulty-기초 { background: #E3F2FD; color: #1e40af; }
+.difficulty-중급 { background: #FFF8E1; color: #92400e; }
+.difficulty-실무 { background: #FCE7F3; color: #9d174d; }
+.difficulty-고급 { background: #FFEBEE; color: #991b1b; }
+
+/* 인쇄 / 반응형 */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper, table, .diagram-container, .project-box { break-inside: avoid; page-break-inside: avoid; }
+  h1, h2, h3, h4 { break-after: avoid; page-break-after: avoid; }
+}
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+  .chapter-nav { flex-direction: column; }
+}
+
+/* === templates/chapter_design_template.html (단일 디자인 소스, 우선 적용) === */
+
+/* ============================================================
+   디자인 토큰 (색상·그림자) — 브랜드 변경 시 여기만 수정
+   ============================================================ */
+:root {
+  --primary: #1976D2;        /* 주조색(파랑) — 헤더/제목/강조 */
+  --primary-light: #E3F2FD;  /* 주조색 옅은 톤 — 박스 배경/밑줄 */
+  --accent: #FF6F00;         /* 강조색(주황) — 해설 라벨/연습문제 */
+  --success: #2E7D32;        /* 성공(초록) */
+  --warning: #F57F17;        /* 경고(노랑) */
+  --danger: #C62828;         /* 위험(빨강) */
+  --bg: #FAFAFA;             /* 페이지 배경 */
+  --text: #212121;           /* 본문 텍스트 */
+  --text-secondary: #616161; /* 보조 텍스트 */
+  --border: #E0E0E0;         /* 테두리 */
+  --code-bg: #2d2d2d;        /* 코드 배경 */
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  font-size: 16px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   메인 콘텐츠
+   ============================================================ */
+.main-content {
+  flex: 1;
+  max-width: 1400px;
+  padding: 40px 48px;
+  margin: 0 auto;
+}
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white;
+  padding: 48px 40px;
+  border-radius: 16px;
+  margin-bottom: 40px;
+}
+
+.chapter-header .chapter-number {
+  font-size: 14px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.chapter-header h1 {
+  font-size: 32px;
+  margin: 8px 0 16px;
+  font-weight: 800;
+}
+
+.chapter-header .chapter-meta {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* 학습 목표 박스 */
+.learning-objectives {
+  background: var(--primary-light);
+  border-left: 4px solid var(--primary);
+  padding: 24px 28px;
+  border-radius: 0 12px 12px 0;
+  margin-bottom: 36px;
+}
+
+.learning-objectives h3 {
+  color: var(--primary);
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.learning-objectives li {
+  margin: 8px 0;
+  padding-left: 8px;
+  color: var(--text);
+}
+
+/* 섹션 */
+h2 {
+  font-size: 26px;
+  color: var(--primary);
+  margin: 48px 0 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--primary-light);
+}
+
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+
+p { margin: 12px 0; }
+
+/* ============================================================
+   코드 블록 - 박스형 + 줄번호 + 실무 설명
+   ============================================================ */
+.code-block-wrapper {
+  margin: 24px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+}
+
+.code-block-header {
+  background: #1a1a2e;
+  color: #a0a0b0;
+  padding: 10px 20px;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+
+.code-block-header .lang-badge {
+  background: var(--primary);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Prism 줄번호 스타일 오버라이드 */
+pre[class*="language-"] {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  padding: 20px !important;
+}
+
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important;
+  padding-right: 8px !important;
+}
+
+/* 코드 실무 설명 박스 */
+.code-explanation {
+  background: #f8f9fa;
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.code-explanation strong { color: var(--text); }
+
+.code-explanation .explain-title {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+/* 코드 실행 결과 */
+.code-output {
+  background: #1e1e1e;
+  color: #4EC9B0;
+  padding: 12px 20px;
+  font-family: monospace;
+  font-size: 13px;
+  border-top: 1px dashed #444;
+}
+
+.code-output::before {
+  content: "▶ 실행 결과";
+  display: block;
+  color: #808080;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+/* ============================================================
+   특수 박스 (팁, 주의, 베스트 프랙티스, 초보자 설명)
+   ============================================================ */
+.info-box {
+  padding: 14px 20px;
+  border-radius: 12px;
+  margin: 16px 0;
+  border-left: 4px solid;
+}
+.info-box p:last-child { margin-bottom: 0; }
+.info-box ul:last-child { margin-bottom: 0; }
+
+.info-box.tip {
+  background: #E8F5E9;
+  border-color: var(--success);
+}
+
+.info-box.warning {
+  background: #FFF8E1;
+  border-color: var(--warning);
+}
+
+.info-box.danger {
+  background: #FFEBEE;
+  border-color: var(--danger);
+}
+
+.info-box.beginner {
+  background: #F3E5F5;
+  border-color: #7B1FA2;
+}
+
+.info-box.best-practice {
+  background: #E0F2F1;
+  border-color: #00695C;
+}
+
+.info-box .box-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(123, 31, 162, 0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* ============================================================
+   라이브러리 & API 레퍼런스 테이블
+   ============================================================ */
+.api-reference, .library-section {
+  margin: 32px 0;
+}
+
+.api-reference h3, .library-section h3 {
+  background: var(--primary);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 0;
+  font-size: 16px;
+}
+
+hr.section-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 36px 0;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  margin: 16px 0;
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  font-size: 14px;
+}
+
+table thead {
+  background: #f5f5f5;
+}
+
+table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 2px solid var(--border);
+}
+
+table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+table tr:hover { background: #fafafa; }
+
+table code {
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+/* API 시그니처 행 */
+.api-signature {
+  background: var(--code-bg);
+  color: #e0e0e0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 13px;
+  margin: 4px 0;
+  overflow-x: auto;
+}
+
+/* ============================================================
+   이미지 / 다이어그램
+   ============================================================ */
+.diagram-container {
+  margin: 28px 0;
+  text-align: center;
+}
+
+.diagram-container img {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+}
+
+.diagram-container .caption {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* PPTX 원본 보존 뱃지 */
+.diagram-container .pptx-badge {
+  display: inline-block;
+  background: #FF6F00;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: normal;
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Mermaid 다이어그램 (인라인 렌더링) */
+.mermaid {
+  margin: 24px auto;
+  text-align: center;
+}
+
+/* ============================================================
+   연습 문제 & 프로젝트
+   ============================================================ */
+.exercise-box {
+  background: #FFF3E0;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 28px 0;
+}
+
+.exercise-box h4 { color: var(--accent); }
+
+.project-box {
+  background: linear-gradient(135deg, #E8EAF6, #C5CAE9);
+  border-radius: 12px;
+  padding: 28px;
+  margin: 36px 0;
+}
+
+/* ============================================================
+   FAQ
+   ============================================================ */
+.faq-section details {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 8px 0;
+  padding: 0;
+}
+
+.faq-section summary {
+  padding: 14px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primary);
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+
+.faq-section details .faq-answer {
+  padding: 16px 20px;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   챕터 네비게이션 (이전/다음)
+   ============================================================ */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  margin: 48px 0 24px;
+  gap: 16px;
+}
+
+.chapter-nav a {
+  flex: 1;
+  display: block;
+  padding: 16px 20px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.chapter-nav a:hover {
+  border-color: var(--primary);
+  box-shadow: var(--card-shadow);
+}
+
+/* ============================================================
+   인쇄용 스타일
+   ============================================================ */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper { break-inside: avoid; }
+}
+
+/* ============================================================
+   반응형 - 모바일
+   ============================================================ */
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+}
+
+</style>
+</head>
+<body>
+<div class="container">
+<main class="main-content">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 10</div>
+    <h1>코드 리뷰 받기·대응하기</h1>
+    <div class="chapter-meta"><span class="difficulty difficulty-실무">실무</span></div>
+  </div>
+
+<h1 id="_1">코드 리뷰 받기·대응하기</h1>
+<div class="learning-objectives">
+<h2 id="_2">이 챕터에서 배우는 것</h2>
+<ul>
+<li>PR을 올리기 전 <code>/code-review</code>로 변경(diff)을 점검해, 지적된 개선점 1개 이상을 미리 반영할 수 있습니다.</li>
+<li>자동 코드 리뷰가 PR에 단 인라인 코멘트를 읽고, 그 지적이 버그·보안·엣지·회귀 중 무엇을 가리키는지 해석할 수 있습니다.</li>
+<li>PR 열림·매 푸시·요청('@claude review') 세 가지 리뷰 트리거를 구분해 필요한 시점에 리뷰를 실행할 수 있습니다.</li>
+<li>리뷰 코멘트마다 타당한 지적은 변경으로 반영하고 부적절한 지적에는 근거 있는 반론을 달아 처리할 수 있습니다.</li>
+</ul>
+</div>
+<h2 id="pr">도입: PR을 올리면 리뷰가 따라온다</h2>
+<p>앞 단원(u8)에서 우리는 작은 논리 단위로 커밋하고, 변경 요약·근거·테스트 결과를 담은 첫 PR을 올렸습니다. 그런데 PR을 올리는 것은 끝이 아니라 <strong>대화의 시작</strong>입니다. PR은 "이 변경을 메인에 합쳐 주세요"라는 요청이고, 팀은 그 요청에 <strong>코드 리뷰(code review)</strong>로 응답합니다. 리뷰어가 변경을 읽고, 질문하고, 개선을 제안하고, 마침내 승인하면 비로소 메인에 합쳐집니다.</p>
+<p>신입에게 코드 리뷰는 양날의 경험입니다. 한편으로는 <strong>가장 많이 배우는 자리</strong>입니다. 시니어가 "여기는 이렇게 하는 게 우리 팀 관례예요", "이 경우 입력이 비어 있으면 어떻게 되죠?"라고 짚어 줄 때, 책에 없는 실무 감각이 쌓입니다. 다른 한편으로는 <strong>가장 긴장되는 자리</strong>이기도 합니다. 내 코드에 빨간 줄이 그어지는 것을 비난으로 받아들이면, 방어적으로 굳어 버리기 쉽습니다.</p>
+<p>이 챕터의 목표는 두 가지입니다. 첫째, <strong>리뷰를 받기 전에 스스로 점검</strong>해서 뻔한 지적을 미리 줄이는 법입니다. Claude Code(클로드 코드)의 <code>/code-review</code>로 올리기 전에 셀프 점검을 하면, 리뷰어는 더 중요한 설계 논의에 집중할 수 있습니다. 둘째, <strong>리뷰 피드백에 성숙하게 대응</strong>하는 법입니다. 타당한 지적은 침착하게 반영하고, 동의하기 어려운 지적에는 근거를 들어 정중히 반론하는 것. 신입의 진짜 역량은 코드 그 자체보다 이 <strong>대응의 태도</strong>에서 드러납니다.</p>
+<div class="info-box beginner">
+<h3 id="_3">선수 개념 상기</h3>
+<p>이 챕터는 <strong>git 워크플로: 커밋과 첫 PR(c09)</strong>을 바로 앞 선수로 합니다. 리뷰는 "올린 PR"이 있어야 시작되므로, ch_09에서 배운 작업 브랜치·논리 단위 커밋·PR 본문 작성이 전제입니다. 또 리뷰 지적을 반영해 코드를 고칠 때는 <strong>실행·테스트로 검증하기(c07)</strong>가 다시 등장합니다. 지적을 반영한 뒤 "고쳤습니다"가 아니라 "고치고 테스트가 여전히 통과합니다"를 보여야 리뷰어가 안심합니다. 멀게는 <strong>디버깅(c11, 다음 단원)</strong>과도 이어지는데, 리뷰가 짚은 버그를 재현하고 최소 수정하는 과정이 곧 디버깅이기 때문입니다.</p>
+</div>
+<h2 id="code-review">/code-review: 터미널에서 올리기 전 자가 점검</h2>
+<p>리뷰의 첫 단계는 사실 <strong>남이 아니라 내가</strong> 하는 것입니다. PR을 올리기 전에 내 변경을 한 번 더 점검하면, 사소한 실수로 리뷰 왕복을 낭비하지 않습니다.</p>
+<h3 id="code-review_1">정의: /code-review</h3>
+<div class="info-box beginner">
+<p><strong><code>/code-review</code>(코드 리뷰 커맨드)</strong>는 Claude Code에 기본 내장된(번들) 슬래시 커맨드로, GitHub 앱을 설치하지 않고도 <strong>터미널에서 현재 변경(diff)을 리뷰</strong>해 정확성 버그와 재사용·단순화·효율 개선점을 짚어 주는 자가 점검 도구입니다.</p>
+</div>
+<p><code>/code-review</code>의 동작을 정확히 알아 둡니다.</p>
+<ul>
+<li><strong>무엇을 보나</strong>: 기본적으로 현재 브랜치가 upstream(보통 <code>main</code>)보다 앞선 커밋들 + 아직 커밋하지 않은 워킹 트리의 변경을 함께 봅니다. 곧 "이 PR이 될 변경 전체"를 점검합니다.</li>
+<li><strong>무엇을 짚나</strong>: 정확성 버그(correctness bug)와 함께, 중복 제거(reuse)·단순화(simplification)·효율(efficiency) 같은 개선점을 보고합니다. 단순한 스타일 지적을 넘어 "이 로직이 빈 입력에서 깨질 수 있다" 같은 실질적 문제를 잡습니다.</li>
+<li><strong>고치기까지</strong>: <code>--fix</code> 옵션을 붙이면 발견한 문제를 <strong>바로 반영</strong>하도록 할 수 있습니다. 다만 신입에게는 먼저 점검 결과를 읽고 <strong>무엇을 받아들일지 판단한 뒤</strong> 고치는 것을 권합니다.</li>
+</ul>
+<p>비슷한 이름의 형제 명령도 함께 기억해 둡니다. <strong><code>/review</code></strong>는 같은 읽기 전용 리뷰를 <strong>GitHub의 특정 PR</strong>에 대해 수행하고, <strong><code>/security-review</code></strong>는 보안에 집중한 더 깊은 점검입니다(이 챕터 뒤에서 다룹니다). 이 셋은 모두 실제 내장 명령입니다.</p>
+<div class="info-box warning">
+<h3 id="code-review-github"><code>/code-review</code>(내장)와 자동 코드 리뷰(GitHub 연동)를 구분하기</h3>
+<p>두 가지를 헷갈리지 마십시오. <code>/code-review</code>는 <strong>내 터미널에서, 올리기 전에, 내가 직접</strong> 돌리는 자가 점검입니다. 반면 다음 절에서 다룰 <strong>자동 코드 리뷰</strong>는 조직이 GitHub에 <strong>Code Review를 활성화</strong>했을 때, PR이 올라오면 자동으로 돌아 <strong>PR 화면에 인라인 코멘트</strong>를 다는 별도 기능입니다. 전자는 사전 점검, 후자는 사후 자동 리뷰입니다. 좋은 신입은 둘을 함께 씁니다. 올리기 전 <code>/code-review</code>로 거르고, 올린 뒤 자동 리뷰와 사람 리뷰로 한 번 더 거릅니다.</p>
+</div>
+<h2 id="pr_1">동작 원리: 자동 리뷰가 PR에 인라인 코멘트를 다는 흐름</h2>
+<div class="diagram-container">
+<div class="svg-diagram" role="img" aria-label="PR 열림·푸시·요청 트리거로 시작해 변경을 분석하고 발견을 중복 제거·심각도순 정렬한 뒤 해당 코드 줄에 인라인 코멘트를 달고, 신입이 반영·재요청·반론으로 대응해 머지로 이어지는 흐름도">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 400" width="820" height="400"
+     font-family="'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#78909c">
+      <polygon points="0 0,10 3.5,0 7"/>
+    </marker>
+    <marker id="arr-b" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#1565c0">
+      <polygon points="0 0,10 3.5,0 7"/>
+    </marker>
+  </defs>
+  <rect width="820" height="400" fill="#ffffff"/>
+
+  <!-- 제목 -->
+  <text x="410" y="36" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a1a2e">자동 리뷰가 PR에 인라인 코멘트를 다는 흐름</text>
+
+  <!-- Step 0: /code-review 자가 점검 (왼쪽 상단, 선행 단계) -->
+  <rect x="30" y="75" width="155" height="75" rx="8" fill="#e1f5fe" stroke="#90caf9" stroke-width="2"/>
+  <text x="107" y="103" text-anchor="middle" font-size="13" font-weight="bold" fill="#37474f">/code-review</text>
+  <text x="107" y="121" text-anchor="middle" font-size="11" fill="#546e7a">올리기 전</text>
+  <text x="107" y="137" text-anchor="middle" font-size="11" fill="#546e7a">자가 점검</text>
+
+  <!-- Arrow 0→1 (아래로) -->
+  <line x1="107" y1="150" x2="107" y2="190" stroke="#90caf9" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <text x="120" y="174" font-size="10" fill="#546e7a">선택</text>
+
+  <!-- Step 1: PR 제출 -->
+  <rect x="30" y="192" width="155" height="75" rx="8" fill="#fff3e0" stroke="#ffcc80" stroke-width="2"/>
+  <text x="107" y="220" text-anchor="middle" font-size="13" font-weight="bold" fill="#37474f">PR</text>
+  <text x="107" y="238" text-anchor="middle" font-size="13" font-weight="bold" fill="#37474f">제출</text>
+  <text x="107" y="256" text-anchor="middle" font-size="11" fill="#546e7a">gh pr create</text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="185" y1="229" x2="228" y2="229" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Step 2: 자동 리뷰 트리거 -->
+  <rect x="230" y="192" width="175" height="75" rx="8" fill="#f3e5f5" stroke="#ce93d8" stroke-width="2"/>
+  <text x="317" y="217" text-anchor="middle" font-size="13" font-weight="bold" fill="#37474f">자동 리뷰</text>
+  <text x="317" y="235" text-anchor="middle" font-size="11" fill="#546e7a">트리거: PR 열림</text>
+  <text x="317" y="251" text-anchor="middle" font-size="11" fill="#546e7a">·푸시·@claude review</text>
+
+  <!-- Arrow 2→3 -->
+  <line x1="405" y1="229" x2="448" y2="229" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Step 3: 인라인 코멘트 -->
+  <rect x="450" y="192" width="155" height="75" rx="8" fill="#fce4ec" stroke="#ef9a9a" stroke-width="2"/>
+  <text x="527" y="217" text-anchor="middle" font-size="13" font-weight="bold" fill="#37474f">인라인</text>
+  <text x="527" y="235" text-anchor="middle" font-size="13" font-weight="bold" fill="#37474f">코멘트</text>
+  <text x="527" y="253" text-anchor="middle" font-size="10" fill="#546e7a">버그·보안·엣지 케이스</text>
+
+  <!-- Arrow 3→4 -->
+  <line x1="605" y1="229" x2="648" y2="229" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Step 4: 대응 -->
+  <rect x="650" y="192" width="140" height="75" rx="8" fill="#fff3e0" stroke="#ffcc80" stroke-width="2"/>
+  <text x="720" y="217" text-anchor="middle" font-size="13" font-weight="bold" fill="#37474f">대응</text>
+  <text x="720" y="235" text-anchor="middle" font-size="11" fill="#546e7a">반영 · 재요청</text>
+  <text x="720" y="253" text-anchor="middle" font-size="11" fill="#546e7a">근거 있는 반론</text>
+
+  <!-- 대응 후 → 머지 (아래) -->
+  <line x1="720" y1="267" x2="720" y2="310" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Step 5: 머지 -->
+  <rect x="650" y="312" width="140" height="55" rx="8" fill="#e8f5e9" stroke="#a5d6a7" stroke-width="2"/>
+  <text x="720" y="344" text-anchor="middle" font-size="14" font-weight="bold" fill="#1b5e20">머지</text>
+
+  <!-- 리뷰 트리거 상세 설명 박스 -->
+  <rect x="230" y="295" width="175" height="70" rx="6" fill="#f9f9f9" stroke="#bdbdbd" stroke-width="1.5"/>
+  <text x="317" y="316" text-anchor="middle" font-size="11" font-weight="bold" fill="#37474f">리뷰 트리거</text>
+  <text x="317" y="334" text-anchor="middle" font-size="11" fill="#546e7a">• PR 열릴 때 자동</text>
+  <text x="317" y="352" text-anchor="middle" font-size="11" fill="#546e7a">• 매 푸시마다</text>
+
+  <!-- 점선 연결: 리뷰트리거 상세 → Step2 -->
+  <line x1="317" y1="267" x2="317" y2="294" stroke="#bdbdbd" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+  <!-- 하단 주석 -->
+  <text x="410" y="383" text-anchor="middle" font-size="11" fill="#78909c">피드백은 방어적으로 받지 않고 근거를 이해한 뒤 반영 또는 반론한다</text>
+</svg>
+
+</div>
+</div>
+
+<p>조직이 Claude Code의 <strong>Code Review(코드 리뷰 서비스)</strong>를 활성화하면, PR이 올라올 때 전문 에이전트가 변경을 분석해 <strong>문제를 발견한 바로 그 코드 줄에 인라인 코멘트(inline comment)</strong>로 남깁니다. 이 자동 리뷰가 일하는 흐름을 단계로 풀면 다음과 같습니다.</p>
+<ol>
+<li>
+<p><strong>트리거(trigger)</strong> — 설정된 조건이 충족되면 리뷰가 시작됩니다. 보통은 PR이 열리는 순간입니다(자세한 트리거 방식은 다음 절에서 다룹니다).</p>
+</li>
+<li>
+<p><strong>분석(analyze)</strong> — 에이전트가 PR의 변경(diff)과 주변 코드를 읽어, 논리 오류·보안 취약점·엣지 케이스·미묘한 회귀(regression, 기존 동작이 깨지는 것)를 찾습니다. 단순히 줄 단위로 보는 것이 아니라 변경의 <strong>맥락</strong>을 함께 봅니다.</p>
+</li>
+<li>
+<p><strong>정리(dedupe·rank)</strong> — 발견한 문제들을 <strong>중복 제거(dedupe)</strong>하고 <strong>심각도순으로 정렬(rank)</strong>합니다. 같은 문제를 여러 번 반복해 코멘트하지 않고, 중요한 것이 위로 오게 합니다. 신입이 "코멘트 폭탄"에 압도되지 않도록 걸러 주는 단계입니다.</p>
+</li>
+<li>
+<p><strong>인라인 코멘트(comment)</strong> — 각 문제를 <strong>해당 코드 줄에 직접</strong> 코멘트로 답니다. "이 줄에서 <code>task_id</code>가 없으면 KeyError가 납니다" 같은 식으로, 어느 코드의 무엇이 문제인지가 한눈에 연결됩니다.</p>
+</li>
+<li>
+<p><strong>대응(respond)</strong> — 신입은 각 코멘트를 읽고 대응합니다. 타당하면 코드를 고쳐 다시 푸시하고, 동의하기 어려우면 코멘트에 답글로 근거를 답니다. 이 왕복이 끝나고 사람 리뷰어가 승인하면 머지(merge)됩니다.</p>
+</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>단계</th>
+<th>무엇이 일어나나</th>
+<th>신입이 할 일</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>트리거</td>
+<td>PR 열림·푸시·요청으로 리뷰 시작</td>
+<td>트리거 방식을 알고 기다림</td>
+</tr>
+<tr>
+<td>분석</td>
+<td>버그·보안·엣지·회귀 탐색</td>
+<td>(기다림)</td>
+</tr>
+<tr>
+<td>정리</td>
+<td>중복 제거·심각도 정렬</td>
+<td>(기다림)</td>
+</tr>
+<tr>
+<td>인라인 코멘트</td>
+<td>문제 줄에 코멘트 부착</td>
+<td>코멘트를 읽고 이해</td>
+</tr>
+<tr>
+<td>대응</td>
+<td>반영·재요청·반론</td>
+<td>판단해 대응, 테스트로 검증</td>
+</tr>
+</tbody>
+</table>
+<div class="info-box tip">
+<h3 id="_4">자동 리뷰는 사람 리뷰를 대체하지 않는다</h3>
+<p>자동 코드 리뷰는 <strong>뻔한 버그·보안 문제·엣지 케이스를 빠르게 걸러</strong> 사람 리뷰어의 부담을 덜어 줍니다. 하지만 "이 기능이 우리 제품 방향에 맞는가", "이 설계가 6개월 뒤에도 유지보수하기 좋은가" 같은 <strong>판단</strong>은 여전히 사람의 몫입니다. 자동 리뷰를 "1차 필터"로, 사람 리뷰를 "최종 판단"으로 보는 것이 건강한 관점입니다.</p>
+</div>
+<h2 id="worked-example-code-review">worked example: /code-review로 점검해 지적 미리 반영</h2>
+<p>ch_09에서 만든 "작업 완료 처리 엔드포인트" 브랜치를 PR로 올리기 전에 <code>/code-review</code>로 점검해 보겠습니다. 목표는 "리뷰어가 짚기 전에 내가 먼저 발견해 고치기"입니다.</p>
+<p>리뷰 대상 코드는 다음과 같다고 합시다. 언뜻 동작하지만 숨은 문제가 있습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># routers/tasks.py (점검 대상)
+@router.patch(&quot;/tasks/{task_id}/complete&quot;)
+def complete_task(task_id: int):
+    task = TASKS[task_id]          # 없는 id 면 KeyError
+    task[&quot;done&quot;] = True
+    return task
+</code></pre></div>
+<p>이제 터미널에서 자가 점검을 돌립니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; /code-review
+
+(Claude Code가 현재 브랜치의 변경을 읽고 리뷰 결과를 보고)
+
+코드 리뷰 결과 — feature/task-complete (2건)
+
+[높음] 정확성 — routers/tasks.py:3
+  TASKS[task_id] 는 없는 task_id 에 대해 KeyError 를 던져 500 오류가
+  납니다. 존재하지 않는 작업에는 404 를 반환해야 합니다.
+  제안: task = TASKS.get(task_id) 후 None 이면 HTTPException(404).
+
+[낮음] 견고성 — routers/tasks.py:4
+  이미 done=True 인 작업도 그대로 덮어씁니다. 동작엔 문제없지만,
+  중복 완료 요청을 멱등(idempotent)하게 처리한다는 점을 테스트로
+  명시해 두면 좋습니다.
+</code></pre></div>
+<div class="code-explanation">
+<ul>
+<li><code>/code-review</code>는 인자 없이 부르면 <strong>현재 브랜치의 변경 전체</strong>를 점검합니다. PR을 올리기 전에 돌렸다는 점이 핵심입니다. 리뷰어가 아니라 내가 먼저 봅니다.</li>
+<li>결과가 <strong>심각도(<code>[높음]</code>·<code>[낮음]</code>)와 파일:줄</strong>로 정리되어 있습니다. <code>routers/tasks.py:3</code>처럼 위치가 명확해 어디를 고칠지 바로 압니다.</li>
+<li><code>[높음]</code> 지적은 <strong>실제 버그</strong>입니다. 없는 <code>task_id</code>로 요청하면 <code>KeyError</code>가 나 500 오류가 됩니다. 이런 건 리뷰어가 짚기 전에 반드시 고쳐야 할 정확성 문제입니다.</li>
+<li><code>[낮음]</code> 지적은 버그는 아니지만 <strong>견고성</strong> 제안입니다. 모든 지적을 같은 무게로 받지 말고, 심각도에 따라 우선순위를 두는 것이 좋습니다.</li>
+</ul>
+</div>
+<p>이제 높음 지적을 반영합니다. <code>/code-review --fix</code>로 자동 반영할 수도 있지만, 여기서는 무엇을 고칠지 명시해 직접 고치게 합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; [높음] 지적을 반영해 줘. 없는 task_id 면 404 를 반환하도록
+  HTTPException 으로 고치고, 그 경우를 검증하는 테스트도 추가해 줘.
+</code></pre></div>
+<p>반영 후 코드는 다음과 같이 바뀝니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># routers/tasks.py (반영 후)
+from fastapi import HTTPException
+
+@router.patch(&quot;/tasks/{task_id}/complete&quot;)
+def complete_task(task_id: int):
+    task = TASKS.get(task_id)
+    if task is None:
+        raise HTTPException(status_code=404, detail=&quot;작업을 찾을 수 없습니다&quot;)
+    task[&quot;done&quot;] = True
+    return task
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ pytest tests/test_tasks_complete.py -q
+...                                                       [100%]
+3 passed in 0.20s
+</code></pre></div>
+<div class="code-explanation">
+<ul>
+<li><code>TASKS[task_id]</code>를 <code>TASKS.get(task_id)</code>로 바꿔 없는 키에 <code>None</code>을 받게 하고, <code>None</code>이면 <code>HTTPException(404)</code>로 명확한 응답을 줍니다. 500(서버 오류)이 아니라 404(찾을 수 없음)는 "클라이언트가 없는 자원을 요청했다"는 정확한 의미입니다.</li>
+<li>고친 뒤 <strong>반드시 테스트를 돌려</strong> 통과를 확인했습니다(c07). "고쳤다"가 아니라 "고치고 3개 테스트가 통과한다"가 진짜 완료입니다.</li>
+<li>이렇게 올리기 전에 정확성 버그를 스스로 잡으면, 실제 PR 리뷰는 더 가벼워지고 리뷰어는 더 중요한 부분에 집중합니다.</li>
+</ul>
+</div>
+<h2 id="pr-claude-review">리뷰 트리거: PR 열림·매 푸시·요청('@claude review')</h2>
+<p>자동 코드 리뷰가 <strong>언제</strong> 돌지는 저장소별로 설정합니다. 조직이 Code Review를 활성화하면, 저장소마다 "리뷰 동작(Review Behavior)"을 골라 트리거 방식을 정합니다. 세 가지 방식이 있습니다.</p>
+<table>
+<thead>
+<tr>
+<th>트리거</th>
+<th>언제 리뷰가 도나</th>
+<th>어울리는 상황</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PR 생성 후 1회</td>
+<td>PR이 열리거나 'Ready for review'가 될 때 한 번</td>
+<td>기본값. 완성된 변경을 한 번 점검</td>
+</tr>
+<tr>
+<td>매 푸시마다</td>
+<td>PR 브랜치에 푸시할 때마다</td>
+<td>변경이 자주 바뀌는 PR을 계속 추적</td>
+</tr>
+<tr>
+<td>수동(요청 시)</td>
+<td>코멘트로 <code>@claude review</code>라고 적을 때만</td>
+<td>필요할 때만 비용 없이 호출</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>PR 생성 후 1회</strong>가 기본입니다. PR을 열면 리뷰가 한 번 돌아 초기 점검을 해 줍니다. 대부분의 작은 PR에는 이걸로 충분합니다.</li>
+<li><strong>매 푸시마다</strong>는 PR이 진화하는 동안 새로 들어온 문제를 계속 잡아 줍니다. 다만 푸시가 잦으면 리뷰도 자주 돌아 비용·코멘트가 늘 수 있습니다.</li>
+<li><strong>수동</strong>은 평소엔 돌지 않다가, 누군가 PR 코멘트에 <code>@claude review</code>라고 적으면 그때 리뷰합니다. 비용을 아끼면서 "지금 봐 줘"라고 명시적으로 부를 때 유용합니다.</li>
+</ul>
+<p>여기서 <code>@claude</code>는 GitHub의 멘션(mention)입니다. PR이나 이슈 코멘트에 <code>@claude</code>로 부르면 Claude가 요청을 받아 분석·리뷰·수정 같은 작업을 수행합니다(GitHub Actions 연동 기반). 예컨대 자동 리뷰가 한 번 끝난 뒤 코드를 더 고쳐 올리고 나서, <code>@claude review</code>로 다시 봐 달라고 명시적으로 요청할 수 있습니다.</p>
+<div class="info-box tip">
+<h3 id="_5">트리거를 알면 리뷰를 능동적으로 쓴다</h3>
+<p>트리거 방식을 모르면 "왜 리뷰가 안 달리지?" 하고 막연히 기다리게 됩니다. 우리 저장소가 "수동" 설정이라면 PR을 올려도 자동으로 리뷰가 돌지 않으니, 직접 <code>@claude review</code>로 불러야 합니다. 반대로 "매 푸시마다"라면 작은 수정을 푸시할 때마다 리뷰가 돌 수 있습니다. 내 저장소의 설정을 알아 두는 것이 리뷰를 능동적으로 활용하는 출발점입니다.</p>
+</div>
+<p>다음은 "수동" 트리거 저장소에서, 리뷰 지적을 반영해 다시 푸시한 뒤 명시적으로 재리뷰를 요청하는 흐름입니다. PR 화면의 코멘트 입력란에 멘션을 적습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[PR #42 코멘트 입력]
+@claude review
+
+404 처리와 status 필터 기본값을 고쳐 다시 푸시했습니다. 변경된 두 줄을
+다시 봐 주세요.
+</code></pre></div>
+<p>이렇게 <code>@claude</code>를 멘션하면 Claude가 PR의 최신 상태를 다시 분석해 새 인라인 코멘트를 답니다. "수동" 트리거에서는 이 멘션이 있어야 리뷰가 돌므로, 고치고 푸시한 뒤 재요청하는 것을 잊지 마십시오. 같은 멘션 방식으로 <code>@claude</code>에게 특정 작업(예: "이 함수의 테스트를 추가해 줘")을 PR 안에서 직접 부탁할 수도 있습니다.</p>
+<h2 id="worked-example">worked example: 인라인 코멘트를 읽고 해당 줄 수정</h2>
+<p>PR을 올리자 자동 리뷰가 한 코드 줄에 인라인 코멘트를 달았다고 합시다. 이를 읽고 해당 줄을 고치는 흐름을 따라가 봅니다.</p>
+<p>상태 필터를 추가한 다음 엔드포인트가 리뷰 대상입니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># routers/tasks.py (리뷰가 코멘트를 단 코드)
+@router.get(&quot;/tasks&quot;)
+def list_tasks(status: str = None):
+    return [t for t in TASKS.values() if t[&quot;status&quot;] == status]
+</code></pre></div>
+<p>자동 리뷰가 <code>return</code> 줄에 다음 인라인 코멘트를 남겼습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[자동 리뷰 코멘트 — routers/tasks.py:4]
+status 파라미터가 주어지지 않으면(None) 어떤 작업도 status == None 과
+일치하지 않아 항상 빈 목록이 반환됩니다. 필터가 없을 때는 전체 목록을
+반환해야 의도에 맞습니다.
+</code></pre></div>
+<p>이 코멘트는 <strong>회귀에 가까운 논리 오류</strong>를 짚었습니다. "필터를 안 주면 전체가 나와야 하는데, 빈 목록이 나온다"는 것입니다. 코멘트가 가리키는 줄을 에이전트와 함께 고칩니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; routers/tasks.py:4 에 달린 리뷰 코멘트를 반영해 줘. status 가
+  None 이면 전체를 반환하고, 값이 있으면 그 값으로 필터링하도록 고치고,
+  두 경우를 모두 검증하는 테스트를 추가해 줘.
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># routers/tasks.py (반영 후)
+@router.get(&quot;/tasks&quot;)
+def list_tasks(status: str | None = None):
+    tasks = list(TASKS.values())
+    if status is None:
+        return tasks
+    return [t for t in tasks if t[&quot;status&quot;] == status]
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ pytest tests/test_tasks_filter.py -q
+....                                                      [100%]
+4 passed in 0.23s
+</code></pre></div>
+<div class="code-explanation">
+<ul>
+<li>인라인 코멘트의 <strong>위치(<code>:4</code>)와 내용</strong>을 그대로 지시에 담아, 에이전트가 어느 줄의 무엇을 고칠지 정확히 알게 했습니다. "코멘트 반영해 줘"라고만 하지 않고 "어떻게 고칠지"(None이면 전체, 값이 있으면 필터)를 명시한 점이 중요합니다.</li>
+<li>고친 로직은 <code>status is None</code>을 먼저 분기해 <strong>필터가 없으면 전체</strong>를 반환합니다. 리뷰가 짚은 논리 오류를 정확히 해소했습니다.</li>
+<li>한 코멘트를 반영할 때도 <strong>그 경우를 검증하는 테스트</strong>(필터 없음·필터 있음 두 경우)를 함께 추가하고 통과를 확인했습니다. 이렇게 하면 같은 문제가 다시 생기지 않습니다(회귀 방지).</li>
+<li>고친 뒤에는 다시 푸시합니다. 트리거가 "매 푸시마다"라면 자동 리뷰가 다시 돌고, "수동"이라면 <code>@claude review</code>로 다시 봐 달라고 요청합니다.</li>
+</ul>
+</div>
+<h2 id="security-review">/security-review로 취약점 사전 점검</h2>
+<p>정확성 버그를 잡았다면, 한 가지 점검이 더 남았습니다. <strong>보안</strong>입니다. 보안 결함은 평소엔 잘 드러나지 않다가, 공격자가 악용할 때 큰 사고가 됩니다. 신입이 무심코 흘리기 쉬운 영역이라 별도의 도구가 있습니다.</p>
+<h3 id="security-review_1">정의: /security-review</h3>
+<div class="info-box beginner">
+<p><strong><code>/security-review</code>(보안 리뷰 커맨드)</strong>는 Claude Code에 내장된 슬래시 커맨드로, 변경을 <strong>보안 관점에서 더 깊이</strong> 점검해 SQL 인젝션·XSS(크로스 사이트 스크립팅)·인증 결함·안전하지 않은 데이터 처리·의존성 취약점 같은 흔한 보안 문제를 찾아 주는 읽기 전용 점검입니다.</p>
+</div>
+<p><code>/security-review</code>는 터미널에서 바로 돌려 <strong>올리기 전에</strong> 보안을 점검할 수 있고, 발견한 문제를 고쳐 달라고 바로 이어서 요청할 수도 있습니다. GitHub Actions로 연동하면 PR마다 보안 리뷰를 자동으로 돌릴 수도 있습니다. 권장 습관은 <strong>의미 있는 변경을 커밋하기 전에 <code>/security-review</code>를 한 번 돌리는 것</strong>입니다.</p>
+<p>다음은 사용자 검색 엔드포인트를 보안 점검하는 예입니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; /security-review
+
+(Claude Code가 변경을 보안 관점에서 분석)
+
+보안 리뷰 결과 (1건)
+
+[높음] SQL 인젝션 — routers/search.py:7
+  사용자 입력 keyword 를 f-string 으로 SQL 문에 직접 끼워 넣어,
+  공격자가 임의 SQL 을 실행할 수 있습니다.
+  제안: 파라미터 바인딩(플레이스홀더)을 사용해 입력을 값으로 전달하세요.
+</code></pre></div>
+<p>문제가 된 코드와 안전한 수정은 다음과 같습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># 취약: 사용자 입력을 SQL 에 직접 끼워 넣음 (SQL 인젝션)
+query = f&quot;SELECT * FROM users WHERE name LIKE '%{keyword}%'&quot;
+db.execute(query)
+
+# 안전: 파라미터 바인딩으로 입력을 값으로 전달
+query = &quot;SELECT * FROM users WHERE name LIKE ?&quot;
+db.execute(query, (f&quot;%{keyword}%&quot;,))
+</code></pre></div>
+<div class="code-explanation">
+<ul>
+<li>취약한 코드는 <code>keyword</code>를 <strong>문자열로 직접</strong> SQL에 붙였습니다. 공격자가 <code>keyword</code>에 <code>' OR '1'='1</code> 같은 값을 넣으면 의도하지 않은 쿼리가 실행됩니다(SQL 인젝션).</li>
+<li>안전한 코드는 값이 들어갈 자리를 <code>?</code> 플레이스홀더로 두고, 실제 값을 별도 인자로 전달합니다. 데이터베이스가 입력을 <strong>코드가 아니라 값으로</strong> 취급하므로 인젝션이 막힙니다.</li>
+<li><code>/security-review</code>는 이런 결함을 <strong>사람 리뷰어가 놓치기 쉬운 단계에서 미리</strong> 잡아 줍니다. 다만 보안 리뷰가 모든 취약점을 잡는다고 맹신하지 말고, 입력 검증·인증 같은 기본기는 평소에 갖추는 것이 우선입니다.</li>
+</ul>
+</div>
+<h2 id="_6">피드백 대응: 반영·재요청·근거 있는 반론</h2>
+<p>리뷰 코멘트를 받았을 때의 대응은 세 가지로 나뉩니다. 신입의 성숙도는 이 셋을 <strong>상황에 맞게</strong> 고르는 데서 드러납니다.</p>
+<ol>
+<li>
+<p><strong>반영(accept)</strong> — 지적이 타당하면 코드를 고치고, 테스트로 검증한 뒤, 무엇을 어떻게 고쳤는지 코멘트에 한 줄로 답합니다. 가장 흔하고 기본이 되는 대응입니다.</p>
+</li>
+<li>
+<p><strong>재요청(re-review)</strong> — 고쳐 푸시한 뒤 다시 봐 달라고 요청합니다. 트리거가 "매 푸시마다"면 자동으로 다시 돌고, "수동"이면 <code>@claude review</code>나 리뷰어 멘션으로 명시적으로 부릅니다.</p>
+</li>
+<li>
+<p><strong>근거 있는 반론(push back with reason)</strong> — 모든 지적을 무조건 수용할 필요는 없습니다. 동의하기 어렵다면, <strong>감정이 아니라 근거</strong>로 정중히 반론합니다. "그건 이미 상위 미들웨어에서 검증하고 있어서 여기서 다시 검사하면 중복입니다. 관련 코드는 <code>middleware.py:20</code>입니다"처럼 사실과 위치를 들어 답합니다.</p>
+</li>
+</ol>
+<p>세 대응의 좋은 답글 예시를 비교합니다.</p>
+<table>
+<thead>
+<tr>
+<th>상황</th>
+<th>나쁜 답글</th>
+<th>좋은 답글</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>타당한 지적</td>
+<td>(무시하고 그냥 머지)</td>
+<td>"맞습니다. <code>get</code>+404로 고치고 테스트 추가했습니다. 통과 확인했습니다."</td>
+</tr>
+<tr>
+<td>고치고 재요청</td>
+<td>"고쳤어요"</td>
+<td>"404 처리와 테스트를 추가해 다시 푸시했습니다. <code>@claude review</code>로 재점검 부탁드립니다."</td>
+</tr>
+<tr>
+<td>동의 어려움</td>
+<td>"이게 맞는데요"</td>
+<td>"이 검증은 <code>middleware.py:20</code>에서 이미 수행해 중복이라 판단합니다. 그래도 여기 두는 게 좋을까요?"</td>
+</tr>
+</tbody>
+</table>
+<div class="info-box best-practice">
+<h3 id="_7">리뷰는 비난이 아니라 코드에 대한 대화다</h3>
+<p>리뷰 코멘트는 "당신이 틀렸다"가 아니라 "이 코드를 더 좋게 만들자"는 제안입니다. 지적의 대상은 <strong>여러분이 아니라 코드</strong>입니다. 이 관점을 가지면 방어적으로 굳지 않고, 지적을 학습 기회로 받아들일 수 있습니다. 반대로 모든 지적을 무비판적으로 수용하는 것도 좋지 않습니다. 근거를 이해하지 못한 채 고치면 같은 실수를 반복합니다. <strong>"왜 이런 지적이 나왔는가"를 이해하는 것</strong>이 반영이든 반론이든 모든 좋은 대응의 출발점입니다.</p>
+</div>
+<h2 id="_8">자주 묻는 질문</h2>
+<div class="faq-section">
+<h3 id="code-review-review"><code>/code-review</code>와 <code>/review</code>는 무엇이 다른가요?</h3>
+<p><code>/code-review</code>는 <strong>내 터미널의 현재 변경(diff)</strong>을 점검합니다. 아직 PR을 올리지 않았거나 커밋하지 않은 변경까지 봅니다. <code>/review</code>는 같은 읽기 전용 리뷰를 <strong>이미 GitHub에 올라간 특정 PR</strong>에 대해 수행합니다. 곧 "올리기 전 내 변경 점검"은 <code>/code-review</code>, "올라간 PR 점검"은 <code>/review</code>로 기억하면 됩니다.</p>
+<h3 id="_9">자동 리뷰가 코멘트를 너무 많이 달면 어떻게 하나요?</h3>
+<p>Code Review 서비스는 발견한 문제를 <strong>중복 제거하고 심각도순으로 정렬</strong>해 답니다. 그래도 코멘트가 많다면 <code>[높음]</code>부터 차례로 대응하세요. 모든 코멘트를 한 번에 완벽히 처리하려 하기보다, 심각도가 높은 것부터 반영하고 푸시해 가며 좁혀 가는 편이 현실적입니다.</p>
+<h3 id="_10">리뷰 지적이 틀린 것 같으면 그냥 무시해도 되나요?</h3>
+<p>무시하지 말고 <strong>근거를 들어 답글로 반론</strong>하세요. 지적이 정말 부적절하다면 "이 검증은 <code>middleware.py:20</code>에서 이미 수행해 중복입니다"처럼 사실과 위치로 답하면 됩니다. 답 없이 무시하면 리뷰어(사람이든 자동이든)는 여러분이 코멘트를 못 봤는지, 동의하는지 알 수 없습니다. 반론도 대응의 한 형태입니다.</p>
+<h3 id="security-review_2"><code>/security-review</code>는 언제 돌리는 게 좋나요?</h3>
+<p>권장 습관은 <strong>의미 있는 변경을 커밋하기 전에 한 번</strong> 돌리는 것입니다. 특히 사용자 입력을 다루거나(검색·로그인), 데이터베이스 쿼리를 만들거나, 외부 요청을 보내는 코드를 바꿨다면 반드시 점검하세요. 프로덕션 코드 저장소라면 GitHub Actions로 PR마다 자동 보안 리뷰를 돌리도록 설정하는 것도 좋습니다.</p>
+</div>
+<h2 id="2-1">즉시 연습 (2종 1세트)</h2>
+<p>이제 종이에 답글을 채우는 대신, 1장에서 준비한 <strong>실제 <code>team-tasks-api</code> 저장소에 변경을 만들고 <code>/code-review</code>를 실제로 돌려</strong> 받은 지적을 기록하고, 그중 하나를 반영해 봅니다. 핵심은 "예상한 코멘트"가 아니라 화면에 실제로 나타난 리뷰 지적을 그대로 옮기고, 반영 뒤 <code>python -m pytest -q</code>로 검증까지 직접 하는 것입니다.</p>
+<h3 id="1">1) 모범 예시 (실제 실행 예)</h3>
+<p>자동 리뷰가 다음 코멘트를 달았다고 합시다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[자동 리뷰 코멘트 — routers/tasks.py:9]
+삭제 엔드포인트가 없는 task_id 에도 200 을 반환합니다. 존재하지 않는
+작업 삭제는 404 가 적절합니다.
+</code></pre></div>
+<p>좋은 대응은 다음과 같습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; 이 코멘트를 반영해 줘. 없는 task_id 삭제는 404 를 반환하도록 고치고,
+  그 경우 테스트를 추가한 뒤 pytest 로 통과를 확인해 줘.
+</code></pre></div>
+<p>그리고 PR 코멘트에 답글을 답니다.</p>
+<blockquote>
+<p>맞습니다. 없는 작업 삭제 시 404를 반환하도록 고치고, 해당 경우의 테스트를 추가했습니다. <code>pytest</code>로 통과를 확인해 다시 푸시했습니다.</p>
+</blockquote>
+<h3 id="2-team-tasks-api-code-review">2) 직접 해보기 (team-tasks-api에서 실제로 /code-review 돌리기)</h3>
+<div class="project-box">
+<p><strong>연습 1 — 변경을 만들고 <code>/code-review</code>를 <em>실제로</em> 돌려 지적을 기록하라.</strong></p>
+<p>team-tasks-api에서 작업 브랜치를 만들고, <code>claude</code>로 작은 변경을 하나 만드세요(예: "routers/tasks.py에 GET /tasks/titles 엔드포인트를 추가해 줘"). 변경을 만든 뒤 같은 세션에서 슬래시 명령 <code>/code-review</code>를 실행하고, <strong>화면에 실제로 나타난 지적</strong>을 그대로 옮겨 적으세요(미리 예상한 코멘트가 아니라 진짜 받은 지적).</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[실제 지적 1] /code-review가 짚은 내용(파일·줄·문제):
+[실제 지적 2] (있다면):
+[심각도 판단] 위 지적 중 먼저 고쳐야 할 것과 그 이유:
+</code></pre></div>
+<p><strong>연습 2 — 지적 하나를 <em>실제로</em> 반영하고 테스트로 검증하라.</strong></p>
+<p>받은 지적 중 타당한 것 하나를 골라 에이전트에게 반영을 지시하고("이 지적을 반영해 고치고, 그 경우 테스트를 더한 뒤 python -m pytest -q로 통과를 확인해 줘"), 반영 뒤 실제 출력을 옮겨 적으세요.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[반영한 변경] 실제로 바뀐 부분(diff의 + 줄):
+[검증] python -m pytest -q 실제 출력(통과했는가?):
+</code></pre></div>
+<p><strong>연습 3 — 보안 점검과 근거 있는 반론을 <em>실제로</em> 해보라.</strong></p>
+<p>같은 변경에 <code>/security-review</code>를 실행해 보안 관점 지적이 있는지 확인하세요. 또, 받은 지적 중 <strong>동의하기 어려운 것</strong>이 있으면(예: 이미 FastAPI의 경로 파라미터 int 타입이 검증하는 부분) 감정이 아니라 근거·위치를 들어 정중히 반론하는 답글을 PR에 실제로 달아 보세요.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[security-review 결과] 보안 지적이 있었는가(없으면 &quot;없음&quot;):
+[근거 있는 반론] 동의하기 어려운 지적과 내가 든 근거:
+</code></pre></div>
+</div>
+<div class="project-box">
+<p><strong>자가체크 — 머리로가 아니라 <em>손으로</em> 했는지 확인하세요.</strong></p>
+<ul>
+<li>[ ] team-tasks-api에 실제 변경을 만들고 <code>/code-review</code>를 <strong>실제로 실행</strong>해 지적을 받았다.</li>
+<li>[ ] [실제 지적]에 적은 것이 예상이 아니라 화면에 실제로 나타난 리뷰 코멘트다.</li>
+<li>[ ] 받은 지적을 <strong>심각도에 따라</strong> 우선순위를 두고, 하나를 골라 실제로 반영했다.</li>
+<li>[ ] 지적을 반영한 뒤 <code>python -m pytest -q</code>로 <strong>통과를 직접 확인</strong>했다(c07).</li>
+<li>[ ] <code>/security-review</code>도 실제로 한 번 돌려 보안 관점 지적 유무를 확인했다.</li>
+<li>[ ] 동의하기 어려운 지적에는 감정이 아니라 <strong>근거·위치</strong>로 답했다.</li>
+</ul>
+</div>
+<h2 id="team-tasks-api">단원 미니 프로젝트: team-tasks-api 변경을 올리기 전 자가 점검</h2>
+<p>이 미니 프로젝트는 9장에서 만든 <code>team-tasks-api</code>의 작업 브랜치를, PR로 올리기 <strong>전에</strong> <code>/code-review</code>·<code>/security-review</code>로 스스로 점검하고 지적을 반영하는 과제입니다. 9장 미니 프로젝트의 변경(예: <code>routers/tasks.py</code>의 작은 기능 추가와 그 테스트)이 작업 브랜치에 있다고 가정합니다.</p>
+<p>마일스톤(증분):</p>
+<ol>
+<li><strong>M1 정확성 자가 점검.</strong> <code>team-tasks-api</code> 루트에서 작업 브랜치에 선 채로 <code>/code-review</code>를 실행해, 현재 브랜치의 변경 전체에 대한 정확성·개선 지적을 받습니다. (적용 개념: <code>/code-review</code> 자가 점검)</li>
+<li><strong>M2 보안 자가 점검.</strong> 이어서 <code>/security-review</code>를 실행해 보안 관점의 지적이 없는지 확인합니다. 사용자 입력을 다루는 부분이 있다면 특히 주의해 봅니다. (적용 개념: <code>/security-review</code>)</li>
+<li><strong>M3 심각도순 반영.</strong> <code>[높음]</code> 지적부터 차례로 반영합니다. 없는 자원에 404를 주는지, 필터 없는 요청에 전체를 반환하는지 같은 경계 동작을 점검해 고칩니다. (적용 개념: 심각도순 대응)</li>
+<li><strong>M4 검증·재요청.</strong> 반영 후 테스트를 돌려 통과를 확인하고, 그 결과를 답글·PR 본문에 적습니다. "수동" 트리거 저장소라면 <code>@claude review</code>로 재점검을 요청합니다. (적용 개념: 반영·재요청·검증)</li>
+</ol>
+<p><strong>실제 검증 단계.</strong> 지적을 반영한 뒤 반드시 저장소 전체 테스트를 돌려 통과를 확인합니다(c07). 한 군데를 고치다 다른 곳을 깨지 않았는지까지 봅니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; python -m pytest -q
+........                                                                 [100%]
+8 passed
+</code></pre></div>
+<div class="project-box">
+<p><strong>미니 프로젝트 자가체크</strong></p>
+<ul>
+<li>[ ] <code>team-tasks-api</code>에서 올리기 전 <code>/code-review</code>를 직접 돌렸는가</li>
+<li>[ ] <code>/security-review</code>로 보안 관점도 점검했는가</li>
+<li>[ ] 지적을 <strong>심각도순</strong>으로 우선순위를 두어 반영했는가</li>
+<li>[ ] 반영 후 <code>python -m pytest -q</code>로 전체 통과를 확인했는가(부분 테스트만 보지 않았는가)</li>
+<li>[ ] 동의하기 어려운 지적에는 근거·위치(<code>파일:줄</code>)로 답했는가</li>
+<li>[ ] 우리 저장소의 리뷰 트리거 방식(1회·매 푸시·수동)을 확인하고 필요 시 <code>@claude review</code>로 재요청했는가</li>
+</ul>
+</div>
+<blockquote>
+<p>참고: 위 worked example의 <code>routers/tasks.py</code>·<code>routers/search.py</code> 코드 조각은 리뷰가 잡아내는 "고치기 전 초안"을 보여 주기 위한 예시입니다. 실제 <code>team-tasks-api</code>의 라우터는 1장에서 본 대로 <code>store.py</code>에 로직을 위임하므로, 여러분의 점검 대상은 여러분이 그 저장소에 더한 실제 변경입니다.</p>
+</blockquote>
+<hr />
+<h2 id="_11">흔한 오류와 오개념</h2>
+<div class="info-box danger">
+<h3 id="1_1">1. 리뷰 지적을 방어적으로 받아들인다</h3>
+<p>빨간 줄을 비난으로 느껴 굳어 버리면 배울 기회를 잃습니다. 리뷰의 대상은 <strong>여러분이 아니라 코드</strong>입니다. "왜 이런 지적이 나왔는가"를 먼저 이해하면, 반영하든 반론하든 한 단계 성장합니다. 신입의 평판은 완벽한 첫 코드가 아니라 <strong>피드백에 대응하는 태도</strong>에서 만들어집니다.</p>
+<h3 id="2">2. 자동 리뷰가 모든 걸 잡아 준다고 맹신한다</h3>
+<p>자동 코드 리뷰·<code>/code-review</code>·<code>/security-review</code>는 강력하지만 <strong>만능이 아닙니다.</strong> "이 기능이 제품 방향에 맞는가", "이 설계가 장기적으로 유지보수하기 좋은가" 같은 판단은 사람의 몫이고, 자동 리뷰가 놓치는 도메인 특유의 버그도 있습니다. 자동 리뷰는 "1차 필터"이지 "최종 보증"이 아닙니다. 통과했다고 검증을 생략하지 마십시오.</p>
+<h3 id="3">3. 모든 지적을 무비판적으로 반영한다</h3>
+<p>지적이 타당한지 따져 보지 않고 기계적으로 다 고치면, 근거 없는 변경이 쌓이고 때로는 멀쩡한 코드를 망칩니다. 이미 다른 곳에서 처리되는 검증을 중복으로 넣거나, 우리 맥락에 맞지 않는 일반론을 따르는 일이 생깁니다. <strong>근거를 이해하고 판단해</strong> 반영하거나, 합당한 이유가 있으면 정중히 반론하세요.</p>
+<h3 id="4">4. 고치기만 하고 검증하지 않는다</h3>
+<p>리뷰 지적을 반영한 뒤 "고쳤습니다"로 끝내면, 그 수정이 다른 곳을 깨뜨렸을 수 있습니다. 반영 후에는 <strong>반드시 테스트를 돌려 통과를 확인</strong>(c07)하고, 그 결과를 답글에 함께 적으세요. "고치고 테스트가 통과합니다"가 "고쳤습니다"보다 훨씬 신뢰를 줍니다.</p>
+<h3 id="5-code-review">5. <code>/code-review</code>와 자동 코드 리뷰를 혼동한다</h3>
+<p><code>/code-review</code>는 <strong>내 터미널에서 올리기 전에 내가</strong> 돌리는 자가 점검이고, 자동 코드 리뷰는 조직이 GitHub에 활성화했을 때 <strong>PR에 자동으로</strong> 인라인 코멘트를 다는 기능입니다. 둘은 시점과 주체가 다릅니다. 또 <code>/code-review</code>·<code>/security-review</code>는 진짜 내장 명령이지만, 앞 챕터의 <code>/commit-push-pr</code>은 커스텀 커맨드였다는 점도 함께 기억하면 "이 명령이 어디서 왔는가"를 정확히 구분할 수 있습니다.</p>
+</div>
+<div class="info-box best-practice">
+<h3 id="_12">이 챕터 한 줄 정리</h3>
+<p>좋은 리뷰 대응은 "올리기 전 <code>/code-review</code>·<code>/security-review</code>로 자가 점검 → 자동 리뷰의 인라인 코멘트를 심각도순으로 이해 → 타당하면 반영하고 테스트로 검증, 동의 어려우면 근거로 반론"의 흐름이며, 리뷰는 비난이 아니라 코드를 함께 다듬는 대화입니다. 다음 단원(u10)에서는 리뷰가 짚은 버그를 본격적으로 추적해 고치는 <strong>디버깅</strong>을 배웁니다.</p>
+</div>
+
+<nav class="chapter-nav"><a href="ch_09.html">← 이전: 첫 커밋과 첫 PR: git 워크플로</a><a href="index.html" style="flex:0 0 auto; text-align:center">목차</a><a href="ch_11.html" style="text-align:right">다음: 에이전트와 함께 디버깅하기 →</a></nav>
+</main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-powershell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+</body>
+</html>

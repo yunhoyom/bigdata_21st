@@ -1,0 +1,40 @@
+{
+	"folders": {},
+	"connections": {
+		"postgres-jdbc-19f1bab5d75-2a6a0af253052808": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "shop_real",
+			"save-password": true,
+			"configuration": {
+				"host": "localhost",
+				"port": "5556",
+				"database": "shop_real",
+				"url": "jdbc:postgresql://localhost:5556/shop_real",
+				"configurationType": "MANUAL",
+				"type": "dev",
+				"closeIdleConnection": true,
+				"provider-properties": {
+					"@dbeaver-show-non-default-db@": "false"
+				},
+				"auth-model": "native"
+			}
+		}
+	},
+	"connection-types": {
+		"dev": {
+			"name": "Development",
+			"color": "255,255,255",
+			"description": "Regular development database",
+			"auto-commit": true,
+			"confirm-execute": false,
+			"confirm-data-change": false,
+			"smart-commit": false,
+			"smart-commit-recover": true,
+			"auto-close-transactions": true,
+			"close-transactions-period": 1800,
+			"auto-close-connections": true,
+			"close-connections-period": 14400
+		}
+	}
+}

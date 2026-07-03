@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13장: 종합 프로젝트: 첫 기능·첫 PR — 분석(요구사항·범위) - Claude Code 신입 개발자 온보딩 — 첫 기능부터 첫 PR까지</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+<style>
+
+/* 디자인 토큰 — 브랜드 변경 시 여기만 수정 */
+:root {
+  --primary: #1976D2;
+  --primary-light: #E3F2FD;
+  --accent: #FF6F00;
+  --success: #2E7D32;
+  --warning: #F57F17;
+  --danger: #C62828;
+  --bg: #FAFAFA;
+  --text: #212121;
+  --text-secondary: #616161;
+  --border: #E0E0E0;
+  --code-bg: #2d2d2d;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.8; font-size: 16px;
+}
+.container { max-width: 1400px; margin: 0 auto; }
+.main-content { max-width: 1000px; padding: 40px 48px; margin: 0 auto; }
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white; padding: 48px 40px; border-radius: 16px; margin-bottom: 40px;
+}
+.chapter-header .chapter-number {
+  font-size: 14px; opacity: 0.8; text-transform: uppercase; letter-spacing: 2px;
+}
+.chapter-header h1 { font-size: 32px; margin: 8px 0 16px; font-weight: 800; }
+.chapter-header .chapter-meta { font-size: 14px; opacity: 0.9; }
+
+/* 학습 목표 */
+.learning-objectives {
+  background: var(--primary-light); border-left: 4px solid var(--primary);
+  padding: 24px 28px; border-radius: 0 12px 12px 0; margin-bottom: 36px;
+}
+.learning-objectives h3 { color: var(--primary); font-size: 16px; margin-bottom: 12px; }
+.learning-objectives li { margin: 8px 0; padding-left: 8px; }
+
+/* 섹션 / 본문 기본 요소 */
+h1 { font-size: 28px; margin: 36px 0 16px; color: var(--text); }
+h2 {
+  font-size: 26px; color: var(--primary); margin: 48px 0 20px;
+  padding-bottom: 10px; border-bottom: 2px solid var(--primary-light);
+}
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+p { margin: 12px 0; }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin: 6px 0; }
+a { color: var(--primary); }
+img { max-width: 100%; height: auto; border-radius: 12px; }
+blockquote {
+  border-left: 4px solid var(--primary); background: var(--primary-light);
+  padding: 12px 20px; margin: 16px 0; border-radius: 0 12px 12px 0;
+}
+blockquote p:last-child { margin-bottom: 0; }
+/* 인라인 코드 (pre 밖) */
+:not(pre) > code {
+  background: #f0f0f0; padding: 2px 6px; border-radius: 4px;
+  font-size: 0.9em; color: var(--danger);
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+}
+
+/* 코드 블록 (.code-block-wrapper) */
+.code-block-wrapper {
+  margin: 24px 0; border-radius: 12px; overflow: hidden;
+  box-shadow: var(--card-shadow); border: 1px solid var(--border);
+}
+.code-block-header {
+  background: #1a1a2e; color: #a0a0b0; padding: 10px 20px; font-size: 13px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+.code-block-header .lang-badge {
+  background: var(--primary); color: white; padding: 2px 10px;
+  border-radius: 10px; font-size: 11px; font-weight: 700;
+}
+pre[class*="language-"] {
+  margin: 0 !important; border-radius: 0 !important;
+  font-size: 14px !important; line-height: 1.6 !important; padding: 20px !important;
+}
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important; padding-right: 8px !important;
+}
+.code-explanation {
+  background: #f8f9fa; border-top: 1px solid var(--border); padding: 16px 20px;
+  font-size: 14px; color: var(--text-secondary); line-height: 1.7;
+}
+.code-explanation strong { color: var(--text); }
+.code-explanation .explain-title {
+  display: inline-block; background: var(--accent); color: white; font-size: 11px;
+  font-weight: 700; padding: 2px 10px; border-radius: 10px; margin-bottom: 8px;
+}
+.code-output {
+  background: #1e1e1e; color: #4EC9B0; padding: 12px 20px;
+  font-family: monospace; font-size: 13px; border-top: 1px dashed #444;
+}
+.code-output::before {
+  content: "▶ 실행 결과"; display: block; color: #808080;
+  font-size: 11px; margin-bottom: 4px;
+}
+
+/* 특수 박스 (info-box 5종) */
+.info-box { padding: 14px 20px; border-radius: 12px; margin: 16px 0; border-left: 4px solid; }
+.info-box p:last-child, .info-box ul:last-child { margin-bottom: 0; }
+.info-box.tip { background: #E8F5E9; border-color: var(--success); }
+.info-box.warning { background: #FFF8E1; border-color: var(--warning); }
+.info-box.danger { background: #FFEBEE; border-color: var(--danger); }
+.info-box.beginner { background: #F3E5F5; border-color: #7B1FA2; }
+.info-box.best-practice { background: #E0F2F1; border-color: #00695C; }
+.info-box .box-header {
+  display: flex; align-items: center; margin-bottom: 12px;
+  padding-bottom: 10px; border-bottom: 1px solid rgba(123,31,162,0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* 표 */
+.api-reference h3, .library-section h3 {
+  background: var(--primary); color: white; padding: 12px 20px;
+  border-radius: 8px 8px 0 0; margin-bottom: 0; font-size: 16px;
+}
+hr.section-divider, hr {
+  border: none; border-top: 2px solid var(--border); margin: 36px 0;
+}
+.table-responsive { overflow-x: auto; margin: 16px 0; border-radius: 8px; box-shadow: var(--card-shadow); }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+table thead { background: #f5f5f5; }
+table th { padding: 12px 16px; text-align: left; font-weight: 700; border-bottom: 2px solid var(--border); }
+table td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table tr:hover { background: #fafafa; }
+table code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 13px; color: var(--danger); }
+.api-signature {
+  background: var(--code-bg); color: #e0e0e0; padding: 8px 16px; border-radius: 6px;
+  font-family: monospace; font-size: 13px; margin: 4px 0; overflow-x: auto;
+}
+
+/* 다이어그램 */
+.diagram-container { margin: 28px 0; text-align: center; }
+.diagram-container img { max-width: 100%; border-radius: 12px; box-shadow: var(--card-shadow); }
+.diagram-container img.screenshot { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.diagram-container .caption { margin-top: 10px; font-size: 13px; color: var(--text-secondary); font-style: italic; }
+.diagram-container .svg-diagram { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; }
+.diagram-container .svg-diagram svg { max-width: 100%; height: auto; }
+.missing-diagram { color: var(--danger); font-style: italic; padding: 1rem; background: #FFEBEE; border-radius: 8px; }
+.mermaid { margin: 24px auto; text-align: center; }
+
+/* 연습 문제 & 프로젝트 */
+.exercise-box { background: #FFF3E0; border: 2px solid var(--accent); border-radius: 12px; padding: 24px; margin: 28px 0; }
+.exercise-box h4 { color: var(--accent); }
+.project-box { background: linear-gradient(135deg, #E8EAF6, #C5CAE9); border-radius: 12px; padding: 28px; margin: 36px 0; }
+.project-box h3 { color: #283593; margin-bottom: 12px; }
+.project-readme { background: rgba(255,255,255,0.7); border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; }
+.project-file { margin: 12px 0; border-radius: 8px; overflow: hidden; }
+.project-file summary { background: rgba(255,255,255,0.7); padding: 12px 16px; cursor: pointer; font-weight: 600; border-radius: 8px; }
+.project-file pre { margin: 0; }
+
+/* FAQ */
+.faq-section details { border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; }
+.faq-section summary { padding: 14px 20px; cursor: pointer; font-weight: 600; color: var(--primary); background: #fafafa; border-radius: 8px; }
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+.faq-section .faq-answer { padding: 16px 20px; color: var(--text-secondary); }
+
+/* 챕터 네비게이션 */
+.chapter-nav { display: flex; justify-content: space-between; margin: 48px 0 24px; gap: 16px; }
+.chapter-nav a {
+  flex: 1; display: block; padding: 16px 20px; background: white;
+  border: 1px solid var(--border); border-radius: 12px; text-decoration: none;
+  color: var(--text); transition: all 0.2s;
+}
+.chapter-nav a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+
+/* ── 인덱스 페이지 ── */
+.index-container { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+.book-header { text-align: center; margin-bottom: 40px; }
+.book-header h1 { font-size: 36px; color: var(--primary); border: none; margin: 0 0 8px; }
+.book-header p { color: var(--text-secondary); font-size: 18px; }
+.chapter-list { list-style: none; margin: 0; }
+.chapter-list li { margin-bottom: 12px; }
+.chapter-list a {
+  display: flex; align-items: center; gap: 16px; padding: 16px 24px;
+  background: white; border: 1px solid var(--border); border-radius: 12px;
+  text-decoration: none; color: var(--text); transition: all 0.2s;
+}
+.chapter-list a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+.chapter-list .ch-num { font-weight: 700; color: var(--primary); min-width: 3.5rem; }
+.difficulty-group { margin-top: 32px; }
+.difficulty-group h2 { font-size: 18px; border: none; }
+.difficulty { display: inline-block; padding: 2px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; }
+.difficulty-입문 { background: #E8F5E9; color: #166534; }
+.difficulty-기초 { background: #E3F2FD; color: #1e40af; }
+.difficulty-중급 { background: #FFF8E1; color: #92400e; }
+.difficulty-실무 { background: #FCE7F3; color: #9d174d; }
+.difficulty-고급 { background: #FFEBEE; color: #991b1b; }
+
+/* 인쇄 / 반응형 */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper, table, .diagram-container, .project-box { break-inside: avoid; page-break-inside: avoid; }
+  h1, h2, h3, h4 { break-after: avoid; page-break-after: avoid; }
+}
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+  .chapter-nav { flex-direction: column; }
+}
+
+/* === templates/chapter_design_template.html (단일 디자인 소스, 우선 적용) === */
+
+/* ============================================================
+   디자인 토큰 (색상·그림자) — 브랜드 변경 시 여기만 수정
+   ============================================================ */
+:root {
+  --primary: #1976D2;        /* 주조색(파랑) — 헤더/제목/강조 */
+  --primary-light: #E3F2FD;  /* 주조색 옅은 톤 — 박스 배경/밑줄 */
+  --accent: #FF6F00;         /* 강조색(주황) — 해설 라벨/연습문제 */
+  --success: #2E7D32;        /* 성공(초록) */
+  --warning: #F57F17;        /* 경고(노랑) */
+  --danger: #C62828;         /* 위험(빨강) */
+  --bg: #FAFAFA;             /* 페이지 배경 */
+  --text: #212121;           /* 본문 텍스트 */
+  --text-secondary: #616161; /* 보조 텍스트 */
+  --border: #E0E0E0;         /* 테두리 */
+  --code-bg: #2d2d2d;        /* 코드 배경 */
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  font-size: 16px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   메인 콘텐츠
+   ============================================================ */
+.main-content {
+  flex: 1;
+  max-width: 1400px;
+  padding: 40px 48px;
+  margin: 0 auto;
+}
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white;
+  padding: 48px 40px;
+  border-radius: 16px;
+  margin-bottom: 40px;
+}
+
+.chapter-header .chapter-number {
+  font-size: 14px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.chapter-header h1 {
+  font-size: 32px;
+  margin: 8px 0 16px;
+  font-weight: 800;
+}
+
+.chapter-header .chapter-meta {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* 학습 목표 박스 */
+.learning-objectives {
+  background: var(--primary-light);
+  border-left: 4px solid var(--primary);
+  padding: 24px 28px;
+  border-radius: 0 12px 12px 0;
+  margin-bottom: 36px;
+}
+
+.learning-objectives h3 {
+  color: var(--primary);
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.learning-objectives li {
+  margin: 8px 0;
+  padding-left: 8px;
+  color: var(--text);
+}
+
+/* 섹션 */
+h2 {
+  font-size: 26px;
+  color: var(--primary);
+  margin: 48px 0 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--primary-light);
+}
+
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+
+p { margin: 12px 0; }
+
+/* ============================================================
+   코드 블록 - 박스형 + 줄번호 + 실무 설명
+   ============================================================ */
+.code-block-wrapper {
+  margin: 24px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+}
+
+.code-block-header {
+  background: #1a1a2e;
+  color: #a0a0b0;
+  padding: 10px 20px;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+
+.code-block-header .lang-badge {
+  background: var(--primary);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Prism 줄번호 스타일 오버라이드 */
+pre[class*="language-"] {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  padding: 20px !important;
+}
+
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important;
+  padding-right: 8px !important;
+}
+
+/* 코드 실무 설명 박스 */
+.code-explanation {
+  background: #f8f9fa;
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.code-explanation strong { color: var(--text); }
+
+.code-explanation .explain-title {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+/* 코드 실행 결과 */
+.code-output {
+  background: #1e1e1e;
+  color: #4EC9B0;
+  padding: 12px 20px;
+  font-family: monospace;
+  font-size: 13px;
+  border-top: 1px dashed #444;
+}
+
+.code-output::before {
+  content: "▶ 실행 결과";
+  display: block;
+  color: #808080;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+/* ============================================================
+   특수 박스 (팁, 주의, 베스트 프랙티스, 초보자 설명)
+   ============================================================ */
+.info-box {
+  padding: 14px 20px;
+  border-radius: 12px;
+  margin: 16px 0;
+  border-left: 4px solid;
+}
+.info-box p:last-child { margin-bottom: 0; }
+.info-box ul:last-child { margin-bottom: 0; }
+
+.info-box.tip {
+  background: #E8F5E9;
+  border-color: var(--success);
+}
+
+.info-box.warning {
+  background: #FFF8E1;
+  border-color: var(--warning);
+}
+
+.info-box.danger {
+  background: #FFEBEE;
+  border-color: var(--danger);
+}
+
+.info-box.beginner {
+  background: #F3E5F5;
+  border-color: #7B1FA2;
+}
+
+.info-box.best-practice {
+  background: #E0F2F1;
+  border-color: #00695C;
+}
+
+.info-box .box-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(123, 31, 162, 0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* ============================================================
+   라이브러리 & API 레퍼런스 테이블
+   ============================================================ */
+.api-reference, .library-section {
+  margin: 32px 0;
+}
+
+.api-reference h3, .library-section h3 {
+  background: var(--primary);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 0;
+  font-size: 16px;
+}
+
+hr.section-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 36px 0;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  margin: 16px 0;
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  font-size: 14px;
+}
+
+table thead {
+  background: #f5f5f5;
+}
+
+table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 2px solid var(--border);
+}
+
+table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+table tr:hover { background: #fafafa; }
+
+table code {
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+/* API 시그니처 행 */
+.api-signature {
+  background: var(--code-bg);
+  color: #e0e0e0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 13px;
+  margin: 4px 0;
+  overflow-x: auto;
+}
+
+/* ============================================================
+   이미지 / 다이어그램
+   ============================================================ */
+.diagram-container {
+  margin: 28px 0;
+  text-align: center;
+}
+
+.diagram-container img {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+}
+
+.diagram-container .caption {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* PPTX 원본 보존 뱃지 */
+.diagram-container .pptx-badge {
+  display: inline-block;
+  background: #FF6F00;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: normal;
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Mermaid 다이어그램 (인라인 렌더링) */
+.mermaid {
+  margin: 24px auto;
+  text-align: center;
+}
+
+/* ============================================================
+   연습 문제 & 프로젝트
+   ============================================================ */
+.exercise-box {
+  background: #FFF3E0;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 28px 0;
+}
+
+.exercise-box h4 { color: var(--accent); }
+
+.project-box {
+  background: linear-gradient(135deg, #E8EAF6, #C5CAE9);
+  border-radius: 12px;
+  padding: 28px;
+  margin: 36px 0;
+}
+
+/* ============================================================
+   FAQ
+   ============================================================ */
+.faq-section details {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 8px 0;
+  padding: 0;
+}
+
+.faq-section summary {
+  padding: 14px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primary);
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+
+.faq-section details .faq-answer {
+  padding: 16px 20px;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   챕터 네비게이션 (이전/다음)
+   ============================================================ */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  margin: 48px 0 24px;
+  gap: 16px;
+}
+
+.chapter-nav a {
+  flex: 1;
+  display: block;
+  padding: 16px 20px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.chapter-nav a:hover {
+  border-color: var(--primary);
+  box-shadow: var(--card-shadow);
+}
+
+/* ============================================================
+   인쇄용 스타일
+   ============================================================ */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper { break-inside: avoid; }
+}
+
+/* ============================================================
+   반응형 - 모바일
+   ============================================================ */
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+}
+
+</style>
+</head>
+<body>
+<div class="container">
+<main class="main-content">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 13</div>
+    <h1>종합 프로젝트: 첫 기능·첫 PR — 분석(요구사항·범위)</h1>
+    <div class="chapter-meta"><span class="difficulty difficulty-실무">실무</span></div>
+  </div>
+
+<h1 id="pr">종합 프로젝트: 첫 기능·첫 PR — 분석(요구사항·범위)</h1>
+<div class="learning-objectives">
+<h2 id="_1">이 챕터에서 배우는 것</h2>
+<ul>
+<li>드라이빙 퀘스천(핵심 질문)을 기능 요구사항(FR)과 비기능 요구사항(NFR) 항목으로 각각 구체화해 표로 작성할 수 있습니다.</li>
+<li>처음 받은 FastAPI 저장소를 에이전트 탐색으로 파악해, 첫 기능을 사용자 스토리와 유스케이스 1건 이상으로 정의할 수 있습니다.</li>
+<li>범위를 In/Out으로 나눠, 신입이 감당할 작은 첫 기능으로 한정되도록 통제할 수 있습니다.</li>
+<li>각 요구사항이 앞서 배운 어느 단원 개념으로 구현되는지 요구사항↔개념 매핑 표로 작성할 수 있습니다.</li>
+</ul>
+</div>
+<h2 id="_2">종합 프로젝트를 시작하며: 지금까지 배운 것을 하나의 업무로 엮습니다</h2>
+<p>여기까지 우리는 11개 단원에 걸쳐 12개의 개념을 하나씩 배웠습니다. 설치·인증(c01)으로 시작해, 에이전트 루프(c02)와 효과적인 작업 지시(c03)를 익히고, 낯선 코드를 탐색하는 법(c04), 권한(c05)과 플랜 모드(c06)로 안전하게 변경하는 법, 실행·테스트로 검증하기(c07), CLAUDE.md로 팀 규약을 주입하기(c08), 첫 커밋과 첫 PR(c09), 코드 리뷰 대응(c10), 디버깅(c11), 그리고 서브에이전트·MCP 맛보기(c12)까지 왔습니다.</p>
+<p>각 단원의 미니 프로젝트로 개념을 따로따로 적용해 보았지만, 실제 신입의 첫 업무는 이 개념들이 <strong>하나의 흐름으로 모일 때</strong> 비로소 완성됩니다. 이번 종합 프로젝트(capstone, 캡스톤)는 그 흐름을 처음부터 끝까지 한 번에 통과하는 통과의례입니다. 이 챕터부터 네 챕터(분석 → 설계 → 구현 → 발표·성찰)에 걸쳐, 다음 한 가지 실제 업무를 끝까지 수행합니다.</p>
+<blockquote>
+<p><strong>종합 프로젝트 주제: 기존 팀 FastAPI 저장소에 첫 기능 추가하고 첫 PR 올리기</strong>
+받은 팀의 <code>team-tasks-api</code>(할 일 관리 API) 저장소에 <strong>완료 처리(PATCH /tasks/{id}/complete)</strong>와 <strong>상태 필터(GET /tasks?status=)</strong> 두 엔드포인트를 테스트와 함께 추가하고, 작은 논리 단위로 커밋해 첫 PR을 올려 리뷰까지 통과시킵니다.</p>
+</blockquote>
+<div class="info-box beginner">
+<h3 id="_3">이 챕터는 새 개념을 배우지 않습니다</h3>
+<p>종합 프로젝트의 네 챕터는 <strong>새로운 도구나 개념을 가르치지 않습니다.</strong> 대신 앞 12개 개념을 실제 업무에 통합 적용합니다. 그래서 이 챕터의 모든 요구사항과 결정에는 "이건 어느 단원에서 배운 무엇인가"를 함께 표시합니다. 만약 어떤 부분이 막힌다면, 매핑된 단원으로 돌아가 복습하면 됩니다. 종합 프로젝트는 <strong>복습이자 전이(transfer)</strong>의 장입니다.</p>
+</div>
+<h2 id="pov">드라이빙 퀘스천과 POV 다시 보기</h2>
+<p>프로젝트 기반 학습(PBL)은 하나의 <strong>드라이빙 퀘스천(driving question, 핵심 질문)</strong>을 끝까지 붙들고 답을 만들어 가는 방식입니다. 우리의 드라이빙 퀘스천은 다음과 같습니다.</p>
+<div class="info-box best-practice">
+<h3 id="_4">드라이빙 퀘스천</h3>
+<blockquote>
+<p>신입 개발자가 처음 받은 팀의 FastAPI 저장소를 Claude Code로 안전하게 파악하고, 작은 기능 하나를 테스트와 함께 추가해 리뷰어가 신뢰할 수 있는 첫 PR로 올리려면 어떻게 해야 할까?</p>
+</blockquote>
+<p>이 질문은 "정답이 하나로 정해진" 질문이 아니라, <strong>여러 단계의 판단과 검증을 요구하는 열린 질문</strong>입니다. 분석 → 설계 → 구현 → 발표의 네 단계가 바로 이 질문에 답해 가는 과정입니다.</p>
+</div>
+<p>이 질문의 주인공이 누구인지를 분명히 해 두면 모든 결정의 기준이 또렷해집니다. 이것이 <strong>POV(Point of View, 관점)</strong>입니다. POV는 "누가(user) · 무엇이 필요하며(need) · 왜 그것이 핵심인가(insight)"를 한 문장으로 모은 것입니다.</p>
+<table>
+<thead>
+<tr>
+<th>POV 요소</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>사용자(user)</td>
+<td>팀에 막 합류해 첫 업무로 기존 FastAPI 저장소에 작은 기능 추가를 맡은 주니어 신입 개발자</td>
+</tr>
+<tr>
+<td>필요(need)</td>
+<td>낯선 팀 코드를 안전하게 파악해 작은 기능 하나를 테스트와 함께 추가하고, 리뷰어가 신뢰할 수 있는 첫 PR을 올려 리뷰까지 통과한다</td>
+</tr>
+<tr>
+<td>통찰(insight)</td>
+<td>기능을 따로 배우는 것과 한 번의 실제 업무로 엮어 쓰는 것은 다르다. 첫 기능을 직접 추가해 PR까지 올려 보면 설치·탐색·권한·플랜·검증·CLAUDE.md·커밋·리뷰·디버깅이 어떻게 하나의 온보딩 흐름으로 모이는지를 비로소 체득한다</td>
+</tr>
+</tbody>
+</table>
+<p>POV가 있으면 "기능을 더 화려하게 만들까?" 같은 유혹 앞에서 멈출 수 있습니다. 우리의 사용자는 <strong>신입</strong>이고, 그가 필요한 것은 화려함이 아니라 <strong>안전하게·검증 가능하게·리뷰어가 신뢰할 수 있게</strong> 작은 기능 하나를 끝까지 해내는 것이기 때문입니다. 이 기준이 다음 절부터의 모든 요구사항과 범위 결정을 이끕니다.</p>
+<h2 id="fastapi">기존 FastAPI 저장소 파악 (에이전트 탐색)</h2>
+<p>분석의 첫걸음은 "무엇을 만들지" 정하기 전에 <strong>무엇이 이미 있는지</strong> 아는 것입니다. 신입이 받은 것은 빈 폴더가 아니라 <strong>이미 동작하는 팀의 코드</strong>입니다. 여기서 ch_04에서 배운 <strong>코드베이스 탐색(c04)</strong>을 그대로 씁니다. 변경 없이 읽기만 하면서, 시니어에게 묻듯 에이전트에게 질문해 구조를 파악합니다.</p>
+<p>먼저 저장소가 무엇을 하는지, 엔드포인트가 무엇인지 요약하게 합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; 이 저장소가 무엇을 하는 API인지, 어떤 엔드포인트가 있는지,
+  핵심 파일 구조가 어떻게 되는지 한국어로 요약해 줘. 아직 아무것도
+  바꾸지 말고 읽기만 해.
+
+(Claude Code가 Glob·Read·Grep으로 저장소를 훑은 뒤 요약)
+
+이 저장소(team-tasks-api)는 할 일(task)을 관리하는 FastAPI 기반 REST API
+입니다. 데이터는 데이터베이스 없이 인메모리(메모리 안 리스트)에 저장합니다.
+현재 엔드포인트는 세 개입니다.
+
+- GET  /tasks          전체 할 일 목록 조회
+- POST /tasks          새 할 일 생성(title을 받음)
+- GET  /tasks/{id}     단일 할 일 조회(없으면 404)
+
+핵심 파일 구조는 다음과 같습니다.
+  main.py            FastAPI 앱 생성, 라우터 등록
+  routers/tasks.py   tasks 관련 엔드포인트 정의
+  models.py          Task 등 pydantic 모델
+  store.py           인메모리 저장소(목록·조회·추가 함수)
+  tests/test_tasks.py  기존 엔드포인트 테스트
+</code></pre></div>
+<div class="code-explanation">
+<ul>
+<li>에이전트는 <code>Glob</code>(파일 찾기)·<code>Read</code>(파일 읽기)·<code>Grep</code>(코드 검색) 같은 <strong>읽기 전용 도구</strong>만 써서 구조를 파악했습니다. "아직 아무것도 바꾸지 말고"라는 제약(c03의 작업 지시 4요소 중 하나)을 명시해, 탐색 단계에서 코드가 변하지 않게 했습니다.</li>
+<li>핵심 산출물은 "엔드포인트 목록"과 "파일 구조"입니다. 이 두 가지를 알면 "내 기능을 어디에 끼워 넣을지"의 출발점이 잡힙니다. 완료 처리·상태 필터는 모두 tasks에 관한 일이므로 <code>routers/tasks.py</code>가 주된 작업 무대가 될 것임을 짐작할 수 있습니다.</li>
+<li>데이터가 <strong>인메모리</strong>라는 점도 중요합니다. 데이터베이스 연동이 없으므로, 우리 작업의 범위가 "저장소(store.py)의 리스트를 다루는 일"로 좁혀집니다(범위 결정의 근거).</li>
+</ul>
+</div>
+<p>다음으로, 우리가 바꿀 핵심인 <strong>데이터(할 일 한 건)가 어떻게 생겼는지</strong>와 <strong>검증·에러가 어떻게 처리되는지</strong>를 더 구체적으로 묻습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; Task 데이터 한 건이 어떤 필드로 이루어져 있는지, 그리고 없는 id를
+  조회할 때 404를 어떻게 내는지 해당 코드를 인용해서 설명해 줘.
+
+(Claude Code가 models.py와 routers/tasks.py의 관련 부분을 읽어 설명)
+
+Task 모델(models.py)은 다음 필드를 가집니다.
+  - id:    정수, 생성 시 자동 부여
+  - title: 문자열, 필수
+  - status: 문자열, 기본값 &quot;todo&quot;   (이미 status 필드가 존재합니다)
+
+없는 id 처리는 routers/tasks.py의 GET /tasks/{id}에서
+store.get_task(id)가 None을 반환하면 다음과 같이 404를 냅니다.
+
+    task = store.get_task(task_id)
+    if task is None:
+        raise HTTPException(status_code=404, detail=&quot;task를 찾을 수 없습니다&quot;)
+    return task
+</code></pre></div>
+<div class="code-explanation">
+<ul>
+<li>가장 값진 발견은 <strong><code>status</code> 필드가 이미 존재한다</strong>는 사실입니다. 기본값이 <code>"todo"</code>이므로, 우리는 새 필드를 만드는 게 아니라 <strong>기존 필드의 값을 <code>"done"</code>으로 바꾸는</strong> 일을 하면 됩니다. 탐색이 작업의 난이도를 크게 낮춰 준 것입니다. 추측으로 시작했다면 불필요한 필드를 새로 추가했을지도 모릅니다.</li>
+<li>기존 코드가 없는 id에 <code>HTTPException(status_code=404, ...)</code>로 응답한다는 <strong>기존 패턴</strong>도 확인했습니다. 우리가 추가할 완료 처리도 "없는 id면 404"라는 같은 패턴을 따르면, 코드가 팀의 스타일과 일관됩니다(ch_03에서 배운 "기존 스타일 따르기").</li>
+<li>이처럼 탐색은 "무엇을 만들지"가 아니라 <strong>"무엇이 이미 있어서 재사용·일관되게 따라갈 수 있는지"</strong>를 알려 줍니다. 이 정보가 다음 절의 요구사항을 현실적으로 만듭니다.</li>
+</ul>
+</div>
+<p>탐색으로 파악한 핵심을 한 문단으로 정리하면 이렇습니다. <code>team-tasks-api</code>는 인메모리 tasks API이고, 할 일은 <code>id·title·status</code>를 가지며 <code>status</code>는 이미 존재해 <code>"todo"</code>가 기본값입니다. 엔드포인트는 목록·생성·단건 조회 세 개이고, 없는 id에는 404를 내는 패턴이 자리잡혀 있습니다. <strong>변경 없이</strong> 이만큼 파악했으니, 이제 "무엇을 더할지"를 요구사항으로 적을 수 있습니다.</p>
+<h2 id="fr">기능 요구사항(FR): 완료 처리·상태 필터 엔드포인트</h2>
+<p><strong>요구사항(requirement)</strong>은 "이 기능이 무엇을 해야 하는가"를 검증 가능한 문장으로 적은 것입니다. 그중 <strong>기능 요구사항(FR, Functional Requirement)</strong>은 시스템이 <strong>무엇을 하는지</strong>(동작·기능)를 정의합니다. 모호한 "완료 기능을 추가한다" 대신, 확인할 수 있는 구체적 문장으로 적습니다.</p>
+<p>탐색 결과를 바탕으로 이번 첫 기능의 기능 요구사항을 다음 일곱 가지로 정리했습니다. 각 요구사항 끝에는 <strong>그것을 구현할 때 쓰는 단원·개념</strong>을 함께 적었습니다(추적성).</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>기능 요구사항</th>
+<th>적용 단원</th>
+<th>적용 개념</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FR1</td>
+<td>기존 tasks API의 구조·엔드포인트·데이터 흐름을 파악해 변경 지점을 찾는다</td>
+<td>u4</td>
+<td>c04 탐색</td>
+</tr>
+<tr>
+<td>FR2</td>
+<td>완료 처리 엔드포인트(PATCH /tasks/{id}/complete)로 해당 작업의 status를 done으로 변경한다</td>
+<td>u3, u5</td>
+<td>c03 지시, c06 플랜</td>
+</tr>
+<tr>
+<td>FR3</td>
+<td>상태 필터 엔드포인트(GET /tasks?status=done|todo)로 목록을 상태별로 거른다</td>
+<td>u3, u5</td>
+<td>c03 지시, c06 플랜</td>
+</tr>
+<tr>
+<td>FR4</td>
+<td>없는 id는 404, 잘못된 status 값은 422로 적절한 상태 코드와 에러 응답을 낸다</td>
+<td>u10</td>
+<td>c11 디버깅</td>
+</tr>
+<tr>
+<td>FR5</td>
+<td>추가한 두 엔드포인트를 pytest(TestClient)로 검증한다</td>
+<td>u6</td>
+<td>c07 검증</td>
+</tr>
+<tr>
+<td>FR6</td>
+<td>변경을 작은 논리 단위로 커밋하고 첫 PR로 올린다</td>
+<td>u8</td>
+<td>c09 커밋·PR</td>
+</tr>
+<tr>
+<td>FR7</td>
+<td>코드 리뷰를 받아 지적을 반영하거나 근거로 대응한다</td>
+<td>u9</td>
+<td>c10 리뷰</td>
+</tr>
+</tbody>
+</table>
+<p>각 요구사항이 왜 이렇게 적혔는지 핵심만 짚겠습니다.</p>
+<ul>
+<li><strong>FR2(완료 처리)</strong>는 "어떻게(PATCH)"와 "무엇이 바뀌는가(status가 done으로)"를 모두 담았습니다. "complete 엔드포인트 추가"보다 훨씬 검증하기 쉽습니다. 나중에 "PATCH /tasks/1/complete를 호출하면 1번 작업의 status가 done이 된다"를 테스트로 그대로 옮길 수 있습니다.</li>
+<li><strong>FR3(상태 필터)</strong>는 입력(쿼리 파라미터 <code>status</code>)과 출력(거른 목록)을 명시했습니다. <code>todo|done</code> 두 값만 받는다고 못박아, FR4의 "잘못된 status는 422"와 자연스럽게 연결됩니다.</li>
+<li><strong>FR4(에러 응답)</strong>는 "잘 안 되면 어떻게 되는가"라는 <strong>불행 경로(unhappy path)</strong>를 미리 정의합니다. 신입이 가장 자주 빠뜨리는 부분이지만, 실제 업무에서는 "정상일 때"만큼 "비정상일 때"가 중요합니다. 기존 코드가 이미 404를 쓰므로 같은 패턴을 따릅니다.</li>
+</ul>
+<div class="info-box tip">
+<h3 id="_5">좋은 요구사항은 "테스트로 옮길 수 있는" 문장입니다</h3>
+<p>요구사항이 잘 적혔는지 판단하는 가장 쉬운 기준은 "이 문장을 그대로 테스트(pytest)로 옮길 수 있는가?"입니다. "완료 기능을 잘 만든다"는 테스트로 옮길 수 없지만, "PATCH /tasks/{존재하는 id}/complete를 호출하면 200과 status=done이 반환된다"는 그대로 한 줄짜리 테스트가 됩니다. 요구사항을 적을 때부터 ch_07의 검증(c07)·TDD를 염두에 두면, 분석 단계가 곧 테스트 설계가 됩니다.</p>
+</div>
+<h2 id="nfr">비기능 요구사항(NFR): 테스트·안전·팀 규약</h2>
+<p><strong>비기능 요구사항(NFR, Non-Functional Requirement)</strong>은 "무엇을 하는가"가 아니라 <strong>"어떻게·얼마나 잘 하는가"</strong>(품질·방식·제약)를 정의합니다. 같은 기능이라도 안전하게·검증 가능하게·일관되게 만드는 것이 NFR입니다. 신입의 첫 기능에서는 결과물의 기능만큼 <strong>일하는 방식</strong>이 평가받으므로 NFR이 특히 중요합니다.</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>비기능 요구사항</th>
+<th>적용 개념</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NFR1</td>
+<td>에이전트 루프를 이해하고 목표·맥락·제약·완료 조건의 4요소 지시로 작업한다</td>
+<td>c02 루프, c03 지시</td>
+</tr>
+<tr>
+<td>NFR2</td>
+<td>부수효과 도구(편집·실행)를 최소 권한 settings.json으로 통제한다</td>
+<td>c05 권한</td>
+</tr>
+<tr>
+<td>NFR3</td>
+<td>변경 전에 플랜 모드로 계획을 받아 검토한다(안전)</td>
+<td>c06 플랜</td>
+</tr>
+<tr>
+<td>NFR4</td>
+<td>테스트 우선(TDD)으로 완료 조건을 먼저 세운다</td>
+<td>c07 검증</td>
+</tr>
+<tr>
+<td>NFR5</td>
+<td>팀 규약을 CLAUDE.md로 영속화해 세션 간 일관성을 유지한다</td>
+<td>c08 CLAUDE.md</td>
+</tr>
+<tr>
+<td>NFR6</td>
+<td>막힘은 디버깅 루프(재현→가설→최소 수정→회귀 테스트)로 해소한다</td>
+<td>c11 디버깅</td>
+</tr>
+<tr>
+<td>NFR7</td>
+<td>반복 작업은 서브에이전트로, 외부 자료는 MCP로 가볍게 활용한다(맛보기)</td>
+<td>c12 자동화</td>
+</tr>
+</tbody>
+</table>
+<p>기능 요구사항(FR)과 비기능 요구사항(NFR)의 차이를 한 문장으로 구분하면 이렇습니다. <strong>FR은 "무엇을 만드는가"(완료 처리·상태 필터), NFR은 "어떻게 만드는가"(안전하게·검증하며·일관되게)</strong>입니다. 둘 다 충족해야 신입의 첫 업무가 "동작하긴 하는데 위험하게 만든 코드"가 아니라 "안전하게·검증 가능하게 만든 신뢰할 수 있는 코드"가 됩니다.</p>
+<div class="info-box warning">
+<h3 id="nfr_1">NFR을 빠뜨리면 "동작은 하지만 못 믿을" 결과가 됩니다</h3>
+<p>기능(FR)만 채우고 비기능(NFR)을 무시하면, 엔드포인트는 동작하지만 테스트가 없고(NFR4 위반), 권한 통제 없이 위험하게 만들어졌으며(NFR2 위반), 팀 규약과 어긋나(NFR5 위반) 리뷰에서 막힙니다. 평가 루브릭(ch_16)이 기능 완성도뿐 아니라 안전·절차·협업을 함께 보는 이유가 여기 있습니다. 신입의 첫 PR이 신뢰를 얻는지는 NFR에서 갈립니다.</p>
+</div>
+<h2 id="_6">사용자 스토리와 유스케이스</h2>
+<p>요구사항을 <strong>사용자의 입장</strong>에서 다시 적으면, "왜 이 기능이 필요한가"가 또렷해집니다. 이를 위한 두 가지 도구가 사용자 스토리와 유스케이스입니다.</p>
+<p><strong>사용자 스토리(user story)</strong>는 "[누구]로서, [무엇을] 하고 싶다, [왜]"의 형식으로 요구를 사용자 관점에서 적은 짧은 문장입니다. 우리 프로젝트의 사용자(신입 개발자)가 가진 네 가지 스토리는 다음과 같습니다.</p>
+<ol>
+<li>신입으로서, 받은 저장소가 무엇을 하는지 빠르게 파악해 어디를 바꿔야 할지 알고 싶다. (→ FR1 탐색)</li>
+<li>신입으로서, 기존 코드를 망가뜨릴까 봐 두렵지 않게 안전장치(권한·플랜)를 갖추고 손대고 싶다. (→ NFR2·NFR3)</li>
+<li>신입으로서, 추가한 기능이 정말 동작하는지 테스트로 증명하고 싶다. (→ FR5·NFR4)</li>
+<li>신입으로서, 리뷰어가 빠르게 이해하는 좋은 첫 PR을 올리고 리뷰를 통과하고 싶다. (→ FR6·FR7)</li>
+</ol>
+<p><strong>유스케이스(use case)</strong>는 한 걸음 더 들어가, 사용자가 시스템과 <strong>어떻게 상호작용해 목표를 이루는지</strong>를 입력→처리→결과의 흐름으로 적은 시나리오입니다. 스토리가 "무엇을 원하는가"라면, 유스케이스는 "그래서 실제로 어떤 요청을 보내고 어떤 응답을 받는가"입니다.</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>유스케이스</th>
+<th>흐름(입력 → 결과)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UC1</td>
+<td>완료 처리</td>
+<td><code>PATCH /tasks/1/complete</code> → 1번 task의 status가 done으로 바뀌고 200 응답</td>
+</tr>
+<tr>
+<td>UC2</td>
+<td>상태 필터</td>
+<td><code>GET /tasks?status=done</code> → status가 done인 task만 목록으로 반환</td>
+</tr>
+<tr>
+<td>UC3</td>
+<td>첫 PR</td>
+<td>작업 브랜치 커밋 → PR 생성 → /code-review·자동 리뷰 → 반영 → 통과</td>
+</tr>
+</tbody>
+</table>
+<div class="code-explanation">
+<ul>
+<li>UC1·UC2의 흐름이 곧 <strong>테스트 시나리오</strong>입니다. 예컨대 UC1은 "1번 작업을 만들고 → PATCH로 완료 처리하고 → 응답이 200이고 status가 done인지 확인"이라는 pytest 한 케이스로 그대로 옮겨집니다(ch_07·ch_15에서 구현).</li>
+<li>UC3은 코드가 아니라 <strong>협업 절차</strong>의 유스케이스입니다. 커밋·PR·리뷰·반영이라는 사람과 사람(그리고 자동 리뷰)의 상호작용을 담아, 종합 프로젝트가 "코드 작성"으로 끝나지 않고 "팀에 합류시키기"까지 포함함을 보여 줍니다.</li>
+<li>사용자 스토리·유스케이스를 분석 단계에서 적어 두면, 구현(ch_15)에서 "무엇을 만들고 무엇을 테스트할지"를 다시 고민하지 않고 이 목록을 그대로 따라가면 됩니다. 분석이 충실하면 구현이 단순해집니다.</li>
+</ul>
+</div>
+<h2 id="inout">범위 In/Out 확정 (작은 첫 기능으로)</h2>
+<p>신입이 첫 업무에서 저지르는 흔한 실수는 <strong>범위를 키우는 것</strong>입니다. "기왕 하는 김에 인증도 붙이고, 데이터베이스도 연동하고…"라는 생각은 첫 PR을 끝없이 미루게 만듭니다. POV가 알려 주듯 우리의 사용자는 신입이고, 필요한 것은 <strong>작은 기능 하나를 끝까지</strong> 해내는 것입니다. 그래서 무엇을 <strong>포함(In)</strong>하고 무엇을 <strong>제외(Out)</strong>할지 명시적으로 못박습니다.</p>
+<table>
+<thead>
+<tr>
+<th>범위 In (이번에 한다)</th>
+<th>범위 Out (이번에 하지 않는다)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>기존 저장소 탐색·구조 지도 작성</td>
+<td>데이터베이스 연동·마이그레이션(기존 인메모리 유지)</td>
+</tr>
+<tr>
+<td>완료 처리 엔드포인트(PATCH /tasks/{id}/complete) 추가</td>
+<td>인증·권한 같은 큰 신규 기능(범위 초과)</td>
+</tr>
+<tr>
+<td>상태 필터 엔드포인트(GET /tasks?status=done|todo) 추가</td>
+<td>프런트엔드·UI</td>
+</tr>
+<tr>
+<td>입력 검증과 적절한 상태 코드·에러 응답(404·422)</td>
+<td>배포·인프라·CI 무인 자동화(본서는 맛보기까지만)</td>
+</tr>
+<tr>
+<td>각 변경에 대한 pytest 테스트(TestClient)</td>
+<td>서브에이전트·MCP 심화 설계(맛보기 단원까지만)</td>
+</tr>
+<tr>
+<td>권한 설정·플랜 모드·CLAUDE.md 적용</td>
+<td></td>
+</tr>
+<tr>
+<td>작은 논리 단위 커밋과 첫 PR 작성·리뷰 대응</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>범위를 좁히면 무엇이 좋을까요? 첫째, <strong>끝낼 수 있습니다.</strong> 작은 범위는 한 번의 작업 세션으로 완결되어 첫 PR을 실제로 올릴 수 있습니다. 둘째, <strong>리뷰가 쉽습니다.</strong> 변경이 작으면 리뷰어가 빠르고 정확하게 봐 주고, 문제가 생겨도 영향 범위가 좁습니다(ch_09에서 배운 "신입의 PR은 작을수록 좋다"). 셋째, <strong>다음을 위한 여지가 생깁니다.</strong> "완료 취소"나 "완료 시각 기록" 같은 확장은 후속 PR로 미루면 되므로, 이번 PR이 깔끔하게 유지됩니다.</p>
+<div class="info-box best-practice">
+<h3 id="mvp">MVP: 가장 작은 첫 버전부터</h3>
+<p>범위 안에서도 <strong>MVP(Minimum Viable Product, 최소 기능 제품)</strong>를 먼저 정합니다. 우리의 MVP는 "완료 처리 엔드포인트(PATCH /tasks/{id}/complete) 하나를 테스트와 함께 추가해 통과시키고 첫 커밋·PR을 올리는 최소 버전"입니다. 상태 필터·에러 응답 보강·리뷰 대응은 MVP 이후의 <strong>증분 확장</strong>입니다. 한꺼번에 다 만들려다 아무것도 끝내지 못하는 대신, 가장 작은 동작하는 버전을 먼저 완성하고 거기서 키워 갑니다. 이 증분 전략이 구현 챕터(ch_15)의 마일스톤 순서가 됩니다.</p>
+</div>
+<h2 id="_7">추적성: 요구사항 ↔ 단원 개념 매핑</h2>
+<p>종합 프로젝트의 핵심은 <strong>추적성(traceability)</strong>입니다. 모든 요구사항이 "허공에서 나온 것"이 아니라 <strong>앞서 배운 어느 개념으로 구현되는지</strong> 한눈에 이어지게 만드는 것입니다. 추적성 표가 있으면 두 가지가 가능합니다. (1) 구현 중 막히면 해당 개념의 단원으로 정확히 돌아가 복습할 수 있고, (2) 이 프로젝트가 정말 12개 개념을 모두 통합하는지 빠짐없이 확인할 수 있습니다.</p>
+<p>아래는 이번 프로젝트가 다루는 요구사항(FR·NFR·UC)을 단원·개념별로 모은 전체 추적성 표입니다.</p>
+<table>
+<thead>
+<tr>
+<th>단원</th>
+<th>개념</th>
+<th>이 프로젝트에서의 쓰임</th>
+<th>연결된 요구사항</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>u1</td>
+<td>c01 설치·인증</td>
+<td>작업 환경(Claude Code) 준비, 세션 운용</td>
+<td>전반 환경</td>
+</tr>
+<tr>
+<td>u2</td>
+<td>c02 에이전트 루프</td>
+<td>관찰→계획→도구→확인 흐름으로 작업 진행</td>
+<td>NFR1</td>
+</tr>
+<tr>
+<td>u3</td>
+<td>c03 작업 지시</td>
+<td>4요소 지시로 엔드포인트 추가 요청</td>
+<td>FR2, FR3, NFR1</td>
+</tr>
+<tr>
+<td>u4</td>
+<td>c04 코드 탐색</td>
+<td>기존 저장소 파악·구조 지도</td>
+<td>FR1, UC 전반</td>
+</tr>
+<tr>
+<td>u5</td>
+<td>c05 권한</td>
+<td>최소 권한 settings.json</td>
+<td>NFR2</td>
+</tr>
+<tr>
+<td>u5</td>
+<td>c06 플랜 모드</td>
+<td>변경 전 계획 검토</td>
+<td>FR2, FR3, NFR3</td>
+</tr>
+<tr>
+<td>u6</td>
+<td>c07 검증</td>
+<td>pytest·TDD로 동작 증명</td>
+<td>FR5, NFR4, UC1, UC2</td>
+</tr>
+<tr>
+<td>u7</td>
+<td>c08 CLAUDE.md</td>
+<td>팀 규약 영속화</td>
+<td>NFR5</td>
+</tr>
+<tr>
+<td>u8</td>
+<td>c09 커밋·PR</td>
+<td>논리 단위 커밋·첫 PR</td>
+<td>FR6, UC3</td>
+</tr>
+<tr>
+<td>u9</td>
+<td>c10 코드 리뷰</td>
+<td>리뷰 받기·대응</td>
+<td>FR7, UC3</td>
+</tr>
+<tr>
+<td>u10</td>
+<td>c11 디버깅</td>
+<td>404·422 에러·실패 진단</td>
+<td>FR4, NFR6</td>
+</tr>
+<tr>
+<td>u11</td>
+<td>c12 자동화</td>
+<td>서브에이전트·MCP 맛보기</td>
+<td>NFR7</td>
+</tr>
+</tbody>
+</table>
+<p>표를 보면 <strong>12개 개념이 빠짐없이 이 프로젝트의 어딘가로 이어진다</strong>는 것을 확인할 수 있습니다. 이것이 종합 프로젝트가 "그냥 던져 주는 과제"가 아니라 <strong>커리큘럼 전체를 통합 적용하도록 역설계된 업무</strong>라는 증거입니다. 다음 챕터(ch_14)에서는 이 요구사항들을 실제 <strong>설계</strong>(데이터 구조·모듈 변경·ADR)로 옮깁니다.</p>
+<h2 id="2-1">작성형 연습 (2종 1세트)</h2>
+<p>분석을 직접 해 봅니다. 먼저 ① 모범 예시를 확인하고, ② 빈 템플릿을 스스로 채운 뒤, ③ 자가체크로 점검합니다.</p>
+<h3 id="_8">모범 예시: 요구사항 한 줄을 검증 가능하게 다듬기</h3>
+<p>모호한 요구사항 "완료된 작업만 볼 수 있게 한다"를 검증 가능한 기능 요구사항으로 다듬으면 다음과 같습니다.</p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>요구사항 ID</td>
+<td>FR3</td>
+</tr>
+<tr>
+<td>검증 가능한 문장</td>
+<td>GET /tasks?status=done 요청 시 status가 done인 task만 목록으로 반환한다</td>
+</tr>
+<tr>
+<td>입력</td>
+<td>쿼리 파라미터 status=done (허용 값: todo, done)</td>
+</tr>
+<tr>
+<td>정상 결과</td>
+<td>200, done인 task만 담긴 목록</td>
+</tr>
+<tr>
+<td>비정상 결과</td>
+<td>status=foo 같은 허용 외 값이면 422</td>
+</tr>
+<tr>
+<td>적용 개념</td>
+<td>c03 작업 지시, c06 플랜 모드, c07 검증, c11 디버깅(422)</td>
+</tr>
+</tbody>
+</table>
+<p>핵심은 "완료된 작업만 본다"는 막연한 말을 <strong>입력·정상 결과·비정상 결과</strong>로 쪼개, 그대로 테스트로 옮길 수 있게 만든 점입니다.</p>
+<div class="project-box">
+<h3 id="1-team-tasks-api">연습 1: 내 team-tasks-api의 완료 처리 요구사항을 직접 작성하라</h3>
+<p>받은 <code>team-tasks-api</code>를 탐색한 내용을 바탕으로, "완료 처리" 기능(FR2)의 요구사항을 <strong>직접 작성</strong>하세요. 위 모범 예시(FR3)를 본떠, 추측을 빈칸에 적는 것이 아니라 <strong>자신이 탐색으로 확인한 실제 코드(status 필드·404 패턴)에 근거해</strong> 각 항목을 검증 가능한 문장으로 적습니다.</p>
+<p>아래 표를 그대로 옮겨, 오른쪽 칸에 자신의 분석 결과를 직접 적으세요(예시를 베끼지 말고, 내 저장소에서 확인한 것으로 적습니다).</p>
+<table>
+<thead>
+<tr>
+<th>항목</th>
+<th>내가 작성한 내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>요구사항 ID</td>
+<td>FR2</td>
+</tr>
+<tr>
+<td>검증 가능한 문장</td>
+<td>(여기에 직접 적는다: PATCH 경로와 status가 어떻게 바뀌는지)</td>
+</tr>
+<tr>
+<td>입력</td>
+<td>(여기에 직접 적는다: 어떤 경로 파라미터로 어느 작업을 가리키나)</td>
+</tr>
+<tr>
+<td>정상 결과</td>
+<td>(여기에 직접 적는다: 상태 코드와 바뀐 status 값)</td>
+</tr>
+<tr>
+<td>비정상 결과(없는 id)</td>
+<td>(여기에 직접 적는다: 내 저장소의 실제 404 패턴을 확인해 적는다)</td>
+</tr>
+<tr>
+<td>적용 개념</td>
+<td>(여기에 직접 적는다: 본문 추적성 표에서 FR2에 연결된 단원·개념)</td>
+</tr>
+</tbody>
+</table>
+<p>작성 안내: 입력은 경로 파라미터(어느 작업?)입니다. 정상 결과의 상태 코드와 바뀐 status 값을 적으세요. 비정상은 "없는 id를 완료 처리하려 하면?"을 생각해, <strong>추측이 아니라 ch_13에서 탐색한 기존 저장소의 404 패턴</strong>을 옮겨 적습니다.</p>
+</div>
+<div class="project-box">
+<h3 id="2">연습 2: 추적성을 직접 이어 작성하라</h3>
+<p>아래 요구사항이 어느 단원·개념으로 구현되는지, 본문의 추적성 표를 참고해 <strong>직접 작성</strong>하세요. 단원·개념은 본문 표에서 찾아 적고, "한 줄 근거"는 베끼지 말고 <strong>자신의 말로</strong> 왜 그 개념이 그 요구사항을 구현하는지 적습니다.</p>
+<p>아래 표를 그대로 옮겨, 빈 칸에 자신이 이어 낸 단원·개념·근거를 직접 적으세요.</p>
+<table>
+<thead>
+<tr>
+<th>요구사항</th>
+<th>적용 단원(직접 적기)</th>
+<th>적용 개념(직접 적기)</th>
+<th>한 줄 근거(왜 그 개념인가 — 내 말로)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FR4 없는 id 404·잘못된 status 422</td>
+<td>(직접 적는다)</td>
+<td>(직접 적는다)</td>
+<td>(직접 적는다)</td>
+</tr>
+<tr>
+<td>FR5 두 엔드포인트를 pytest로 검증</td>
+<td>(직접 적는다)</td>
+<td>(직접 적는다)</td>
+<td>(직접 적는다)</td>
+</tr>
+<tr>
+<td>NFR3 변경 전 플랜 모드로 계획 검토</td>
+<td>(직접 적는다)</td>
+<td>(직접 적는다)</td>
+<td>(직접 적는다)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="project-box">
+<h3 id="_9">자가체크</h3>
+<ul>
+<li>[ ] 모든 기능 요구사항(FR)을 "테스트로 옮길 수 있는" 검증 가능한 문장으로 적었는가?</li>
+<li>[ ] 기능 요구사항(FR)과 비기능 요구사항(NFR)을 "무엇을/어떻게"로 구분했는가?</li>
+<li>[ ] 정상 경로뿐 아니라 <strong>비정상 경로</strong>(없는 id 404·잘못된 status 422)를 요구사항에 포함했는가?</li>
+<li>[ ] 범위 Out에 "이번에 하지 않을 것"을 명시해 첫 기능을 작게 통제했는가?</li>
+<li>[ ] 각 요구사항이 어느 단원·개념으로 구현되는지 추적성으로 이어 두었는가?</li>
+<li>[ ] 기존 저장소를 <strong>변경 없이 읽기만</strong> 하며 탐색했는가(탐색 중 코드를 바꾸지 않았는가)?</li>
+</ul>
+</div>
+<h2 id="_10">흔한 오류와 오개념</h2>
+<div class="info-box danger">
+<h3 id="1">1. 기존 코드를 안 보고 바로 만들기 시작한다</h3>
+<p>신입이 가장 자주 하는 실수는 받은 저장소를 파악하지 않고 곧장 코드를 쓰는 것입니다. 그러면 이미 있는 <code>status</code> 필드를 모른 채 새 필드를 만들거나, 팀의 404 패턴과 다른 방식으로 에러를 내 일관성이 깨집니다. <strong>분석은 만들기 전에 무엇이 이미 있는지 아는 단계</strong>입니다. ch_04의 탐색(c04)으로 먼저 읽고, 그다음에 요구사항을 적으세요.</p>
+<h3 id="2_1">2. 요구사항을 "잘 만든다"처럼 막연하게 적는다</h3>
+<p>"완료 기능을 잘 만든다"는 요구사항이 아닙니다. 무엇이 "잘"인지 검증할 수 없기 때문입니다. 요구사항은 <strong>입력·정상 결과·비정상 결과</strong>를 담아 그대로 테스트로 옮길 수 있어야 합니다. "테스트로 옮길 수 있는가?"를 매 요구사항마다 자문하세요.</p>
+<h3 id="3-pr">3. 범위를 키워 첫 PR을 끝내지 못한다</h3>
+<p>"기왕 하는 김에" 인증·데이터베이스·UI까지 붙이려다 첫 PR을 영원히 올리지 못하는 함정입니다. 범위 Out을 명시하고 MVP(완료 처리 하나)부터 완성하세요. <strong>작게 끝내고 다음 PR로 키우는 것</strong>이 크게 벌이고 못 끝내는 것보다 항상 낫습니다.</p>
+<h3 id="4-nfr">4. 비기능 요구사항(NFR)을 무시한다</h3>
+<p>"동작만 하면 됐지"라며 테스트·권한·플랜·CLAUDE.md를 건너뛰면, 기능은 되지만 리뷰에서 막히고 팀의 신뢰를 잃습니다. 신입의 첫 업무는 <strong>결과만큼 일하는 방식</strong>으로 평가받습니다. FR과 NFR을 함께 채우세요.</p>
+</div>
+<div class="info-box best-practice">
+<h3 id="_11">이 챕터 한 줄 정리</h3>
+<p>분석은 드라이빙 퀘스천·POV로 방향을 잡고, 기존 저장소를 <strong>변경 없이 탐색</strong>해 파악한 뒤, 무엇을 만드는지(FR)와 어떻게 만드는지(NFR)를 검증 가능한 요구사항으로 적고, 범위(In/Out)로 작게 통제하며, 각 요구사항을 <strong>단원 개념으로 추적</strong>하는 단계입니다. 다음 챕터(ch_14)에서는 이 요구사항을 <strong>설계</strong>(데이터 구조·모듈 변경·ADR·순서도)로 옮깁니다.</p>
+</div>
+
+<nav class="chapter-nav"><a href="ch_12.html">← 이전: 더 나아가기(맛보기): 서브에이전트와 MCP</a><a href="index.html" style="flex:0 0 auto; text-align:center">목차</a><a href="ch_14.html" style="text-align:right">다음: 종합 프로젝트: 첫 기능·첫 PR — 설계(데이터·모듈·ADR) →</a></nav>
+</main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-powershell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+</body>
+</html>

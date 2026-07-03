@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 신입 개발자 온보딩 — 첫 기능부터 첫 PR까지</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+
+/* 디자인 토큰 — 브랜드 변경 시 여기만 수정 */
+:root {
+  --primary: #1976D2;
+  --primary-light: #E3F2FD;
+  --accent: #FF6F00;
+  --success: #2E7D32;
+  --warning: #F57F17;
+  --danger: #C62828;
+  --bg: #FAFAFA;
+  --text: #212121;
+  --text-secondary: #616161;
+  --border: #E0E0E0;
+  --code-bg: #2d2d2d;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.8; font-size: 16px;
+}
+.container { max-width: 1400px; margin: 0 auto; }
+.main-content { max-width: 1000px; padding: 40px 48px; margin: 0 auto; }
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white; padding: 48px 40px; border-radius: 16px; margin-bottom: 40px;
+}
+.chapter-header .chapter-number {
+  font-size: 14px; opacity: 0.8; text-transform: uppercase; letter-spacing: 2px;
+}
+.chapter-header h1 { font-size: 32px; margin: 8px 0 16px; font-weight: 800; }
+.chapter-header .chapter-meta { font-size: 14px; opacity: 0.9; }
+
+/* 학습 목표 */
+.learning-objectives {
+  background: var(--primary-light); border-left: 4px solid var(--primary);
+  padding: 24px 28px; border-radius: 0 12px 12px 0; margin-bottom: 36px;
+}
+.learning-objectives h3 { color: var(--primary); font-size: 16px; margin-bottom: 12px; }
+.learning-objectives li { margin: 8px 0; padding-left: 8px; }
+
+/* 섹션 / 본문 기본 요소 */
+h1 { font-size: 28px; margin: 36px 0 16px; color: var(--text); }
+h2 {
+  font-size: 26px; color: var(--primary); margin: 48px 0 20px;
+  padding-bottom: 10px; border-bottom: 2px solid var(--primary-light);
+}
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+p { margin: 12px 0; }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin: 6px 0; }
+a { color: var(--primary); }
+img { max-width: 100%; height: auto; border-radius: 12px; }
+blockquote {
+  border-left: 4px solid var(--primary); background: var(--primary-light);
+  padding: 12px 20px; margin: 16px 0; border-radius: 0 12px 12px 0;
+}
+blockquote p:last-child { margin-bottom: 0; }
+/* 인라인 코드 (pre 밖) */
+:not(pre) > code {
+  background: #f0f0f0; padding: 2px 6px; border-radius: 4px;
+  font-size: 0.9em; color: var(--danger);
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+}
+
+/* 코드 블록 (.code-block-wrapper) */
+.code-block-wrapper {
+  margin: 24px 0; border-radius: 12px; overflow: hidden;
+  box-shadow: var(--card-shadow); border: 1px solid var(--border);
+}
+.code-block-header {
+  background: #1a1a2e; color: #a0a0b0; padding: 10px 20px; font-size: 13px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+.code-block-header .lang-badge {
+  background: var(--primary); color: white; padding: 2px 10px;
+  border-radius: 10px; font-size: 11px; font-weight: 700;
+}
+pre[class*="language-"] {
+  margin: 0 !important; border-radius: 0 !important;
+  font-size: 14px !important; line-height: 1.6 !important; padding: 20px !important;
+}
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important; padding-right: 8px !important;
+}
+.code-explanation {
+  background: #f8f9fa; border-top: 1px solid var(--border); padding: 16px 20px;
+  font-size: 14px; color: var(--text-secondary); line-height: 1.7;
+}
+.code-explanation strong { color: var(--text); }
+.code-explanation .explain-title {
+  display: inline-block; background: var(--accent); color: white; font-size: 11px;
+  font-weight: 700; padding: 2px 10px; border-radius: 10px; margin-bottom: 8px;
+}
+.code-output {
+  background: #1e1e1e; color: #4EC9B0; padding: 12px 20px;
+  font-family: monospace; font-size: 13px; border-top: 1px dashed #444;
+}
+.code-output::before {
+  content: "▶ 실행 결과"; display: block; color: #808080;
+  font-size: 11px; margin-bottom: 4px;
+}
+
+/* 특수 박스 (info-box 5종) */
+.info-box { padding: 14px 20px; border-radius: 12px; margin: 16px 0; border-left: 4px solid; }
+.info-box p:last-child, .info-box ul:last-child { margin-bottom: 0; }
+.info-box.tip { background: #E8F5E9; border-color: var(--success); }
+.info-box.warning { background: #FFF8E1; border-color: var(--warning); }
+.info-box.danger { background: #FFEBEE; border-color: var(--danger); }
+.info-box.beginner { background: #F3E5F5; border-color: #7B1FA2; }
+.info-box.best-practice { background: #E0F2F1; border-color: #00695C; }
+.info-box .box-header {
+  display: flex; align-items: center; margin-bottom: 12px;
+  padding-bottom: 10px; border-bottom: 1px solid rgba(123,31,162,0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* 표 */
+.api-reference h3, .library-section h3 {
+  background: var(--primary); color: white; padding: 12px 20px;
+  border-radius: 8px 8px 0 0; margin-bottom: 0; font-size: 16px;
+}
+hr.section-divider, hr {
+  border: none; border-top: 2px solid var(--border); margin: 36px 0;
+}
+.table-responsive { overflow-x: auto; margin: 16px 0; border-radius: 8px; box-shadow: var(--card-shadow); }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+table thead { background: #f5f5f5; }
+table th { padding: 12px 16px; text-align: left; font-weight: 700; border-bottom: 2px solid var(--border); }
+table td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table tr:hover { background: #fafafa; }
+table code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 13px; color: var(--danger); }
+.api-signature {
+  background: var(--code-bg); color: #e0e0e0; padding: 8px 16px; border-radius: 6px;
+  font-family: monospace; font-size: 13px; margin: 4px 0; overflow-x: auto;
+}
+
+/* 다이어그램 */
+.diagram-container { margin: 28px 0; text-align: center; }
+.diagram-container img { max-width: 100%; border-radius: 12px; box-shadow: var(--card-shadow); }
+.diagram-container img.screenshot { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.diagram-container .caption { margin-top: 10px; font-size: 13px; color: var(--text-secondary); font-style: italic; }
+.diagram-container .svg-diagram { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; }
+.diagram-container .svg-diagram svg { max-width: 100%; height: auto; }
+.missing-diagram { color: var(--danger); font-style: italic; padding: 1rem; background: #FFEBEE; border-radius: 8px; }
+.mermaid { margin: 24px auto; text-align: center; }
+
+/* 연습 문제 & 프로젝트 */
+.exercise-box { background: #FFF3E0; border: 2px solid var(--accent); border-radius: 12px; padding: 24px; margin: 28px 0; }
+.exercise-box h4 { color: var(--accent); }
+.project-box { background: linear-gradient(135deg, #E8EAF6, #C5CAE9); border-radius: 12px; padding: 28px; margin: 36px 0; }
+.project-box h3 { color: #283593; margin-bottom: 12px; }
+.project-readme { background: rgba(255,255,255,0.7); border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; }
+.project-file { margin: 12px 0; border-radius: 8px; overflow: hidden; }
+.project-file summary { background: rgba(255,255,255,0.7); padding: 12px 16px; cursor: pointer; font-weight: 600; border-radius: 8px; }
+.project-file pre { margin: 0; }
+
+/* FAQ */
+.faq-section details { border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; }
+.faq-section summary { padding: 14px 20px; cursor: pointer; font-weight: 600; color: var(--primary); background: #fafafa; border-radius: 8px; }
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+.faq-section .faq-answer { padding: 16px 20px; color: var(--text-secondary); }
+
+/* 챕터 네비게이션 */
+.chapter-nav { display: flex; justify-content: space-between; margin: 48px 0 24px; gap: 16px; }
+.chapter-nav a {
+  flex: 1; display: block; padding: 16px 20px; background: white;
+  border: 1px solid var(--border); border-radius: 12px; text-decoration: none;
+  color: var(--text); transition: all 0.2s;
+}
+.chapter-nav a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+
+/* ── 인덱스 페이지 ── */
+.index-container { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+.book-header { text-align: center; margin-bottom: 40px; }
+.book-header h1 { font-size: 36px; color: var(--primary); border: none; margin: 0 0 8px; }
+.book-header p { color: var(--text-secondary); font-size: 18px; }
+.chapter-list { list-style: none; margin: 0; }
+.chapter-list li { margin-bottom: 12px; }
+.chapter-list a {
+  display: flex; align-items: center; gap: 16px; padding: 16px 24px;
+  background: white; border: 1px solid var(--border); border-radius: 12px;
+  text-decoration: none; color: var(--text); transition: all 0.2s;
+}
+.chapter-list a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+.chapter-list .ch-num { font-weight: 700; color: var(--primary); min-width: 3.5rem; }
+.difficulty-group { margin-top: 32px; }
+.difficulty-group h2 { font-size: 18px; border: none; }
+.difficulty { display: inline-block; padding: 2px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; }
+.difficulty-입문 { background: #E8F5E9; color: #166534; }
+.difficulty-기초 { background: #E3F2FD; color: #1e40af; }
+.difficulty-중급 { background: #FFF8E1; color: #92400e; }
+.difficulty-실무 { background: #FCE7F3; color: #9d174d; }
+.difficulty-고급 { background: #FFEBEE; color: #991b1b; }
+
+/* 인쇄 / 반응형 */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper, table, .diagram-container, .project-box { break-inside: avoid; page-break-inside: avoid; }
+  h1, h2, h3, h4 { break-after: avoid; page-break-after: avoid; }
+}
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+  .chapter-nav { flex-direction: column; }
+}
+
+/* === templates/chapter_design_template.html (단일 디자인 소스, 우선 적용) === */
+
+/* ============================================================
+   디자인 토큰 (색상·그림자) — 브랜드 변경 시 여기만 수정
+   ============================================================ */
+:root {
+  --primary: #1976D2;        /* 주조색(파랑) — 헤더/제목/강조 */
+  --primary-light: #E3F2FD;  /* 주조색 옅은 톤 — 박스 배경/밑줄 */
+  --accent: #FF6F00;         /* 강조색(주황) — 해설 라벨/연습문제 */
+  --success: #2E7D32;        /* 성공(초록) */
+  --warning: #F57F17;        /* 경고(노랑) */
+  --danger: #C62828;         /* 위험(빨강) */
+  --bg: #FAFAFA;             /* 페이지 배경 */
+  --text: #212121;           /* 본문 텍스트 */
+  --text-secondary: #616161; /* 보조 텍스트 */
+  --border: #E0E0E0;         /* 테두리 */
+  --code-bg: #2d2d2d;        /* 코드 배경 */
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  font-size: 16px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   메인 콘텐츠
+   ============================================================ */
+.main-content {
+  flex: 1;
+  max-width: 1400px;
+  padding: 40px 48px;
+  margin: 0 auto;
+}
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white;
+  padding: 48px 40px;
+  border-radius: 16px;
+  margin-bottom: 40px;
+}
+
+.chapter-header .chapter-number {
+  font-size: 14px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.chapter-header h1 {
+  font-size: 32px;
+  margin: 8px 0 16px;
+  font-weight: 800;
+}
+
+.chapter-header .chapter-meta {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* 학습 목표 박스 */
+.learning-objectives {
+  background: var(--primary-light);
+  border-left: 4px solid var(--primary);
+  padding: 24px 28px;
+  border-radius: 0 12px 12px 0;
+  margin-bottom: 36px;
+}
+
+.learning-objectives h3 {
+  color: var(--primary);
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.learning-objectives li {
+  margin: 8px 0;
+  padding-left: 8px;
+  color: var(--text);
+}
+
+/* 섹션 */
+h2 {
+  font-size: 26px;
+  color: var(--primary);
+  margin: 48px 0 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--primary-light);
+}
+
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+
+p { margin: 12px 0; }
+
+/* ============================================================
+   코드 블록 - 박스형 + 줄번호 + 실무 설명
+   ============================================================ */
+.code-block-wrapper {
+  margin: 24px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+}
+
+.code-block-header {
+  background: #1a1a2e;
+  color: #a0a0b0;
+  padding: 10px 20px;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+
+.code-block-header .lang-badge {
+  background: var(--primary);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Prism 줄번호 스타일 오버라이드 */
+pre[class*="language-"] {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  padding: 20px !important;
+}
+
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important;
+  padding-right: 8px !important;
+}
+
+/* 코드 실무 설명 박스 */
+.code-explanation {
+  background: #f8f9fa;
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.code-explanation strong { color: var(--text); }
+
+.code-explanation .explain-title {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+/* 코드 실행 결과 */
+.code-output {
+  background: #1e1e1e;
+  color: #4EC9B0;
+  padding: 12px 20px;
+  font-family: monospace;
+  font-size: 13px;
+  border-top: 1px dashed #444;
+}
+
+.code-output::before {
+  content: "▶ 실행 결과";
+  display: block;
+  color: #808080;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+/* ============================================================
+   특수 박스 (팁, 주의, 베스트 프랙티스, 초보자 설명)
+   ============================================================ */
+.info-box {
+  padding: 14px 20px;
+  border-radius: 12px;
+  margin: 16px 0;
+  border-left: 4px solid;
+}
+.info-box p:last-child { margin-bottom: 0; }
+.info-box ul:last-child { margin-bottom: 0; }
+
+.info-box.tip {
+  background: #E8F5E9;
+  border-color: var(--success);
+}
+
+.info-box.warning {
+  background: #FFF8E1;
+  border-color: var(--warning);
+}
+
+.info-box.danger {
+  background: #FFEBEE;
+  border-color: var(--danger);
+}
+
+.info-box.beginner {
+  background: #F3E5F5;
+  border-color: #7B1FA2;
+}
+
+.info-box.best-practice {
+  background: #E0F2F1;
+  border-color: #00695C;
+}
+
+.info-box .box-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(123, 31, 162, 0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* ============================================================
+   라이브러리 & API 레퍼런스 테이블
+   ============================================================ */
+.api-reference, .library-section {
+  margin: 32px 0;
+}
+
+.api-reference h3, .library-section h3 {
+  background: var(--primary);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 0;
+  font-size: 16px;
+}
+
+hr.section-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 36px 0;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  margin: 16px 0;
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  font-size: 14px;
+}
+
+table thead {
+  background: #f5f5f5;
+}
+
+table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 2px solid var(--border);
+}
+
+table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+table tr:hover { background: #fafafa; }
+
+table code {
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+/* API 시그니처 행 */
+.api-signature {
+  background: var(--code-bg);
+  color: #e0e0e0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 13px;
+  margin: 4px 0;
+  overflow-x: auto;
+}
+
+/* ============================================================
+   이미지 / 다이어그램
+   ============================================================ */
+.diagram-container {
+  margin: 28px 0;
+  text-align: center;
+}
+
+.diagram-container img {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+}
+
+.diagram-container .caption {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* PPTX 원본 보존 뱃지 */
+.diagram-container .pptx-badge {
+  display: inline-block;
+  background: #FF6F00;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: normal;
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Mermaid 다이어그램 (인라인 렌더링) */
+.mermaid {
+  margin: 24px auto;
+  text-align: center;
+}
+
+/* ============================================================
+   연습 문제 & 프로젝트
+   ============================================================ */
+.exercise-box {
+  background: #FFF3E0;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 28px 0;
+}
+
+.exercise-box h4 { color: var(--accent); }
+
+.project-box {
+  background: linear-gradient(135deg, #E8EAF6, #C5CAE9);
+  border-radius: 12px;
+  padding: 28px;
+  margin: 36px 0;
+}
+
+/* ============================================================
+   FAQ
+   ============================================================ */
+.faq-section details {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 8px 0;
+  padding: 0;
+}
+
+.faq-section summary {
+  padding: 14px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primary);
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+
+.faq-section details .faq-answer {
+  padding: 16px 20px;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   챕터 네비게이션 (이전/다음)
+   ============================================================ */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  margin: 48px 0 24px;
+  gap: 16px;
+}
+
+.chapter-nav a {
+  flex: 1;
+  display: block;
+  padding: 16px 20px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.chapter-nav a:hover {
+  border-color: var(--primary);
+  box-shadow: var(--card-shadow);
+}
+
+/* ============================================================
+   인쇄용 스타일
+   ============================================================ */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper { break-inside: avoid; }
+}
+
+/* ============================================================
+   반응형 - 모바일
+   ============================================================ */
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+}
+
+</style>
+</head>
+<body>
+<div class="index-container">
+  <div class="book-header">
+    <h1>Claude Code 신입 개발자 온보딩 — 첫 기능부터 첫 PR까지</h1>
+    <p></p>
+  </div>
+  <section class="book-preface info-box beginner" markdown="0" style="margin-bottom:40px;">
+<h2 style="border:none; margin-top:0;">이 책에 대하여 (머리말)</h2>
+<h3>이 책의 목적</h3>
+<p>이 책의 목적은 Python·웹 백엔드 기초가 있는 주니어 개발자가 Claude Code를 처음 익혀, 기존 팀의 FastAPI 저장소에 작은 기능 하나를 안전하게 추가하고 테스트와 함께 리뷰어가 신뢰할 수 있는 '첫 PR'까지 올리는 온보딩 여정을 끝까지 해내게 하는 것입니다. Claude Code의 기능을 백과사전처럼 나열하지 않고, 신입의 실제 첫 업무 흐름(설치 → 코드베이스 파악 → 안전하게 변경 → 검증 → 팀 규약 → 커밋·PR → 리뷰 대응 → 디버깅)에 맞춰 필요한 만큼만 배웁니다.</p>
+<h3>이 책을 마치면 할 수 있는 것</h3>
+<ul><li>Claude Code를 설치·인증하고 대화형 세션에서 에이전트와 일하는 흐름을 운용할 수 있습니다</li><li>낯선 팀 코드베이스를 에이전트 탐색으로 빠르게 파악하고, 권한·플랜 모드로 안전하게 변경할 수 있습니다</li><li>변경을 pytest 실행·테스트로 검증하고, CLAUDE.md로 팀 규약을 주입할 수 있습니다</li><li>작은 논리 단위로 커밋해 첫 PR을 올리고, 코드 리뷰에 근거 있게 대응하며, 에이전트와 함께 디버깅할 수 있습니다</li><li>종합 프로젝트로 기존 FastAPI 저장소에 '완료 처리·상태 필터' 기능을 추가해 테스트와 함께 첫 PR을 완성할 수 있습니다</li></ul>
+<h3>대상 독자</h3>
+<p>Python 기초 문법과 웹 백엔드(HTTP·REST)의 기본 개념을 갖춘 주니어 개발자로, Claude Code(에이전트형 코딩 도구)는 처음 쓰는 분. 컴퓨터공학 전공 여부는 무관하지만, 아래 선수 지식은 가정합니다(전공이 아니라 '아래를 아는가'가 기준입니다).</p>
+<h3>선수 지식</h3>
+<ul><li>Python 기초 문법: 함수·조건문·리스트/딕셔너리·모듈 import를 읽고 쓸 수 있음(코드를 처음 보는 수준이면 먼저 Python 입문을 권합니다)</li><li>터미널·명령줄 기본: 디렉터리 이동(cd)·명령 실행·환경 변수 개념</li><li>git 기본: add·commit·branch·PR(Pull Request)이 무엇인지 아는 정도(능숙할 필요는 없음 — 9장에서 Claude Code와 함께 익힙니다)</li><li>HTTP·REST 기초: GET/POST 같은 메서드와 상태 코드(200·404 등)의 의미</li><li>FastAPI는 몰라도 됩니다: 실습 저장소(team-tasks-api)의 코드를 '읽을 수 있으면' 충분하며, 필요한 부분은 본문에서 설명합니다</li></ul>
+<h3>실습 환경</h3>
+<ul><li>운영체제: Windows 11 기준(명령은 macOS·Linux에도 대응; 차이는 그때그때 표기)</li><li>Python 3.10 이상과 Git for Windows(Git Bash)</li><li>Claude 구독(Pro/Max) 또는 API 키 — 1장에서 인증 방법을 안내</li><li>공용 실습 저장소: team-tasks-api(이 책의 assets/에 포함; 1장에서 git init·pip·pytest로 셋업)</li></ul>
+</section>
+  <div class="difficulty-group"><h2><span class="difficulty difficulty-입문">입문</span></h2>
+<ul class="chapter-list">
+<li><a href="ch_01.html"><span class="ch-num">Ch.01</span><span class="ch-title">첫날: Claude Code 설치·인증과 첫 세션</span></a></li>
+<li><a href="ch_02.html"><span class="ch-num">Ch.02</span><span class="ch-title">에이전트형 코딩의 작동 방식: 관찰→계획→도구→확인</span></a></li>
+<li><a href="ch_03.html"><span class="ch-num">Ch.03</span><span class="ch-title">효과적인 작업 지시: 목표·맥락·제약·완료 조건</span></a></li>
+</ul></div>
+<div class="difficulty-group"><h2><span class="difficulty difficulty-기초">기초</span></h2>
+<ul class="chapter-list">
+<li><a href="ch_04.html"><span class="ch-num">Ch.04</span><span class="ch-title">낯선 팀 코드 파악하기: 에이전트로 코드베이스 탐색</span></a></li>
+<li><a href="ch_05.html"><span class="ch-num">Ch.05</span><span class="ch-title">안전하게 변경하기 (1): 권한과 승인</span></a></li>
+<li><a href="ch_06.html"><span class="ch-num">Ch.06</span><span class="ch-title">안전하게 변경하기 (2): 플랜 모드로 먼저 계획</span></a></li>
+</ul></div>
+<div class="difficulty-group"><h2><span class="difficulty difficulty-중급">중급</span></h2>
+<ul class="chapter-list">
+<li><a href="ch_07.html"><span class="ch-num">Ch.07</span><span class="ch-title">실행·테스트로 검증하기</span></a></li>
+<li><a href="ch_08.html"><span class="ch-num">Ch.08</span><span class="ch-title">팀 규약 주입: CLAUDE.md로 컨벤션 명문화</span></a></li>
+</ul></div>
+<div class="difficulty-group"><h2><span class="difficulty difficulty-실무">실무</span></h2>
+<ul class="chapter-list">
+<li><a href="ch_09.html"><span class="ch-num">Ch.09</span><span class="ch-title">첫 커밋과 첫 PR: git 워크플로</span></a></li>
+<li><a href="ch_10.html"><span class="ch-num">Ch.10</span><span class="ch-title">코드 리뷰 받기·대응하기</span></a></li>
+<li><a href="ch_11.html"><span class="ch-num">Ch.11</span><span class="ch-title">에이전트와 함께 디버깅하기</span></a></li>
+<li><a href="ch_12.html"><span class="ch-num">Ch.12</span><span class="ch-title">더 나아가기(맛보기): 서브에이전트와 MCP</span></a></li>
+<li><a href="ch_13.html"><span class="ch-num">Ch.13</span><span class="ch-title">종합 프로젝트: 첫 기능·첫 PR — 분석(요구사항·범위)</span></a></li>
+<li><a href="ch_14.html"><span class="ch-num">Ch.14</span><span class="ch-title">종합 프로젝트: 첫 기능·첫 PR — 설계(데이터·모듈·ADR)</span></a></li>
+<li><a href="ch_15.html"><span class="ch-num">Ch.15</span><span class="ch-title">종합 프로젝트: 첫 기능·첫 PR — 구현(마일스톤 증분)</span></a></li>
+<li><a href="ch_16.html"><span class="ch-num">Ch.16</span><span class="ch-title">종합 프로젝트: 첫 기능·첫 PR — 발표·평가·성찰</span></a></li>
+</ul></div>
+
+</div>
+</body>
+</html>

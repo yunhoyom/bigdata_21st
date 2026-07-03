@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>15장: 종합 프로젝트: 첫 기능·첫 PR — 구현(마일스톤 증분) - Claude Code 신입 개발자 온보딩 — 첫 기능부터 첫 PR까지</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+<style>
+
+/* 디자인 토큰 — 브랜드 변경 시 여기만 수정 */
+:root {
+  --primary: #1976D2;
+  --primary-light: #E3F2FD;
+  --accent: #FF6F00;
+  --success: #2E7D32;
+  --warning: #F57F17;
+  --danger: #C62828;
+  --bg: #FAFAFA;
+  --text: #212121;
+  --text-secondary: #616161;
+  --border: #E0E0E0;
+  --code-bg: #2d2d2d;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.8; font-size: 16px;
+}
+.container { max-width: 1400px; margin: 0 auto; }
+.main-content { max-width: 1000px; padding: 40px 48px; margin: 0 auto; }
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white; padding: 48px 40px; border-radius: 16px; margin-bottom: 40px;
+}
+.chapter-header .chapter-number {
+  font-size: 14px; opacity: 0.8; text-transform: uppercase; letter-spacing: 2px;
+}
+.chapter-header h1 { font-size: 32px; margin: 8px 0 16px; font-weight: 800; }
+.chapter-header .chapter-meta { font-size: 14px; opacity: 0.9; }
+
+/* 학습 목표 */
+.learning-objectives {
+  background: var(--primary-light); border-left: 4px solid var(--primary);
+  padding: 24px 28px; border-radius: 0 12px 12px 0; margin-bottom: 36px;
+}
+.learning-objectives h3 { color: var(--primary); font-size: 16px; margin-bottom: 12px; }
+.learning-objectives li { margin: 8px 0; padding-left: 8px; }
+
+/* 섹션 / 본문 기본 요소 */
+h1 { font-size: 28px; margin: 36px 0 16px; color: var(--text); }
+h2 {
+  font-size: 26px; color: var(--primary); margin: 48px 0 20px;
+  padding-bottom: 10px; border-bottom: 2px solid var(--primary-light);
+}
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+p { margin: 12px 0; }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin: 6px 0; }
+a { color: var(--primary); }
+img { max-width: 100%; height: auto; border-radius: 12px; }
+blockquote {
+  border-left: 4px solid var(--primary); background: var(--primary-light);
+  padding: 12px 20px; margin: 16px 0; border-radius: 0 12px 12px 0;
+}
+blockquote p:last-child { margin-bottom: 0; }
+/* 인라인 코드 (pre 밖) */
+:not(pre) > code {
+  background: #f0f0f0; padding: 2px 6px; border-radius: 4px;
+  font-size: 0.9em; color: var(--danger);
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+}
+
+/* 코드 블록 (.code-block-wrapper) */
+.code-block-wrapper {
+  margin: 24px 0; border-radius: 12px; overflow: hidden;
+  box-shadow: var(--card-shadow); border: 1px solid var(--border);
+}
+.code-block-header {
+  background: #1a1a2e; color: #a0a0b0; padding: 10px 20px; font-size: 13px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+.code-block-header .lang-badge {
+  background: var(--primary); color: white; padding: 2px 10px;
+  border-radius: 10px; font-size: 11px; font-weight: 700;
+}
+pre[class*="language-"] {
+  margin: 0 !important; border-radius: 0 !important;
+  font-size: 14px !important; line-height: 1.6 !important; padding: 20px !important;
+}
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important; padding-right: 8px !important;
+}
+.code-explanation {
+  background: #f8f9fa; border-top: 1px solid var(--border); padding: 16px 20px;
+  font-size: 14px; color: var(--text-secondary); line-height: 1.7;
+}
+.code-explanation strong { color: var(--text); }
+.code-explanation .explain-title {
+  display: inline-block; background: var(--accent); color: white; font-size: 11px;
+  font-weight: 700; padding: 2px 10px; border-radius: 10px; margin-bottom: 8px;
+}
+.code-output {
+  background: #1e1e1e; color: #4EC9B0; padding: 12px 20px;
+  font-family: monospace; font-size: 13px; border-top: 1px dashed #444;
+}
+.code-output::before {
+  content: "▶ 실행 결과"; display: block; color: #808080;
+  font-size: 11px; margin-bottom: 4px;
+}
+
+/* 특수 박스 (info-box 5종) */
+.info-box { padding: 14px 20px; border-radius: 12px; margin: 16px 0; border-left: 4px solid; }
+.info-box p:last-child, .info-box ul:last-child { margin-bottom: 0; }
+.info-box.tip { background: #E8F5E9; border-color: var(--success); }
+.info-box.warning { background: #FFF8E1; border-color: var(--warning); }
+.info-box.danger { background: #FFEBEE; border-color: var(--danger); }
+.info-box.beginner { background: #F3E5F5; border-color: #7B1FA2; }
+.info-box.best-practice { background: #E0F2F1; border-color: #00695C; }
+.info-box .box-header {
+  display: flex; align-items: center; margin-bottom: 12px;
+  padding-bottom: 10px; border-bottom: 1px solid rgba(123,31,162,0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* 표 */
+.api-reference h3, .library-section h3 {
+  background: var(--primary); color: white; padding: 12px 20px;
+  border-radius: 8px 8px 0 0; margin-bottom: 0; font-size: 16px;
+}
+hr.section-divider, hr {
+  border: none; border-top: 2px solid var(--border); margin: 36px 0;
+}
+.table-responsive { overflow-x: auto; margin: 16px 0; border-radius: 8px; box-shadow: var(--card-shadow); }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+table thead { background: #f5f5f5; }
+table th { padding: 12px 16px; text-align: left; font-weight: 700; border-bottom: 2px solid var(--border); }
+table td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table tr:hover { background: #fafafa; }
+table code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 13px; color: var(--danger); }
+.api-signature {
+  background: var(--code-bg); color: #e0e0e0; padding: 8px 16px; border-radius: 6px;
+  font-family: monospace; font-size: 13px; margin: 4px 0; overflow-x: auto;
+}
+
+/* 다이어그램 */
+.diagram-container { margin: 28px 0; text-align: center; }
+.diagram-container img { max-width: 100%; border-radius: 12px; box-shadow: var(--card-shadow); }
+.diagram-container img.screenshot { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.diagram-container .caption { margin-top: 10px; font-size: 13px; color: var(--text-secondary); font-style: italic; }
+.diagram-container .svg-diagram { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; }
+.diagram-container .svg-diagram svg { max-width: 100%; height: auto; }
+.missing-diagram { color: var(--danger); font-style: italic; padding: 1rem; background: #FFEBEE; border-radius: 8px; }
+.mermaid { margin: 24px auto; text-align: center; }
+
+/* 연습 문제 & 프로젝트 */
+.exercise-box { background: #FFF3E0; border: 2px solid var(--accent); border-radius: 12px; padding: 24px; margin: 28px 0; }
+.exercise-box h4 { color: var(--accent); }
+.project-box { background: linear-gradient(135deg, #E8EAF6, #C5CAE9); border-radius: 12px; padding: 28px; margin: 36px 0; }
+.project-box h3 { color: #283593; margin-bottom: 12px; }
+.project-readme { background: rgba(255,255,255,0.7); border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; }
+.project-file { margin: 12px 0; border-radius: 8px; overflow: hidden; }
+.project-file summary { background: rgba(255,255,255,0.7); padding: 12px 16px; cursor: pointer; font-weight: 600; border-radius: 8px; }
+.project-file pre { margin: 0; }
+
+/* FAQ */
+.faq-section details { border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; }
+.faq-section summary { padding: 14px 20px; cursor: pointer; font-weight: 600; color: var(--primary); background: #fafafa; border-radius: 8px; }
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+.faq-section .faq-answer { padding: 16px 20px; color: var(--text-secondary); }
+
+/* 챕터 네비게이션 */
+.chapter-nav { display: flex; justify-content: space-between; margin: 48px 0 24px; gap: 16px; }
+.chapter-nav a {
+  flex: 1; display: block; padding: 16px 20px; background: white;
+  border: 1px solid var(--border); border-radius: 12px; text-decoration: none;
+  color: var(--text); transition: all 0.2s;
+}
+.chapter-nav a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+
+/* ── 인덱스 페이지 ── */
+.index-container { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+.book-header { text-align: center; margin-bottom: 40px; }
+.book-header h1 { font-size: 36px; color: var(--primary); border: none; margin: 0 0 8px; }
+.book-header p { color: var(--text-secondary); font-size: 18px; }
+.chapter-list { list-style: none; margin: 0; }
+.chapter-list li { margin-bottom: 12px; }
+.chapter-list a {
+  display: flex; align-items: center; gap: 16px; padding: 16px 24px;
+  background: white; border: 1px solid var(--border); border-radius: 12px;
+  text-decoration: none; color: var(--text); transition: all 0.2s;
+}
+.chapter-list a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+.chapter-list .ch-num { font-weight: 700; color: var(--primary); min-width: 3.5rem; }
+.difficulty-group { margin-top: 32px; }
+.difficulty-group h2 { font-size: 18px; border: none; }
+.difficulty { display: inline-block; padding: 2px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; }
+.difficulty-입문 { background: #E8F5E9; color: #166534; }
+.difficulty-기초 { background: #E3F2FD; color: #1e40af; }
+.difficulty-중급 { background: #FFF8E1; color: #92400e; }
+.difficulty-실무 { background: #FCE7F3; color: #9d174d; }
+.difficulty-고급 { background: #FFEBEE; color: #991b1b; }
+
+/* 인쇄 / 반응형 */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper, table, .diagram-container, .project-box { break-inside: avoid; page-break-inside: avoid; }
+  h1, h2, h3, h4 { break-after: avoid; page-break-after: avoid; }
+}
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+  .chapter-nav { flex-direction: column; }
+}
+
+/* === templates/chapter_design_template.html (단일 디자인 소스, 우선 적용) === */
+
+/* ============================================================
+   디자인 토큰 (색상·그림자) — 브랜드 변경 시 여기만 수정
+   ============================================================ */
+:root {
+  --primary: #1976D2;        /* 주조색(파랑) — 헤더/제목/강조 */
+  --primary-light: #E3F2FD;  /* 주조색 옅은 톤 — 박스 배경/밑줄 */
+  --accent: #FF6F00;         /* 강조색(주황) — 해설 라벨/연습문제 */
+  --success: #2E7D32;        /* 성공(초록) */
+  --warning: #F57F17;        /* 경고(노랑) */
+  --danger: #C62828;         /* 위험(빨강) */
+  --bg: #FAFAFA;             /* 페이지 배경 */
+  --text: #212121;           /* 본문 텍스트 */
+  --text-secondary: #616161; /* 보조 텍스트 */
+  --border: #E0E0E0;         /* 테두리 */
+  --code-bg: #2d2d2d;        /* 코드 배경 */
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  font-size: 16px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   메인 콘텐츠
+   ============================================================ */
+.main-content {
+  flex: 1;
+  max-width: 1400px;
+  padding: 40px 48px;
+  margin: 0 auto;
+}
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white;
+  padding: 48px 40px;
+  border-radius: 16px;
+  margin-bottom: 40px;
+}
+
+.chapter-header .chapter-number {
+  font-size: 14px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.chapter-header h1 {
+  font-size: 32px;
+  margin: 8px 0 16px;
+  font-weight: 800;
+}
+
+.chapter-header .chapter-meta {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* 학습 목표 박스 */
+.learning-objectives {
+  background: var(--primary-light);
+  border-left: 4px solid var(--primary);
+  padding: 24px 28px;
+  border-radius: 0 12px 12px 0;
+  margin-bottom: 36px;
+}
+
+.learning-objectives h3 {
+  color: var(--primary);
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.learning-objectives li {
+  margin: 8px 0;
+  padding-left: 8px;
+  color: var(--text);
+}
+
+/* 섹션 */
+h2 {
+  font-size: 26px;
+  color: var(--primary);
+  margin: 48px 0 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--primary-light);
+}
+
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+
+p { margin: 12px 0; }
+
+/* ============================================================
+   코드 블록 - 박스형 + 줄번호 + 실무 설명
+   ============================================================ */
+.code-block-wrapper {
+  margin: 24px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+}
+
+.code-block-header {
+  background: #1a1a2e;
+  color: #a0a0b0;
+  padding: 10px 20px;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+
+.code-block-header .lang-badge {
+  background: var(--primary);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Prism 줄번호 스타일 오버라이드 */
+pre[class*="language-"] {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  padding: 20px !important;
+}
+
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important;
+  padding-right: 8px !important;
+}
+
+/* 코드 실무 설명 박스 */
+.code-explanation {
+  background: #f8f9fa;
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.code-explanation strong { color: var(--text); }
+
+.code-explanation .explain-title {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+/* 코드 실행 결과 */
+.code-output {
+  background: #1e1e1e;
+  color: #4EC9B0;
+  padding: 12px 20px;
+  font-family: monospace;
+  font-size: 13px;
+  border-top: 1px dashed #444;
+}
+
+.code-output::before {
+  content: "▶ 실행 결과";
+  display: block;
+  color: #808080;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+/* ============================================================
+   특수 박스 (팁, 주의, 베스트 프랙티스, 초보자 설명)
+   ============================================================ */
+.info-box {
+  padding: 14px 20px;
+  border-radius: 12px;
+  margin: 16px 0;
+  border-left: 4px solid;
+}
+.info-box p:last-child { margin-bottom: 0; }
+.info-box ul:last-child { margin-bottom: 0; }
+
+.info-box.tip {
+  background: #E8F5E9;
+  border-color: var(--success);
+}
+
+.info-box.warning {
+  background: #FFF8E1;
+  border-color: var(--warning);
+}
+
+.info-box.danger {
+  background: #FFEBEE;
+  border-color: var(--danger);
+}
+
+.info-box.beginner {
+  background: #F3E5F5;
+  border-color: #7B1FA2;
+}
+
+.info-box.best-practice {
+  background: #E0F2F1;
+  border-color: #00695C;
+}
+
+.info-box .box-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(123, 31, 162, 0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* ============================================================
+   라이브러리 & API 레퍼런스 테이블
+   ============================================================ */
+.api-reference, .library-section {
+  margin: 32px 0;
+}
+
+.api-reference h3, .library-section h3 {
+  background: var(--primary);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 0;
+  font-size: 16px;
+}
+
+hr.section-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 36px 0;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  margin: 16px 0;
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  font-size: 14px;
+}
+
+table thead {
+  background: #f5f5f5;
+}
+
+table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 2px solid var(--border);
+}
+
+table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+table tr:hover { background: #fafafa; }
+
+table code {
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+/* API 시그니처 행 */
+.api-signature {
+  background: var(--code-bg);
+  color: #e0e0e0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 13px;
+  margin: 4px 0;
+  overflow-x: auto;
+}
+
+/* ============================================================
+   이미지 / 다이어그램
+   ============================================================ */
+.diagram-container {
+  margin: 28px 0;
+  text-align: center;
+}
+
+.diagram-container img {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+}
+
+.diagram-container .caption {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* PPTX 원본 보존 뱃지 */
+.diagram-container .pptx-badge {
+  display: inline-block;
+  background: #FF6F00;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: normal;
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Mermaid 다이어그램 (인라인 렌더링) */
+.mermaid {
+  margin: 24px auto;
+  text-align: center;
+}
+
+/* ============================================================
+   연습 문제 & 프로젝트
+   ============================================================ */
+.exercise-box {
+  background: #FFF3E0;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 28px 0;
+}
+
+.exercise-box h4 { color: var(--accent); }
+
+.project-box {
+  background: linear-gradient(135deg, #E8EAF6, #C5CAE9);
+  border-radius: 12px;
+  padding: 28px;
+  margin: 36px 0;
+}
+
+/* ============================================================
+   FAQ
+   ============================================================ */
+.faq-section details {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 8px 0;
+  padding: 0;
+}
+
+.faq-section summary {
+  padding: 14px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primary);
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+
+.faq-section details .faq-answer {
+  padding: 16px 20px;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   챕터 네비게이션 (이전/다음)
+   ============================================================ */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  margin: 48px 0 24px;
+  gap: 16px;
+}
+
+.chapter-nav a {
+  flex: 1;
+  display: block;
+  padding: 16px 20px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.chapter-nav a:hover {
+  border-color: var(--primary);
+  box-shadow: var(--card-shadow);
+}
+
+/* ============================================================
+   인쇄용 스타일
+   ============================================================ */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper { break-inside: avoid; }
+}
+
+/* ============================================================
+   반응형 - 모바일
+   ============================================================ */
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+}
+
+</style>
+</head>
+<body>
+<div class="container">
+<main class="main-content">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 15</div>
+    <h1>종합 프로젝트: 첫 기능·첫 PR — 구현(마일스톤 증분)</h1>
+    <div class="chapter-meta"><span class="difficulty difficulty-실무">실무</span></div>
+  </div>
+
+<h1 id="pr">종합 프로젝트: 첫 기능·첫 PR — 구현(마일스톤 증분)</h1>
+<div class="learning-objectives">
+<h2 id="_1">이 챕터에서 배우는 것</h2>
+<ul>
+<li>CLAUDE.md·권한·플랜 모드부터 테스트·구현·커밋·PR·리뷰까지를 5개 마일스톤(M1~M5)의 증분으로 구현할 수 있습니다.</li>
+<li>각 마일스톤이 어느 단원 개념(c01~c12)을 적용했는지 마일스톤↔개념으로 짝지어 설명할 수 있습니다.</li>
+<li>각 마일스톤 끝에서 pytest 테스트와 실행 결과로 동작을 확인해, 체크포인트 통과 여부로 검증할 수 있습니다.</li>
+<li>5개 마일스톤을 통합해 테스트가 통과하는 두 엔드포인트와, 변경 요약·근거·테스트 결과를 담은 첫 PR을 완성할 수 있습니다.</li>
+</ul>
+</div>
+<blockquote>
+<p>이 챕터는 종합 프로젝트의 <strong>구현(implementation)</strong> 단계입니다. 새 개념을 배우지 않습니다. 앞의 12개 개념 챕터(c01~c12)와 분석(ch_13)·설계(ch_14)에서 정한 요구사항·ADR을 실제 코드로 옮기고, 그 과정을 안전·검증·협업의 흐름으로 엮습니다.</p>
+</blockquote>
+<h2 id="_2">구현 전략과 마일스톤 개요</h2>
+<p>분석(ch_13)에서 우리는 기존 팀 저장소 <code>team-tasks-api</code>에 두 가지 기능을 더하기로 정했습니다.</p>
+<ul>
+<li><strong>완료 처리</strong> — <code>PATCH /tasks/{task_id}/complete</code>: 특정 할 일의 상태를 <code>done</code>으로 바꿉니다(FR2).</li>
+<li><strong>상태 필터</strong> — <code>GET /tasks?status=done|todo</code>: 목록을 상태로 거릅니다(FR3).</li>
+</ul>
+<p>그리고 없는 <code>id</code>는 404, 잘못된 <code>status</code>는 422로 응답하기로 했습니다(FR4). 설계(ch_14)에서는 상태를 불리언이 아니라 <code>todo|done</code> 문자열 enum으로 표현하기로(ADR2), 완료 처리는 부분 변경이므로 PATCH로(ADR1), 필터는 쿼리 파라미터로(ADR3) 결정했습니다.</p>
+<p>이제 이것을 <strong>한 번에 다 만들지 않습니다.</strong> 신입이 첫 기능을 안전하게 추가하는 가장 좋은 방법은, 검증 가능한 작은 단계(마일스톤)로 나누어 한 걸음마다 통과를 확인하며 나아가는 것입니다. 이 챕터는 다음 여섯 마일스톤을 증분으로 진행합니다. 각 마일스톤은 앞 단원에서 배운 개념을 적용하며, 끝에는 반드시 <strong>체크포인트</strong>로 다음 단계로 넘어가도 되는지 확인합니다.</p>
+<table>
+<thead>
+<tr>
+<th>마일스톤</th>
+<th>하는 일</th>
+<th>적용 단원·개념</th>
+<th>체크포인트</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M1 셋업·계획</td>
+<td>CLAUDE.md·권한·플랜 모드로 환경과 계획을 갖춤</td>
+<td>u5·u7 / c05·c06·c08</td>
+<td>계획이 검증 가능한 단계로 승인되고 CLAUDE.md·권한이 준비됨</td>
+</tr>
+<tr>
+<td>M2 테스트 먼저</td>
+<td>두 엔드포인트의 기대 동작을 pytest로 먼저 작성(TDD)</td>
+<td>u3·u6 / c03·c07</td>
+<td>테스트가 기대 동작을 표현하고 아직 실패함</td>
+</tr>
+<tr>
+<td>M3 구현·검증</td>
+<td>두 엔드포인트를 구현하고 pytest를 통과시킴</td>
+<td>u2·u6 / c02·c07</td>
+<td>두 엔드포인트의 테스트가 모두 통과</td>
+</tr>
+<tr>
+<td>M4 커밋·PR</td>
+<td>작은 논리 단위로 커밋하고 첫 PR 초안을 올림</td>
+<td>u8 / c09</td>
+<td>작업 브랜치 커밋과 PR 본문이 리뷰 가능하게 작성됨</td>
+</tr>
+<tr>
+<td>M5 리뷰·디버깅</td>
+<td><code>/code-review</code>로 점검하고 지적을 디버깅·반영</td>
+<td>u9·u10 / c10·c11</td>
+<td>타당한 지적 반영, 부적절한 지적에 근거 답변, 회귀 테스트 통과</td>
+</tr>
+<tr>
+<td>M6 확장(선택)</td>
+<td>테스트 실행을 서브에이전트에, 외부 자료를 MCP로</td>
+<td>u11 / c12</td>
+<td>서브에이전트 호출 또는 MCP 참조가 동작</td>
+</tr>
+</tbody>
+</table>
+<div class="info-box best-practice">
+<h3 id="mvp">MVP를 먼저, 그다음 증분 확장</h3>
+<p>분석에서 정한 MVP(최소 기능)는 "완료 처리 엔드포인트 하나를 테스트와 함께 추가해 통과시키고 첫 커밋·PR을 올리는 것"이었습니다. 그래서 M2~M4에서는 두 엔드포인트를 함께 다루되, 막히면 <strong>완료 처리 하나만</strong> 먼저 통과시키고 상태 필터를 뒤에 붙여도 됩니다. "작게 만들어 통과시키고, 통과한 것 위에 더한다"가 증분 구현의 리듬입니다.</p>
+</div>
+<h2 id="m1-claudemd">M1: CLAUDE.md·권한·플랜 모드로 셋업·계획</h2>
+<p>코드를 한 줄도 바꾸기 전에, <strong>안전하게 일할 환경</strong>부터 갖춥니다. 이 마일스톤은 단원 5(권한 c05·플랜 c06)와 단원 7(CLAUDE.md c08)의 적용입니다.</p>
+<h3 id="1-claudemd-c08">1) CLAUDE.md로 팀 규약을 영속화한다 (c08)</h3>
+<p>세션마다 "이 프로젝트는 어떻게 빌드하고 테스트하나요"를 다시 설명하지 않도록, 빌드·테스트 명령과 컨벤션을 <code>CLAUDE.md</code>에 적어 둡니다. <code>/init</code>로 골격을 만든 뒤 핵심만 간결하게 채웁니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">markdown</span></div><pre class="line-numbers"><code class="language-markdown"># team-tasks-api
+
+할 일(tasks)을 관리하는 작은 FastAPI 서비스입니다.
+
+## 빌드·실행·테스트
+- 의존성 설치: `python -m pip install -r requirements.txt`
+- 개발 서버: `python -m uvicorn app.main:app --reload`
+- 테스트: `python -m pytest -q`
+
+## 코딩 컨벤션
+- 들여쓰기 4칸, 타입 힌트 필수
+- 엔드포인트는 `app/routers/`에, 데이터 보관은 `app/store.py`에 둔다
+- 상태(status)는 `todo|done` 문자열 enum으로 표현한다
+
+## 금지사항
+- main 브랜치에 직접 커밋하지 않는다(작업 브랜치 + PR)
+- 테스트가 통과하지 않은 변경은 커밋하지 않는다
+</code></pre></div>
+<div class="code-explanation">
+<ul>
+<li><strong>빌드·실행·테스트 명령</strong>을 가장 먼저 적었습니다. 에이전트가 "검증해 줘"라는 지시를 받으면 여기 적힌 <code>python -m pytest -q</code>를 그대로 쓰므로, 팀이 정한 검증 방식이 자동으로 통일됩니다.</li>
+<li><strong>컨벤션</strong>에 "상태는 todo|done 문자열 enum"을 박아 두었습니다. 설계(ADR2)의 결정을 메모리에 영속화해, 이번 구현은 물론 다음 작업도 같은 규칙을 따르게 합니다.</li>
+<li><strong>금지사항</strong>은 짧고 구체적입니다. "main에 직접 커밋 금지"가 곧 M4의 작업 브랜치 규칙으로 이어집니다. 길고 추상적인 규칙보다 검증 가능한 짧은 규칙이 잘 지켜집니다.</li>
+</ul>
+</div>
+<h3 id="2-settingsjson-c05">2) 최소 권한 settings.json을 둔다 (c05)</h3>
+<p>이번 작업에 필요한 안전한 명령(테스트·서버 실행·<code>app/**</code> 편집)만 허용하고, 파괴적 명령은 차단합니다. 프로젝트 공유 범위인 <code>.claude/settings.json</code>에 적어 체크인하면 팀 모두가 같은 안전 규칙을 공유합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">json</span></div><pre class="line-numbers"><code class="language-json">{
+  &quot;permissions&quot;: {
+    &quot;allow&quot;: [
+      &quot;Bash(python -m pytest:*)&quot;,
+      &quot;Bash(python -m uvicorn:*)&quot;,
+      &quot;Edit(app/**)&quot;,
+      &quot;Edit(tests/**)&quot;,
+      &quot;Bash(git status)&quot;,
+      &quot;Bash(git diff:*)&quot;,
+      &quot;Bash(git switch:*)&quot;,
+      &quot;Bash(git add:*)&quot;,
+      &quot;Bash(git commit:*)&quot;,
+      &quot;Bash(git push:*)&quot;,
+      &quot;Bash(gh pr create:*)&quot;
+    ],
+    &quot;deny&quot;: [
+      &quot;Bash(git push --force:*)&quot;,
+      &quot;Bash(git reset --hard:*)&quot;,
+      &quot;Bash(rm -rf:*)&quot;
+    ]
+  }
+}
+</code></pre></div>
+<div class="code-explanation">
+<ul>
+<li><code>Bash(python -m pytest:*)</code>는 검증에 쓸 테스트 실행만, <code>Edit(app/**)</code>·<code>Edit(tests/**)</code>는 코드와 테스트 디렉터리 편집만 허용합니다. 이번 작업에 <strong>필요한 만큼만</strong> 여는 최소 권한 원칙입니다.</li>
+<li><code>deny</code>의 명령들은 역사를 파괴적으로 바꾸거나 파일을 지웁니다. <code>deny</code>가 <code>allow</code>보다 우선하므로, 실수로라도 강제 푸시·하드 리셋이 실행되지 않습니다.</li>
+<li>커밋·푸시·PR 명령을 미리 허용해 두면 M4에서 흐름이 끊기지 않습니다. 안전한 반복 작업은 허용하고, 위험한 변형만 콕 집어 막는 설계입니다.</li>
+</ul>
+</div>
+<h3 id="3-c06">3) 플랜 모드로 단계별 계획을 받아 검토·확정한다 (c06)</h3>
+<p>이제 <code>Shift+Tab</code>으로 플랜 모드(읽기 전용 계획 단계)에 들어가, 변경 계획을 먼저 받습니다. 코드를 바꾸지 않고 "어떻게 바꿀지"만 제안받아 검토하는 안전장치입니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">나: (플랜 모드) @app/routers/tasks.py 와 @app/store.py 를 참고해서,
+    PATCH /tasks/{task_id}/complete(완료 처리)와 GET /tasks?status= 필터를
+    추가하려고 해. 기존 스타일을 따르고, 없는 id는 404·잘못된 status는 422로.
+    바로 고치지 말고, 검증 가능한 단계로 나눈 구현 계획부터 세워 줘.
+</code></pre></div>
+<p>에이전트가 돌려준 계획을 검토합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">구현 계획(플랜):
+1. app/models.py 에 Status(todo|done) enum을 추가하고 Task.status 필드에 적용
+2. app/store.py 에 get_task·save_task 가 있는지 확인(없으면 추가)
+3. tests/test_tasks.py 에 완료 처리·필터의 기대 동작 테스트를 먼저 작성(실패 확인)
+4. app/routers/tasks.py 에 complete_task·list_tasks(status) 구현
+5. python -m pytest -q 로 전체 통과 확인
+</code></pre></div>
+<p>이 계획에서 한 가지를 교정합니다. 설계에서 <code>status</code>는 처음부터 enum이었으므로 1번은 "추가"가 아니라 "확인·정리"가 맞습니다. 또 3번을 4번보다 <strong>앞에</strong> 두어 테스트 우선(TDD)을 분명히 합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">나: 좋아. 다만 status enum은 이미 설계에서 todo|done 으로 정했으니
+    1번은 그 정의를 확인·정리하는 것으로 하고, 테스트(3번)를 구현(4번)보다
+    먼저 진행하는 순서를 지켜 줘. 이 계획으로 확정하자.
+</code></pre></div>
+<div class="info-box best-practice">
+<h3 id="m1">M1 체크포인트</h3>
+<p>다음을 모두 만족하면 M2로 넘어갑니다.</p>
+<ul>
+<li>[ ] <code>CLAUDE.md</code>에 빌드·테스트 명령·컨벤션·금지사항이 들어 있는가</li>
+<li>[ ] <code>.claude/settings.json</code>이 필요한 명령만 allow하고 파괴적 명령을 deny하는가</li>
+<li>[ ] 플랜 모드로 받은 계획이 <strong>검증 가능한 단계</strong>로 나뉘고, 교정해 확정했는가</li>
+</ul>
+</div>
+<h2 id="m2-tdd">M2: 테스트 먼저(TDD) — 완료 처리·필터 테스트 작성</h2>
+<p>확정한 계획대로, <strong>구현 전에 기대 동작을 테스트로 못 박습니다</strong>(c07 TDD). 이때 단원 3의 좋은 지시 네 요소(목표·맥락·제약·완료 조건, c03)를 그대로 씁니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">나: 아직 엔드포인트는 구현하지 말고, tests/test_tasks.py 에 다음 기대 동작을
+    검증하는 pytest 테스트부터 작성해 줘. fastapi TestClient 를 쓰고,
+    각 테스트는 store 를 초기화한 상태에서 시작해야 해.
+    - 완료 처리: PATCH /tasks/{id}/complete 하면 200 과 status=done 이 온다
+    - 없는 id: PATCH /tasks/999/complete 는 404
+    - 상태 필터: GET /tasks?status=done 은 done 인 항목만 돌려준다
+    - 잘못된 status: GET /tasks?status=working 은 422
+    작성한 뒤 pytest 로 돌려서, 구현이 없으니 실패하는 것을 먼저 보여 줘.
+</code></pre></div>
+<p>에이전트가 작성한 테스트 파일입니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># tests/test_tasks.py
+import pytest
+from fastapi.testclient import TestClient
+
+from app import store
+from app.main import app
+
+client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def clear_store():
+    # 테스트마다 저장소를 비워 서로 영향을 주지 않게 한다
+    store.reset()
+    yield
+    store.reset()
+
+
+def _seed_two_tasks():
+    client.post(&quot;/tasks&quot;, json={&quot;id&quot;: 1, &quot;title&quot;: &quot;온보딩 문서 읽기&quot;, &quot;status&quot;: &quot;todo&quot;})
+    client.post(&quot;/tasks&quot;, json={&quot;id&quot;: 2, &quot;title&quot;: &quot;개발 환경 설정&quot;, &quot;status&quot;: &quot;done&quot;})
+
+
+def test_complete_task_sets_status_done():
+    _seed_two_tasks()
+    response = client.patch(&quot;/tasks/1/complete&quot;)
+    assert response.status_code == 200
+    assert response.json()[&quot;status&quot;] == &quot;done&quot;
+
+
+def test_complete_unknown_task_returns_404():
+    _seed_two_tasks()
+    response = client.patch(&quot;/tasks/999/complete&quot;)
+    assert response.status_code == 404
+
+
+def test_filter_done_returns_only_done():
+    _seed_two_tasks()
+    client.patch(&quot;/tasks/1/complete&quot;)  # 1번도 done 으로 만든다
+    response = client.get(&quot;/tasks&quot;, params={&quot;status&quot;: &quot;done&quot;})
+    assert response.status_code == 200
+    assert all(task[&quot;status&quot;] == &quot;done&quot; for task in response.json())
+
+
+def test_filter_invalid_status_returns_422():
+    response = client.get(&quot;/tasks&quot;, params={&quot;status&quot;: &quot;working&quot;})
+    assert response.status_code == 422
+</code></pre></div>
+<div class="code-explanation">
+<ul>
+<li><code>@pytest.fixture(autouse=True)</code>로 매 테스트 전후에 <code>store.reset()</code>을 호출합니다. 인메모리 저장소는 테스트 간에 데이터가 남을 수 있으므로, 격리해야 결과가 안정적입니다(설계의 인메모리 저장소 유지 결정에 맞춘 처리).</li>
+<li><code>_seed_two_tasks()</code>는 todo 1건·done 1건을 미리 넣는 보조 함수입니다. 같은 준비를 여러 테스트가 재사용해 중복을 줄입니다.</li>
+<li>네 테스트는 분석의 유스케이스·요구사항과 1:1로 대응합니다. 완료 처리(UC1·FR2), 없는 id(FR4의 404), 필터(UC2·FR3), 잘못된 status(FR4의 422). <strong>요구사항이 곧 테스트</strong>가 되는 것이 TDD의 핵심입니다.</li>
+<li>아직 <code>PATCH .../complete</code> 라우트도, <code>status</code> 필터도 없으므로 이 테스트들은 지금 실패해야 정상입니다.</li>
+</ul>
+</div>
+<p>테스트를 먼저 돌려 "빨강"을 확인합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ python -m pytest -q
+F.FF                                                                     [100%]
+=================================== FAILURES ===================================
+------- test_complete_task_sets_status_done -------
+&gt;       assert response.status_code == 200
+E       assert 404 == 200
+=========================== short test summary info ============================
+FAILED tests/test_tasks.py::test_complete_task_sets_status_done - assert 404 == 200
+FAILED tests/test_tasks.py::test_filter_done_returns_only_done
+FAILED tests/test_tasks.py::test_filter_invalid_status_returns_422 - assert 200 == 422
+3 failed, 1 passed in 0.42s
+</code></pre></div>
+<div class="info-box warning">
+<h3 id="_3">왜 하나는 통과했을까 — 의미 있는 빨강과 우연한 초록</h3>
+<p><code>test_complete_unknown_task_returns_404</code>가 통과(<code>1 passed</code>)한 점을 눈여겨보십시오. 아직 완료 처리 라우트가 없어 FastAPI가 <strong>경로를 못 찾아 404</strong>를 돌려주는데, 이 테스트가 기대하는 값도 마침 404라 우연히 통과한 것입니다. 즉 "없는 id라서 404"가 아니라 "라우트 자체가 없어서 404"입니다. 이것은 아직 의미 있는 검증이 아닙니다. M3에서 라우트를 구현한 뒤 이 테스트가 여전히 통과하는지 다시 봐야 비로소 "없는 id를 제대로 404로 처리한다"가 증명됩니다. 빨강·초록의 <strong>이유</strong>까지 읽는 것이 TDD를 제대로 쓰는 법입니다.</p>
+</div>
+<div class="info-box best-practice">
+<h3 id="m2">M2 체크포인트</h3>
+<ul>
+<li>[ ] 네 가지 기대 동작이 모두 테스트로 표현되었는가(요구사항 ↔ 테스트 매핑)</li>
+<li>[ ] 테스트가 저장소를 초기화한 상태에서 시작하는가(격리)</li>
+<li>[ ] 핵심 동작 테스트가 아직 <strong>실패(빨강)</strong>하는 것을 눈으로 확인했는가</li>
+</ul>
+</div>
+<h2 id="m3">M3: 엔드포인트 구현과 실행·테스트 검증</h2>
+<p>이제 빨강을 초록으로 바꿉니다. 에이전트 루프(c02)를 의식하며, "구현하고 pytest로 통과까지 확인해 줘"라고 검증을 지시의 일부로 못 박습니다(c07).</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">나: 이제 그 테스트들이 통과하도록 구현해 줘.
+    1) app/models.py 에 Status(todo|done) enum 과 Task.status 를 확인·정리
+    2) app/routers/tasks.py 에 PATCH /tasks/{id}/complete 와
+       GET /tasks 의 status 필터를 추가. 없는 id 는 404.
+    구현 후 python -m pytest -q 로 4개가 모두 통과하는 것을 확인해 줘.
+</code></pre></div>
+<p>에이전트는 기존 모듈을 읽고(Read·Grep) 같은 스타일로 변경합니다. 설계(ch_14)의 모듈 분해대로 <code>models.py → store.py → routers/tasks.py</code> 순으로 손댑니다.</p>
+<h3 id="1-enum-modelspy">1) 데이터 모델: 상태 enum (models.py)</h3>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># app/models.py
+from enum import Enum
+
+from pydantic import BaseModel
+
+
+class Status(str, Enum):
+    todo = &quot;todo&quot;
+    done = &quot;done&quot;
+
+
+class Task(BaseModel):
+    id: int
+    title: str
+    status: Status = Status.todo
+</code></pre></div>
+<div class="code-explanation">
+<ul>
+<li><code>class Status(str, Enum)</code>: 상태를 <code>todo|done</code> 문자열 enum으로 정의했습니다(ADR2). <code>str</code>을 함께 상속해, JSON으로 직렬화하면 <code>"done"</code> 같은 문자열로 나갑니다.</li>
+<li><code>status: Status = Status.todo</code>: 새 할 일의 기본 상태를 <code>todo</code>로 두었습니다. 불리언 <code>done</code> 대신 enum을 쓰면 나중에 <code>in_progress</code> 같은 상태를 확장하기 쉽습니다.</li>
+<li>enum이라서 FastAPI가 잘못된 status 값(예: <code>working</code>)을 <strong>자동으로 422</strong>로 막아 줍니다. FR4의 422 요구를 모델 정의만으로 상당 부분 충족하는 지점입니다.</li>
+</ul>
+</div>
+<h3 id="2-storepy">2) 저장소: 조회·저장 함수 (store.py)</h3>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># app/store.py
+from app.models import Task
+
+_tasks: dict[int, Task] = {}
+
+
+def reset() -&gt; None:
+    &quot;&quot;&quot;테스트 격리를 위해 저장소를 비웁니다.&quot;&quot;&quot;
+    _tasks.clear()
+
+
+def add_task(task: Task) -&gt; Task:
+    _tasks[task.id] = task
+    return task
+
+
+def all_tasks() -&gt; list[Task]:
+    return list(_tasks.values())
+
+
+def get_task(task_id: int) -&gt; Task | None:
+    return _tasks.get(task_id)
+
+
+def save_task(task: Task) -&gt; Task:
+    _tasks[task.id] = task
+    return task
+</code></pre></div>
+<div class="code-explanation">
+<ul>
+<li><code>get_task</code>는 해당 id가 없으면 <code>None</code>을 돌려줍니다. 라우터는 이 <code>None</code>을 보고 404를 던집니다. "찾기"와 "에러 응답"의 책임을 분리한 구조입니다.</li>
+<li><code>save_task</code>는 변경된 할 일을 다시 저장합니다. 완료 처리는 상태만 바꾸므로 <code>add_task</code>와 동작이 같지만, 의도를 드러내려 이름을 나눴습니다.</li>
+<li>데이터베이스 없이 <code>dict</code>만 쓰는 인메모리 저장소를 유지했습니다(설계의 scope_out: DB 연동 제외). 범위를 작게 지키는 결정이 코드에도 그대로 반영됩니다.</li>
+</ul>
+</div>
+<h3 id="3-routerstaskspy">3) 엔드포인트: 완료 처리·상태 필터 (routers/tasks.py)</h3>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># app/routers/tasks.py
+from fastapi import APIRouter, HTTPException
+
+from app import store
+from app.models import Status, Task
+
+router = APIRouter(prefix=&quot;/tasks&quot;, tags=[&quot;tasks&quot;])
+
+
+@router.post(&quot;&quot;, status_code=201)
+def create_task(task: Task) -&gt; Task:
+    return store.add_task(task)
+
+
+@router.get(&quot;&quot;)
+def list_tasks(status: Status | None = None) -&gt; list[Task]:
+    tasks = store.all_tasks()
+    if status is None:
+        return tasks
+    return [task for task in tasks if task.status == status]
+
+
+@router.patch(&quot;/{task_id}/complete&quot;)
+def complete_task(task_id: int) -&gt; Task:
+    task = store.get_task(task_id)
+    if task is None:
+        raise HTTPException(status_code=404, detail=&quot;task not found&quot;)
+    task.status = Status.done
+    return store.save_task(task)
+</code></pre></div>
+<div class="code-explanation">
+<ul>
+<li><code>def list_tasks(status: Status | None = None)</code>: 기존 목록 엔드포인트에 <strong>선택적</strong> 쿼리 파라미터 <code>status</code>를 더했습니다(ADR3). 기본값이 <code>None</code>이라 <code>status</code>를 안 주면 전체를 반환해, 기존 동작과 호환됩니다. enum 타입이라 <code>working</code> 같은 잘못된 값은 FastAPI가 422로 막습니다.</li>
+<li><code>if status is None: return tasks</code>: 필터가 없으면 전체를, 있으면 그 상태인 항목만 거릅니다. 한 엔드포인트가 "전체 조회"와 "필터 조회"를 모두 처리합니다.</li>
+<li><code>@router.patch("/{task_id}/complete")</code>: 부분 상태 변경이므로 PATCH를 썼습니다(ADR1). <code>prefix="/tasks"</code>와 합쳐져 실제 경로는 <code>PATCH /tasks/{task_id}/complete</code>입니다.</li>
+<li><code>if task is None: raise HTTPException(status_code=404, ...)</code>: 없는 id를 404로 처리합니다. M2에서 "우연히" 통과하던 404 테스트가, 이제 <strong>라우트가 있는데도 id가 없어서</strong> 404를 내는 진짜 검증으로 바뀝니다.</li>
+<li><code>task.status = Status.done</code>: 완료 처리의 핵심 한 줄입니다. 상태만 바꾸고 다른 필드는 건드리지 않습니다.</li>
+</ul>
+</div>
+<h3 id="4">4) 실행·테스트로 통과 확인</h3>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ python -m pytest -q
+....                                                                     [100%]
+4 passed in 0.45s
+</code></pre></div>
+<p><code>....</code>의 점 네 개가 네 테스트의 통과를 뜻하고, <code>4 passed</code>가 우리가 기다린 증거입니다. 코드를 작성한 순간이 아니라, 이 통과를 확인한 지금이 구현의 진짜 끝입니다. 서버를 직접 띄워 눈으로도 확인할 수 있습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ python -m uvicorn app.main:app --reload
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Application startup complete.
+</code></pre></div>
+<p>다른 터미널에서 완료 처리와 필터를 요청해 봅니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ curl -X PATCH http://127.0.0.1:8000/tasks/1/complete
+{&quot;id&quot;:1,&quot;title&quot;:&quot;온보딩 문서 읽기&quot;,&quot;status&quot;:&quot;done&quot;}
+
+$ curl &quot;http://127.0.0.1:8000/tasks?status=done&quot;
+[{&quot;id&quot;:1,&quot;title&quot;:&quot;온보딩 문서 읽기&quot;,&quot;status&quot;:&quot;done&quot;}]
+</code></pre></div>
+<div class="info-box best-practice">
+<h3 id="m3_1">M3 체크포인트</h3>
+<ul>
+<li>[ ] <code>python -m pytest -q</code>에서 네 테스트가 모두 통과(<code>4 passed</code>)하는가</li>
+<li>[ ] 완료 처리 응답의 <code>status</code>가 <code>done</code>으로 바뀌는가</li>
+<li>[ ] 없는 id가 404, 잘못된 status가 422로 응답하는가(에러 경로 검증)</li>
+</ul>
+</div>
+<h2 id="m4-pr">M4: 논리 단위 커밋과 첫 PR 초안 작성</h2>
+<p>기능이 검증됐으니 이제 팀의 코드로 합류시킬 차례입니다. 단원 8(커밋·PR c09)의 적용입니다. 핵심 원칙은 둘입니다. <strong>작업 브랜치에서</strong>, <strong>작은 논리 단위로</strong> 커밋합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">나: main 인지 확인하고 feature/task-complete-filter 작업 브랜치를 만들어 줘.
+    그리고 변경을 두 논리 단위로 나눠 커밋해 줘.
+    1) 완료 처리·상태 필터 구현(models·store·routers)
+    2) 그 동작을 검증하는 테스트
+    Conventional Commits 형식으로, 메시지에 무엇을·왜를 담아 줘.
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ git switch -c feature/task-complete-filter
+Switched to a new branch 'feature/task-complete-filter'
+
+$ git add app/models.py app/store.py app/routers/tasks.py
+$ git commit -m &quot;feat(tasks): 완료 처리·상태 필터 엔드포인트 추가&quot;
+[feature/task-complete-filter 8c1d2e4] feat(tasks): 완료 처리·상태 필터 엔드포인트 추가
+ 3 files changed, 24 insertions(+), 3 deletions(-)
+
+$ git add tests/test_tasks.py
+$ git commit -m &quot;test(tasks): 완료 처리·필터·에러 경로 테스트 추가&quot;
+[feature/task-complete-filter 5b7a9f1] test(tasks): 완료 처리·필터·에러 경로 테스트 추가
+ 1 file changed, 38 insertions(+)
+</code></pre></div>
+<div class="code-explanation">
+<ul>
+<li>구현(<code>feat</code>)과 테스트(<code>test</code>)를 <strong>두 커밋으로 나눴습니다.</strong> 성격이 다른 변경이라, 나중에 한쪽만 살펴보거나 되돌리기 쉽습니다. <code>git add</code>에 파일을 명시해 무엇을 묶을지 사람이 통제했습니다.</li>
+<li>제목이 <code>type(scope): 설명</code> 형식입니다. <code>feat</code>은 새 기능, <code>test</code>는 테스트 추가, <code>(tasks)</code>는 영향 범위입니다.</li>
+<li>두 커밋 모두 <code>feature/task-complete-filter</code> 작업 브랜치에 쌓였습니다. <code>main</code>은 영향을 받지 않습니다.</li>
+</ul>
+</div>
+<p>이제 브랜치를 푸시하고 PR 초안을 만듭니다. 변경 요약·근거·테스트 결과를 담아 리뷰어를 돕습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ git push -u origin feature/task-complete-filter
+$ gh pr create --draft --title &quot;feat(tasks): 완료 처리·상태 필터 추가&quot; --body &quot;(아래 본문)&quot;
+https://github.com/team/team-tasks-api/pull/57
+</code></pre></div>
+<p>PR 본문은 다음과 같이 작성합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">markdown</span></div><pre class="line-numbers"><code class="language-markdown">## 변경 요약
+할 일을 완료 처리하는 PATCH /tasks/{id}/complete 와, 상태로 거르는
+GET /tasks?status=done|todo 두 엔드포인트를 추가했습니다.
+
+## 변경 근거
+완료 여부를 바꾸거나 상태별로 볼 방법이 없었습니다(이슈 #51).
+가장 작은 단위로 &quot;완료 처리 + 상태 필터&quot;만 먼저 추가합니다.
+
+## 변경 내용
+- app/models.py: 상태를 todo|done 문자열 enum 으로 정의(ADR2)
+- app/routers/tasks.py: 완료 처리(PATCH)·상태 필터(GET ?status=) 추가
+- 없는 id 는 404, 잘못된 status 는 422 로 응답
+- tests/test_tasks.py: 완료·404·필터·422 네 경로를 검증
+
+## 테스트 결과
+\`\`\`
+$ python -m pytest -q
+....                                                             [100%]
+4 passed in 0.45s
+\`\`\`
+
+## 범위
+- 포함: 완료 처리·상태 필터와 그 테스트
+- 제외: 완료 취소(되돌리기), 완료 시각 기록 — 후속 PR에서 다룹니다.
+</code></pre></div>
+<div class="info-box best-practice">
+<h3 id="m4">M4 체크포인트</h3>
+<ul>
+<li>[ ] <code>main</code>이 아니라 작업 브랜치에서 커밋했는가</li>
+<li>[ ] 변경이 작은 논리 단위(<code>feat</code>·<code>test</code>)로 나뉘고 메시지가 관례를 따르는가</li>
+<li>[ ] PR 본문에 변경 요약·근거·내용·<strong>실제 테스트 출력</strong>이 모두 있는가</li>
+</ul>
+</div>
+<h2 id="m5-code-review">M5: /code-review로 리뷰 받고 디버깅·반영</h2>
+<p>PR을 올렸으니 리뷰가 따라옵니다. 단원 9(리뷰 c10)·단원 10(디버깅 c11)의 적용입니다. 먼저 올리기 전 자가 점검으로 <code>/code-review</code>를 씁니다.</p>
+<div class="info-box warning">
+<h3 id="code-review">사실 확인: <code>/code-review</code>는 내장 명령입니다</h3>
+<p><code>/code-review</code>·<code>/security-review</code>는 Claude Code에 <strong>기본 내장(번들)된</strong> 슬래시 커맨드입니다(앞 챕터에서 다룬 <code>/commit-push-pr</code> 같은 팀 커스텀 커맨드와 다릅니다). 터미널에서 <code>/code-review</code>를 실행하면 현재 변경을 검토해 개선점을 짚어 줍니다.</p>
+</div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">나: /code-review
+
+(Claude Code가 변경 diff 를 검토)
+리뷰 결과:
+1. [개선] complete_task 가 이미 done 인 작업도 다시 done 으로 저장합니다.
+   동작엔 문제없지만, 의도를 주석이나 테스트로 드러내면 좋겠습니다.
+2. [질문] status 필터에 빈 문자열(?status=)이 오면 어떻게 되나요?
+3. [칭찬] 에러 경로(404·422)까지 테스트한 점이 좋습니다.
+</code></pre></div>
+<p>세 지적을 모두 같은 방식으로 받지 않습니다. <strong>타당한 지적은 반영하고, 확인이 필요한 지적은 검증하며, 부적절하면 근거로 답합니다.</strong></p>
+<p>2번 지적("빈 status")은 검증이 필요합니다. 디버깅 루프(c11)의 첫 단계인 <strong>재현</strong>으로 직접 확인합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">나: GET /tasks?status= (빈 값)이 오면 어떻게 응답하는지 테스트로 재현해 줘.
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ curl -i &quot;http://127.0.0.1:8000/tasks?status=&quot;
+HTTP/1.1 422 Unprocessable Entity
+</code></pre></div>
+<p>빈 문자열은 enum 값이 아니므로 FastAPI가 이미 422로 막고 있었습니다. 즉 추가 수정 없이 안전합니다. 이 사실을 <strong>회귀 테스트로 못 박아</strong> 재발을 막고, 리뷰어에게 근거로 답합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># tests/test_tasks.py (회귀 테스트 보강)
+def test_filter_empty_status_returns_422():
+    response = client.get(&quot;/tasks&quot;, params={&quot;status&quot;: &quot;&quot;})
+    assert response.status_code == 422
+</code></pre></div>
+<p>1번 지적("이미 done 인 작업")은 타당하므로 의도를 드러내는 테스트를 추가해 반영합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># tests/test_tasks.py (회귀 테스트 보강)
+def test_complete_already_done_is_idempotent():
+    client.post(&quot;/tasks&quot;, json={&quot;id&quot;: 3, &quot;title&quot;: &quot;이미 끝낸 일&quot;, &quot;status&quot;: &quot;done&quot;})
+    response = client.patch(&quot;/tasks/3/complete&quot;)
+    assert response.status_code == 200
+    assert response.json()[&quot;status&quot;] == &quot;done&quot;
+</code></pre></div>
+<p>테스트를 다시 돌려 회귀 확인을 합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ python -m pytest -q
+......                                                                   [100%]
+6 passed in 0.48s
+</code></pre></div>
+<p>여섯 테스트가 모두 통과합니다. 리뷰 지적을 반영(1번)·검증(2번)하고도 기존 동작이 깨지지 않았음이 증명됐습니다. 반영 내용을 커밋해 PR에 올립니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ git add tests/test_tasks.py
+$ git commit -m &quot;test(tasks): 멱등 완료·빈 status 회귀 테스트 추가&quot;
+$ git push
+</code></pre></div>
+<div class="info-box best-practice">
+<h3 id="m5">M5 체크포인트</h3>
+<ul>
+<li>[ ] 리뷰 코멘트의 의미를 이해하고, 반영·검증·반론을 구분해 대응했는가</li>
+<li>[ ] 확인이 필요한 지적을 재현→검증의 디버깅 루프로 확인했는가</li>
+<li>[ ] 잡은/확인한 동작을 회귀 테스트로 못 박고 전체 테스트가 통과하는가(<code>6 passed</code>)</li>
+</ul>
+</div>
+<h2 id="_4">통합 실행과 결과 확인</h2>
+<p>다섯 마일스톤을 통합하면, <code>team-tasks-api</code>에 완료 처리·상태 필터가 실제로 동작하고, 모든 pytest가 통과하며, 첫 PR이 리뷰를 거쳐 머지 가능한 상태가 됩니다. 최종 모듈 구조와 검증 결과를 한 번에 확인합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">team-tasks-api/
+  app/
+    __init__.py
+    main.py            # FastAPI 앱, tasks 라우터 등록
+    models.py          # Task 모델, Status(todo|done) enum  ← 변경
+    store.py           # 인메모리 저장소(get_task·save_task)  ← 변경
+    routers/
+      __init__.py
+      tasks.py         # 완료 처리·상태 필터 엔드포인트  ← 변경
+  tests/
+    __init__.py
+    test_tasks.py      # 6개 테스트(완료·404·필터·422·멱등·빈값)  ← 변경
+  CLAUDE.md            # 빌드·테스트·컨벤션  ← 신규
+  .claude/settings.json  # 최소 권한  ← 신규
+  requirements.txt
+</code></pre></div>
+<p><code>app/main.py</code>는 라우터를 등록만 하므로 변경이 없습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># app/main.py
+from fastapi import FastAPI
+
+from app.routers import tasks
+
+app = FastAPI(title=&quot;team-tasks-api&quot;)
+app.include_router(tasks.router)
+</code></pre></div>
+<p>마지막으로 전체 테스트를 한 번 더 돌려, 통합된 상태가 온전히 통과하는지 확인합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ python -m pytest -q
+......                                                                   [100%]
+6 passed in 0.48s
+</code></pre></div>
+<p>이로써 분석(요구사항) → 설계(ADR) → 구현(마일스톤)의 흐름이 동작하는 코드와 통과한 테스트, 그리고 리뷰를 거친 PR로 마무리됐습니다. PR을 초안(draft)에서 정식 리뷰(Ready for review)로 전환하면 머지를 받을 준비가 끝납니다.</p>
+<div class="info-box tip">
+<h3 id="m6-mcp-c12">선택: M6 — 서브에이전트·MCP 맛보기 (c12)</h3>
+<p>여기서 한 걸음 더 나아가고 싶다면, 반복되는 "테스트 실행·요약"을 서브에이전트에 위임해 볼 수 있습니다. <code>.claude/agents/tester.md</code>에 역할과 도구를 좁게 준 서브에이전트를 정의하면, 메인 대화의 맥락을 어지럽히지 않고 테스트 실행을 맡길 수 있습니다. 또 팀의 API 컨벤션 문서를 MCP 서버로 <code>.mcp.json</code>에 등록하면, 다음 작업에서 외부 자료를 참조할 수 있습니다. 이는 <strong>선택 과제</strong>이며, 본격적인 설계는 이 책 다음 단계의 학습으로 남겨 둡니다(ch_16에서 다음 단계로 안내합니다).</p>
+</div>
+<h2 id="2-1">작성형 연습 (2종 1세트)</h2>
+<p>배운 구현 흐름을 직접 적용해 봅니다. ① 모범 예시를 보고, ② 빈칸을 스스로 채운 뒤, ③ 자가체크로 점검합니다.</p>
+<h3 id="tdd">모범 예시: 완료 취소(되돌리기) 엔드포인트를 TDD로 추가</h3>
+<p>후속 작업으로 "완료를 취소해 다시 <code>todo</code>로 되돌리는" <code>PATCH /tasks/{id}/reopen</code>을 TDD로 추가하는 모범입니다. 테스트를 먼저 쓰고(빨강), 구현해(초록) 통과시킵니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># tests/test_tasks.py (모범 — 테스트 먼저)
+def test_reopen_task_sets_status_todo():
+    client.post(&quot;/tasks&quot;, json={&quot;id&quot;: 5, &quot;title&quot;: &quot;되돌릴 일&quot;, &quot;status&quot;: &quot;done&quot;})
+    response = client.patch(&quot;/tasks/5/reopen&quot;)
+    assert response.status_code == 200
+    assert response.json()[&quot;status&quot;] == &quot;todo&quot;
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># app/routers/tasks.py (모범 — 통과시키는 구현)
+@router.patch(&quot;/{task_id}/reopen&quot;)
+def reopen_task(task_id: int) -&gt; Task:
+    task = store.get_task(task_id)
+    if task is None:
+        raise HTTPException(status_code=404, detail=&quot;task not found&quot;)
+    task.status = Status.todo
+    return store.save_task(task)
+</code></pre></div>
+<p>완료 처리(<code>complete_task</code>)와 대칭 구조입니다. 상태를 <code>done</code> 대신 <code>todo</code>로 바꾸는 한 줄만 다릅니다.</p>
+<h3 id="1-team-tasks-api-pytest">연습 1: team-tasks-api에 직접 구현하고 실제 pytest 출력을 기록하라</h3>
+<div class="project-box">
+<p>이번 연습은 <strong>종이에 채우지 말고 team-tasks-api에서 실제로 구현·실행</strong>합니다. 상태별 <strong>개수</strong>를 돌려주는 <code>GET /tasks/stats</code> 엔드포인트를 TDD로 직접 추가하세요. 기대 동작은 "전체·todo·done 개수를 담은 객체를 200으로 반환"입니다. 미리 정한 답을 적는 것이 아니라, <strong>자신이 작성한 코드와 화면에 나타난 pytest 실제 출력을 그대로 옮기는 것</strong>이 핵심입니다.</p>
+<p><strong>1단계 — 테스트를 먼저 직접 작성한다(빨강).</strong> 위 모범 예시(reopen)의 테스트 형식을 본떠, <code>tests/test_tasks.py</code>에 <code>test_stats_counts_by_status</code>를 <strong>직접 작성</strong>하세요. 상태 코드와 total·done·todo 개수가 무엇이어야 하는지 자신이 정해 단언(assert)을 적습니다. 작성한 테스트를 아래에 그대로 옮기세요.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[내가 작성한 테스트 코드]
+(여기에 직접 적는다)
+
+[python -m pytest -q 실제 출력 — 아직 구현 전이라 실패해야 정상]
+(화면에 나타난 출력을 그대로 옮긴다)
+</code></pre></div>
+<p><strong>2단계 — 통과시키는 구현을 직접 작성한다(초록).</strong> <code>app/routers/tasks.py</code>에 <code>GET /tasks/stats</code>를 <strong>직접 구현</strong>하세요(<code>/{task_id}</code>보다 위에 두는 점에 주의). 그런 뒤 <code>python -m pytest -q</code>를 실제로 돌려 통과를 확인하고, 화면 출력을 그대로 옮기세요.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[내가 작성한 구현 코드]
+(여기에 직접 적는다)
+
+[python -m pytest -q 실제 출력 — 구현 후 통과]
+(화면에 나타난 출력을 그대로 옮긴다)
+</code></pre></div>
+<p>작성 안내: 상태 비교에는 <code>Status.done</code>을 씁니다. <code>todo</code> 개수는 전체에서 done을 뺀 값으로 둘 수 있습니다. 추측을 적지 말고, <strong>실제로 구현해 실행한 결과</strong>를 기록하세요.</p>
+</div>
+<h3 id="2">연습 2: 내가 실제로 진행한 마일스톤과 적용 개념을 직접 작성하라</h3>
+<div class="project-box">
+<p>team-tasks-api에서 <strong>자신이 실제로 진행한</strong> 마일스톤마다 무엇을 했는지, 어떤 단원 개념을 적용했는지 한 줄로 <strong>직접 작성</strong>하고, 체크포인트 통과 여부를 표시하세요(추측이 아니라 실제로 한 일을 적습니다).</p>
+<p>아래 표를 그대로 옮겨, 빈 칸에 내가 한 일을 직접 적으세요.</p>
+<table>
+<thead>
+<tr>
+<th>마일스톤</th>
+<th>내가 실제로 한 일(직접 적기)</th>
+<th>적용 개념(예: c05)</th>
+<th>체크포인트 통과</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M1 셋업·계획</td>
+<td>(직접 적는다)</td>
+<td>(직접 적는다)</td>
+<td>[ ]</td>
+</tr>
+<tr>
+<td>M2 테스트 먼저</td>
+<td>(직접 적는다)</td>
+<td>(직접 적는다)</td>
+<td>[ ]</td>
+</tr>
+<tr>
+<td>M3 구현·검증</td>
+<td>(직접 적는다)</td>
+<td>(직접 적는다)</td>
+<td>[ ]</td>
+</tr>
+<tr>
+<td>M4 커밋·PR</td>
+<td>(직접 적는다)</td>
+<td>(직접 적는다)</td>
+<td>[ ]</td>
+</tr>
+<tr>
+<td>M5 리뷰·디버깅</td>
+<td>(직접 적는다)</td>
+<td>(직접 적는다)</td>
+<td>[ ]</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="project-box">
+<h3 id="_5">자가체크 — 머리로가 아니라 <em>손으로</em> 했는지 확인하세요.</h3>
+<ul>
+<li>[ ] 연습 1의 <code>GET /tasks/stats</code>를 team-tasks-api에 <strong>실제로 구현</strong>했고, <code>python -m pytest -q</code>가 통과하는 것을 화면 출력으로 봤다</li>
+<li>[ ] 기록란에 적은 것이 추측이 아니라 <strong>화면에 실제로 나타난 코드·pytest 출력</strong>이다</li>
+<li>[ ] 구현 전에 테스트가 먼저 실패(빨강)하는 것을 화면으로 직접 확인했다</li>
+<li>[ ] 각 마일스톤을 끝낼 때 체크포인트(테스트 통과 등)로 검증했다</li>
+<li>[ ] 변경을 작은 논리 단위로 커밋하고, 작업 브랜치에서 작업했다</li>
+<li>[ ] PR 본문의 테스트 결과에 "잘 됨"이 아니라 <strong>실제 pytest 출력</strong>을 넣었다</li>
+</ul>
+</div>
+<blockquote>
+<p>막혔다면: 상태 비교에는 <code>Status.done</code>을, todo 개수에는 <code>len(tasks) - len(done)</code>을 떠올려 보세요. 다만 정답을 적는 것이 목적이 아니라, <strong>실제로 구현해 <code>python -m pytest -q</code>를 통과시키는 것</strong>이 이 연습의 목표입니다.</p>
+</blockquote>
+<h2 id="_6">흔한 함정과 점검</h2>
+<div class="info-box danger">
+<h3 id="1">1. 마일스톤을 건너뛰고 한 번에 다 만든다</h3>
+<p>"빨리 끝내자"며 셋업·테스트 없이 곧장 구현·커밋·PR을 한 번에 진행하면, 어디서 잘못됐는지 좁히기 어렵고 리뷰어도 큰 덩어리를 한꺼번에 떠안습니다. <strong>작게 나눠 한 걸음마다 통과를 확인</strong>하세요. 각 마일스톤의 체크포인트가 그 걸음을 검증합니다.</p>
+<h3 id="2-pr">2. 테스트 없이 "동작하는 것 같다"로 PR을 올린다</h3>
+<p>서버에서 한 번 눌러 보고 PR을 올리면, 빈 목록·잘못된 입력·중복 호출 같은 경우는 검증되지 않은 채 남습니다. <strong>요구사항을 테스트로 못 박고</strong>(M2), 그 통과 출력을 PR 본문의 근거로 붙이세요. "잘 됩니다"는 근거가 아닙니다.</p>
+<h3 id="3">3. 리뷰 지적을 무조건 반영하거나 무조건 방어한다</h3>
+<p>타당성을 따지지 않고 다 반영하면 불필요한 변경이 늘고, 무조건 방어하면 배울 기회를 잃습니다. 지적마다 <strong>반영·검증·근거 있는 반론</strong>을 구분하세요. 확인이 필요한 지적은 디버깅 루프(재현→검증)로 사실을 확인한 뒤, 회귀 테스트로 못 박아 답하면 됩니다.</p>
+</div>
+<div class="info-box best-practice">
+<h3 id="_7">이 챕터 한 줄 정리</h3>
+<p>첫 기능 구현은 "셋업·계획(M1) → 테스트 먼저(M2) → 구현·검증(M3) → 커밋·PR(M4) → 리뷰·디버깅(M5)"의 증분 마일스톤이며, 각 단계는 앞 단원 개념을 적용하고 체크포인트로 검증합니다. 다음 챕터(ch_16)에서는 이 산출물을 시연하고 루브릭으로 평가하며, 12개 개념을 어떻게 적용했는지 성찰합니다.</p>
+</div>
+
+<nav class="chapter-nav"><a href="ch_14.html">← 이전: 종합 프로젝트: 첫 기능·첫 PR — 설계(데이터·모듈·ADR)</a><a href="index.html" style="flex:0 0 auto; text-align:center">목차</a><a href="ch_16.html" style="text-align:right">다음: 종합 프로젝트: 첫 기능·첫 PR — 발표·평가·성찰 →</a></nav>
+</main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-powershell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,14 @@
+-- 1. 취소, 환불을 제외한 전체 유효 주문 건수와 유효 매출 합계를 한 행으로 구하라
+select count(*), sum(o.total_amount)
+  from orders o 
+ where o.status not in ('취소', '환불')
+;
+
+-- 2. 주문 상태별 주문 건수, 전체 대비 비율(%), 매출을 건수 내림차순으로 구하라
+select o.status
+	 , count(*) as cnt
+	 , round(100 * count(*) / sum(count(*)) over(), 1) as ratio
+	 , sum(o.total_amount )
+  from orders o
+ group by o.status 
+ order by cnt desc

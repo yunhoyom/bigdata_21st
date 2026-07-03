@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diagram version="1" name="shop_real_erd">
+	<entities>
+		<data-source id="postgres-jdbc-19f1bab5d75-2a6a0af253052808">
+			<entity id="1" name="categories" fq-name="public.categories">
+				<path name="public"/>
+				<path name="shop_real"/>
+			</entity>
+			<entity id="2" name="customers" fq-name="public.customers">
+				<path name="public"/>
+				<path name="shop_real"/>
+			</entity>
+			<entity id="3" name="order_items" fq-name="public.order_items">
+				<path name="public"/>
+				<path name="shop_real"/>
+			</entity>
+			<entity id="4" name="orders" fq-name="public.orders">
+				<path name="public"/>
+				<path name="shop_real"/>
+			</entity>
+			<entity id="5" name="products" fq-name="public.products">
+				<path name="public"/>
+				<path name="shop_real"/>
+			</entity>
+			<entity id="6" name="restock" fq-name="public.restock">
+				<path name="public"/>
+				<path name="shop_real"/>
+			</entity>
+		</data-source>
+	</entities>
+	<relations>
+		<relation name="products_category_id_fkey" fq-name="public.products.products_category_id_fkey" type="fk" pk-ref="1" fk-ref="5"/>
+		<relation name="orders_customer_id_fkey" fq-name="public.orders.orders_customer_id_fkey" type="fk" pk-ref="2" fk-ref="4"/>
+		<relation name="order_items_order_id_fkey" fq-name="public.order_items.order_items_order_id_fkey" type="fk" pk-ref="4" fk-ref="3"/>
+		<relation name="order_items_product_id_fkey" fq-name="public.order_items.order_items_product_id_fkey" type="fk" pk-ref="5" fk-ref="3"/>
+	</relations>
+</diagram>

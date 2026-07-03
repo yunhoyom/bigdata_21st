@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>16장: 종합 프로젝트: 첫 기능·첫 PR — 발표·평가·성찰 - Claude Code 신입 개발자 온보딩 — 첫 기능부터 첫 PR까지</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+<style>
+
+/* 디자인 토큰 — 브랜드 변경 시 여기만 수정 */
+:root {
+  --primary: #1976D2;
+  --primary-light: #E3F2FD;
+  --accent: #FF6F00;
+  --success: #2E7D32;
+  --warning: #F57F17;
+  --danger: #C62828;
+  --bg: #FAFAFA;
+  --text: #212121;
+  --text-secondary: #616161;
+  --border: #E0E0E0;
+  --code-bg: #2d2d2d;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.8; font-size: 16px;
+}
+.container { max-width: 1400px; margin: 0 auto; }
+.main-content { max-width: 1000px; padding: 40px 48px; margin: 0 auto; }
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white; padding: 48px 40px; border-radius: 16px; margin-bottom: 40px;
+}
+.chapter-header .chapter-number {
+  font-size: 14px; opacity: 0.8; text-transform: uppercase; letter-spacing: 2px;
+}
+.chapter-header h1 { font-size: 32px; margin: 8px 0 16px; font-weight: 800; }
+.chapter-header .chapter-meta { font-size: 14px; opacity: 0.9; }
+
+/* 학습 목표 */
+.learning-objectives {
+  background: var(--primary-light); border-left: 4px solid var(--primary);
+  padding: 24px 28px; border-radius: 0 12px 12px 0; margin-bottom: 36px;
+}
+.learning-objectives h3 { color: var(--primary); font-size: 16px; margin-bottom: 12px; }
+.learning-objectives li { margin: 8px 0; padding-left: 8px; }
+
+/* 섹션 / 본문 기본 요소 */
+h1 { font-size: 28px; margin: 36px 0 16px; color: var(--text); }
+h2 {
+  font-size: 26px; color: var(--primary); margin: 48px 0 20px;
+  padding-bottom: 10px; border-bottom: 2px solid var(--primary-light);
+}
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+p { margin: 12px 0; }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin: 6px 0; }
+a { color: var(--primary); }
+img { max-width: 100%; height: auto; border-radius: 12px; }
+blockquote {
+  border-left: 4px solid var(--primary); background: var(--primary-light);
+  padding: 12px 20px; margin: 16px 0; border-radius: 0 12px 12px 0;
+}
+blockquote p:last-child { margin-bottom: 0; }
+/* 인라인 코드 (pre 밖) */
+:not(pre) > code {
+  background: #f0f0f0; padding: 2px 6px; border-radius: 4px;
+  font-size: 0.9em; color: var(--danger);
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+}
+
+/* 코드 블록 (.code-block-wrapper) */
+.code-block-wrapper {
+  margin: 24px 0; border-radius: 12px; overflow: hidden;
+  box-shadow: var(--card-shadow); border: 1px solid var(--border);
+}
+.code-block-header {
+  background: #1a1a2e; color: #a0a0b0; padding: 10px 20px; font-size: 13px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+.code-block-header .lang-badge {
+  background: var(--primary); color: white; padding: 2px 10px;
+  border-radius: 10px; font-size: 11px; font-weight: 700;
+}
+pre[class*="language-"] {
+  margin: 0 !important; border-radius: 0 !important;
+  font-size: 14px !important; line-height: 1.6 !important; padding: 20px !important;
+}
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important; padding-right: 8px !important;
+}
+.code-explanation {
+  background: #f8f9fa; border-top: 1px solid var(--border); padding: 16px 20px;
+  font-size: 14px; color: var(--text-secondary); line-height: 1.7;
+}
+.code-explanation strong { color: var(--text); }
+.code-explanation .explain-title {
+  display: inline-block; background: var(--accent); color: white; font-size: 11px;
+  font-weight: 700; padding: 2px 10px; border-radius: 10px; margin-bottom: 8px;
+}
+.code-output {
+  background: #1e1e1e; color: #4EC9B0; padding: 12px 20px;
+  font-family: monospace; font-size: 13px; border-top: 1px dashed #444;
+}
+.code-output::before {
+  content: "▶ 실행 결과"; display: block; color: #808080;
+  font-size: 11px; margin-bottom: 4px;
+}
+
+/* 특수 박스 (info-box 5종) */
+.info-box { padding: 14px 20px; border-radius: 12px; margin: 16px 0; border-left: 4px solid; }
+.info-box p:last-child, .info-box ul:last-child { margin-bottom: 0; }
+.info-box.tip { background: #E8F5E9; border-color: var(--success); }
+.info-box.warning { background: #FFF8E1; border-color: var(--warning); }
+.info-box.danger { background: #FFEBEE; border-color: var(--danger); }
+.info-box.beginner { background: #F3E5F5; border-color: #7B1FA2; }
+.info-box.best-practice { background: #E0F2F1; border-color: #00695C; }
+.info-box .box-header {
+  display: flex; align-items: center; margin-bottom: 12px;
+  padding-bottom: 10px; border-bottom: 1px solid rgba(123,31,162,0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* 표 */
+.api-reference h3, .library-section h3 {
+  background: var(--primary); color: white; padding: 12px 20px;
+  border-radius: 8px 8px 0 0; margin-bottom: 0; font-size: 16px;
+}
+hr.section-divider, hr {
+  border: none; border-top: 2px solid var(--border); margin: 36px 0;
+}
+.table-responsive { overflow-x: auto; margin: 16px 0; border-radius: 8px; box-shadow: var(--card-shadow); }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+table thead { background: #f5f5f5; }
+table th { padding: 12px 16px; text-align: left; font-weight: 700; border-bottom: 2px solid var(--border); }
+table td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table tr:hover { background: #fafafa; }
+table code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 13px; color: var(--danger); }
+.api-signature {
+  background: var(--code-bg); color: #e0e0e0; padding: 8px 16px; border-radius: 6px;
+  font-family: monospace; font-size: 13px; margin: 4px 0; overflow-x: auto;
+}
+
+/* 다이어그램 */
+.diagram-container { margin: 28px 0; text-align: center; }
+.diagram-container img { max-width: 100%; border-radius: 12px; box-shadow: var(--card-shadow); }
+.diagram-container img.screenshot { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.diagram-container .caption { margin-top: 10px; font-size: 13px; color: var(--text-secondary); font-style: italic; }
+.diagram-container .svg-diagram { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; }
+.diagram-container .svg-diagram svg { max-width: 100%; height: auto; }
+.missing-diagram { color: var(--danger); font-style: italic; padding: 1rem; background: #FFEBEE; border-radius: 8px; }
+.mermaid { margin: 24px auto; text-align: center; }
+
+/* 연습 문제 & 프로젝트 */
+.exercise-box { background: #FFF3E0; border: 2px solid var(--accent); border-radius: 12px; padding: 24px; margin: 28px 0; }
+.exercise-box h4 { color: var(--accent); }
+.project-box { background: linear-gradient(135deg, #E8EAF6, #C5CAE9); border-radius: 12px; padding: 28px; margin: 36px 0; }
+.project-box h3 { color: #283593; margin-bottom: 12px; }
+.project-readme { background: rgba(255,255,255,0.7); border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; }
+.project-file { margin: 12px 0; border-radius: 8px; overflow: hidden; }
+.project-file summary { background: rgba(255,255,255,0.7); padding: 12px 16px; cursor: pointer; font-weight: 600; border-radius: 8px; }
+.project-file pre { margin: 0; }
+
+/* FAQ */
+.faq-section details { border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; }
+.faq-section summary { padding: 14px 20px; cursor: pointer; font-weight: 600; color: var(--primary); background: #fafafa; border-radius: 8px; }
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+.faq-section .faq-answer { padding: 16px 20px; color: var(--text-secondary); }
+
+/* 챕터 네비게이션 */
+.chapter-nav { display: flex; justify-content: space-between; margin: 48px 0 24px; gap: 16px; }
+.chapter-nav a {
+  flex: 1; display: block; padding: 16px 20px; background: white;
+  border: 1px solid var(--border); border-radius: 12px; text-decoration: none;
+  color: var(--text); transition: all 0.2s;
+}
+.chapter-nav a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+
+/* ── 인덱스 페이지 ── */
+.index-container { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+.book-header { text-align: center; margin-bottom: 40px; }
+.book-header h1 { font-size: 36px; color: var(--primary); border: none; margin: 0 0 8px; }
+.book-header p { color: var(--text-secondary); font-size: 18px; }
+.chapter-list { list-style: none; margin: 0; }
+.chapter-list li { margin-bottom: 12px; }
+.chapter-list a {
+  display: flex; align-items: center; gap: 16px; padding: 16px 24px;
+  background: white; border: 1px solid var(--border); border-radius: 12px;
+  text-decoration: none; color: var(--text); transition: all 0.2s;
+}
+.chapter-list a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+.chapter-list .ch-num { font-weight: 700; color: var(--primary); min-width: 3.5rem; }
+.difficulty-group { margin-top: 32px; }
+.difficulty-group h2 { font-size: 18px; border: none; }
+.difficulty { display: inline-block; padding: 2px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; }
+.difficulty-입문 { background: #E8F5E9; color: #166534; }
+.difficulty-기초 { background: #E3F2FD; color: #1e40af; }
+.difficulty-중급 { background: #FFF8E1; color: #92400e; }
+.difficulty-실무 { background: #FCE7F3; color: #9d174d; }
+.difficulty-고급 { background: #FFEBEE; color: #991b1b; }
+
+/* 인쇄 / 반응형 */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper, table, .diagram-container, .project-box { break-inside: avoid; page-break-inside: avoid; }
+  h1, h2, h3, h4 { break-after: avoid; page-break-after: avoid; }
+}
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+  .chapter-nav { flex-direction: column; }
+}
+
+/* === templates/chapter_design_template.html (단일 디자인 소스, 우선 적용) === */
+
+/* ============================================================
+   디자인 토큰 (색상·그림자) — 브랜드 변경 시 여기만 수정
+   ============================================================ */
+:root {
+  --primary: #1976D2;        /* 주조색(파랑) — 헤더/제목/강조 */
+  --primary-light: #E3F2FD;  /* 주조색 옅은 톤 — 박스 배경/밑줄 */
+  --accent: #FF6F00;         /* 강조색(주황) — 해설 라벨/연습문제 */
+  --success: #2E7D32;        /* 성공(초록) */
+  --warning: #F57F17;        /* 경고(노랑) */
+  --danger: #C62828;         /* 위험(빨강) */
+  --bg: #FAFAFA;             /* 페이지 배경 */
+  --text: #212121;           /* 본문 텍스트 */
+  --text-secondary: #616161; /* 보조 텍스트 */
+  --border: #E0E0E0;         /* 테두리 */
+  --code-bg: #2d2d2d;        /* 코드 배경 */
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  font-size: 16px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   메인 콘텐츠
+   ============================================================ */
+.main-content {
+  flex: 1;
+  max-width: 1400px;
+  padding: 40px 48px;
+  margin: 0 auto;
+}
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white;
+  padding: 48px 40px;
+  border-radius: 16px;
+  margin-bottom: 40px;
+}
+
+.chapter-header .chapter-number {
+  font-size: 14px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.chapter-header h1 {
+  font-size: 32px;
+  margin: 8px 0 16px;
+  font-weight: 800;
+}
+
+.chapter-header .chapter-meta {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* 학습 목표 박스 */
+.learning-objectives {
+  background: var(--primary-light);
+  border-left: 4px solid var(--primary);
+  padding: 24px 28px;
+  border-radius: 0 12px 12px 0;
+  margin-bottom: 36px;
+}
+
+.learning-objectives h3 {
+  color: var(--primary);
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.learning-objectives li {
+  margin: 8px 0;
+  padding-left: 8px;
+  color: var(--text);
+}
+
+/* 섹션 */
+h2 {
+  font-size: 26px;
+  color: var(--primary);
+  margin: 48px 0 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--primary-light);
+}
+
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+
+p { margin: 12px 0; }
+
+/* ============================================================
+   코드 블록 - 박스형 + 줄번호 + 실무 설명
+   ============================================================ */
+.code-block-wrapper {
+  margin: 24px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+}
+
+.code-block-header {
+  background: #1a1a2e;
+  color: #a0a0b0;
+  padding: 10px 20px;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+
+.code-block-header .lang-badge {
+  background: var(--primary);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Prism 줄번호 스타일 오버라이드 */
+pre[class*="language-"] {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  padding: 20px !important;
+}
+
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important;
+  padding-right: 8px !important;
+}
+
+/* 코드 실무 설명 박스 */
+.code-explanation {
+  background: #f8f9fa;
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.code-explanation strong { color: var(--text); }
+
+.code-explanation .explain-title {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+/* 코드 실행 결과 */
+.code-output {
+  background: #1e1e1e;
+  color: #4EC9B0;
+  padding: 12px 20px;
+  font-family: monospace;
+  font-size: 13px;
+  border-top: 1px dashed #444;
+}
+
+.code-output::before {
+  content: "▶ 실행 결과";
+  display: block;
+  color: #808080;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+/* ============================================================
+   특수 박스 (팁, 주의, 베스트 프랙티스, 초보자 설명)
+   ============================================================ */
+.info-box {
+  padding: 14px 20px;
+  border-radius: 12px;
+  margin: 16px 0;
+  border-left: 4px solid;
+}
+.info-box p:last-child { margin-bottom: 0; }
+.info-box ul:last-child { margin-bottom: 0; }
+
+.info-box.tip {
+  background: #E8F5E9;
+  border-color: var(--success);
+}
+
+.info-box.warning {
+  background: #FFF8E1;
+  border-color: var(--warning);
+}
+
+.info-box.danger {
+  background: #FFEBEE;
+  border-color: var(--danger);
+}
+
+.info-box.beginner {
+  background: #F3E5F5;
+  border-color: #7B1FA2;
+}
+
+.info-box.best-practice {
+  background: #E0F2F1;
+  border-color: #00695C;
+}
+
+.info-box .box-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(123, 31, 162, 0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* ============================================================
+   라이브러리 & API 레퍼런스 테이블
+   ============================================================ */
+.api-reference, .library-section {
+  margin: 32px 0;
+}
+
+.api-reference h3, .library-section h3 {
+  background: var(--primary);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 0;
+  font-size: 16px;
+}
+
+hr.section-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 36px 0;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  margin: 16px 0;
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  font-size: 14px;
+}
+
+table thead {
+  background: #f5f5f5;
+}
+
+table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 2px solid var(--border);
+}
+
+table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+table tr:hover { background: #fafafa; }
+
+table code {
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+/* API 시그니처 행 */
+.api-signature {
+  background: var(--code-bg);
+  color: #e0e0e0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 13px;
+  margin: 4px 0;
+  overflow-x: auto;
+}
+
+/* ============================================================
+   이미지 / 다이어그램
+   ============================================================ */
+.diagram-container {
+  margin: 28px 0;
+  text-align: center;
+}
+
+.diagram-container img {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+}
+
+.diagram-container .caption {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* PPTX 원본 보존 뱃지 */
+.diagram-container .pptx-badge {
+  display: inline-block;
+  background: #FF6F00;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: normal;
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Mermaid 다이어그램 (인라인 렌더링) */
+.mermaid {
+  margin: 24px auto;
+  text-align: center;
+}
+
+/* ============================================================
+   연습 문제 & 프로젝트
+   ============================================================ */
+.exercise-box {
+  background: #FFF3E0;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 28px 0;
+}
+
+.exercise-box h4 { color: var(--accent); }
+
+.project-box {
+  background: linear-gradient(135deg, #E8EAF6, #C5CAE9);
+  border-radius: 12px;
+  padding: 28px;
+  margin: 36px 0;
+}
+
+/* ============================================================
+   FAQ
+   ============================================================ */
+.faq-section details {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 8px 0;
+  padding: 0;
+}
+
+.faq-section summary {
+  padding: 14px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primary);
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+
+.faq-section details .faq-answer {
+  padding: 16px 20px;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   챕터 네비게이션 (이전/다음)
+   ============================================================ */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  margin: 48px 0 24px;
+  gap: 16px;
+}
+
+.chapter-nav a {
+  flex: 1;
+  display: block;
+  padding: 16px 20px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.chapter-nav a:hover {
+  border-color: var(--primary);
+  box-shadow: var(--card-shadow);
+}
+
+/* ============================================================
+   인쇄용 스타일
+   ============================================================ */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper { break-inside: avoid; }
+}
+
+/* ============================================================
+   반응형 - 모바일
+   ============================================================ */
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+}
+
+</style>
+</head>
+<body>
+<div class="container">
+<main class="main-content">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 16</div>
+    <h1>종합 프로젝트: 첫 기능·첫 PR — 발표·평가·성찰</h1>
+    <div class="chapter-meta"><span class="difficulty difficulty-실무">실무</span></div>
+  </div>
+
+<h1 id="pr">종합 프로젝트: 첫 기능·첫 PR — 발표·평가·성찰</h1>
+<div class="learning-objectives">
+<h2 id="_1">이 챕터에서 배우는 것</h2>
+<ul>
+<li>완성한 첫 기능·통과한 테스트·올린 PR을 공개 산출물로 시연할 수 있습니다.</li>
+<li>주어진 평가 루브릭의 항목별 기준에 맞춰 자신과 동료의 작업을 점수·근거로 평가할 수 있습니다.</li>
+<li>12개 개념(c01~c12) 각각을 종합 프로젝트의 어느 단계에서 어떻게 적용했는지 성찰 회고로 작성할 수 있습니다.</li>
+<li>현재 결과물의 한계 1개 이상과 다음 학습(서브에이전트·MCP 심화) 방향을 제시할 수 있습니다.</li>
+</ul>
+</div>
+<blockquote>
+<p>이 챕터는 종합 프로젝트의 마지막 단계인 <strong>발표·평가·성찰(present &amp; reflect)</strong>입니다. 새 개념을 배우지 않습니다. 구현(ch_15)한 산출물을 남에게 보이고, 기준으로 평가하며, 온보딩 여정 전체를 되짚어 다음 단계로 연결합니다.</p>
+</blockquote>
+<h2 id="pr_1">산출물 시연: 동작하는 기능·통과한 테스트·올린 PR</h2>
+<p>발표의 핵심은 "잘 만들었다"는 말이 아니라 <strong>보이는 증거</strong>입니다. 신입의 첫 기능 발표는 세 가지를 순서대로 보여 주면 충분합니다. 동작하는 기능, 통과한 테스트, 올린 PR입니다.</p>
+<h3 id="1">1) 동작하는 기능 시연</h3>
+<p>서버를 띄우고, 추가한 두 엔드포인트가 실제로 응답하는 모습을 보여 줍니다. 말이 아니라 요청·응답으로 증명합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ python -m uvicorn app.main:app --reload
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Application startup complete.
+
+$ curl -X PATCH http://127.0.0.1:8000/tasks/1/complete
+{&quot;id&quot;:1,&quot;title&quot;:&quot;온보딩 문서 읽기&quot;,&quot;status&quot;:&quot;done&quot;}
+
+$ curl &quot;http://127.0.0.1:8000/tasks?status=done&quot;
+[{&quot;id&quot;:1,&quot;title&quot;:&quot;온보딩 문서 읽기&quot;,&quot;status&quot;:&quot;done&quot;}]
+
+$ curl -i &quot;http://127.0.0.1:8000/tasks?status=working&quot;
+HTTP/1.1 422 Unprocessable Entity
+</code></pre></div>
+<p>완료 처리가 상태를 <code>done</code>으로 바꾸고(UC1), 필터가 <code>done</code>인 항목만 거르며(UC2), 잘못된 상태는 422로 막힙니다(FR4). 정상 경로뿐 아니라 <strong>에러 경로까지</strong> 보여 주는 것이 신뢰를 줍니다.</p>
+<h3 id="2">2) 통과한 테스트 시연</h3>
+<p>기능이 "지금 이 순간"만이 아니라 반복적으로 동작함을 테스트로 보입니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ python -m pytest -q
+......                                                                   [100%]
+6 passed in 0.48s
+</code></pre></div>
+<p>완료·404·필터·422·멱등·빈값의 여섯 경로가 모두 통과합니다. 이 출력이 "동작합니다"라는 주장의 증거입니다.</p>
+<h3 id="3-pr">3) 올린 PR 시연</h3>
+<p>마지막으로 PR을 보여 줍니다. 변경 요약·근거·내용·테스트 결과가 담겨 리뷰어가 1분 안에 파악할 수 있는 형태입니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ gh pr view 57
+title:  feat(tasks): 완료 처리·상태 필터 추가
+state:  OPEN
+url:    https://github.com/team/team-tasks-api/pull/57
+
+완료 처리(PATCH /tasks/{id}/complete)와 상태 필터(GET /tasks?status=)를
+추가했습니다. 없는 id 는 404, 잘못된 status 는 422. 테스트 6개 통과.
+</code></pre></div>
+<div class="info-box best-practice">
+<h3 id="_2">발표 한 장 요약 틀</h3>
+<p>발표는 다음 한 문장 틀에 맞춰 말하면 군더더기 없이 전달됩니다. "<strong>[무엇을]</strong> 추가했고, <strong>[어떤 테스트]</strong>로 검증했으며, <strong>[어떤 PR]</strong>로 올렸습니다. 설계에서는 <strong>[핵심 ADR]</strong>을 택했고, 남은 범위는 <strong>[제외 항목]</strong>입니다." 예: "완료 처리·상태 필터를 추가했고, 여섯 개 테스트로 검증했으며, #57 PR로 올렸습니다. 상태는 확장을 위해 enum으로 택했고(ADR2), 완료 취소는 후속으로 남겼습니다."</p>
+</div>
+<h2 id="_3">평가 루브릭</h2>
+<p>좋은 평가는 "느낌"이 아니라 <strong>공유된 기준</strong>으로 합니다. 아래 루브릭은 이 종합 프로젝트의 여섯 가지 기준과 가중치, 그리고 미흡·보통·우수의 수준을 정의합니다. 자신을 먼저 평가하고, 동료의 작업도 같은 기준으로 봅니다.</p>
+<table>
+<thead>
+<tr>
+<th>기준</th>
+<th>가중치</th>
+<th>미흡</th>
+<th>보통</th>
+<th>우수</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>기능 완성도(완료 처리·상태 필터·에러 응답)</td>
+<td>0.20</td>
+<td>한 엔드포인트만 부분 동작</td>
+<td>두 엔드포인트 동작</td>
+<td>두 엔드포인트 + 404·422 에러 응답까지 동작</td>
+</tr>
+<tr>
+<td>검증(테스트)</td>
+<td>0.20</td>
+<td>테스트 없음</td>
+<td>행복 경로 테스트만</td>
+<td>TDD로 작성한 행복·에러 경로 테스트가 모두 통과</td>
+</tr>
+<tr>
+<td>안전·절차(권한·플랜·CLAUDE.md)</td>
+<td>0.15</td>
+<td>바로 편집</td>
+<td>권한 또는 플랜 중 하나만</td>
+<td>최소 권한·플랜 모드·CLAUDE.md를 모두 적용</td>
+</tr>
+<tr>
+<td>협업(커밋·PR 품질)</td>
+<td>0.20</td>
+<td>한 덩어리 커밋·빈약한 PR</td>
+<td>관례 커밋과 기본 PR</td>
+<td>작은 논리 커밋 + 요약·근거·테스트 결과를 담은 PR</td>
+</tr>
+<tr>
+<td>리뷰 대응·디버깅</td>
+<td>0.15</td>
+<td>대응 없음</td>
+<td>지적을 반영만</td>
+<td>근거를 이해해 반영·반론하고 회귀 테스트로 확인</td>
+</tr>
+<tr>
+<td>발표·성찰</td>
+<td>0.10</td>
+<td>동작만 보여 줌</td>
+<td>변경 의도 설명</td>
+<td>ADR 근거·개념 적용 회고·다음 학습 방향까지 제시</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_4">점수를 매기는 법</h3>
+<p>각 기준의 수준(미흡 1점·보통 2점·우수 3점)에 가중치를 곱해 더하면 가중 평균이 나옵니다. 예를 들어 모든 기준이 "보통(2점)"이면 2.00, 모두 "우수(3점)"이면 3.00입니다. 점수 자체보다 <strong>어느 기준이 약한지</strong>를 찾아 다음에 보완하는 데 의미가 있습니다.</p>
+<h3 id="worked-example">worked example: 이 프로젝트를 루브릭으로 자가 평가하기</h3>
+<p>ch_15에서 완성한 산출물을 루브릭으로 직접 채점해 보겠습니다. 각 기준마다 수준을 고르고, 그 판단의 <strong>근거</strong>를 한 줄로 답니다. 근거 없이 점수만 매기면 다음에 무엇을 고칠지 알 수 없습니다.</p>
+<table>
+<thead>
+<tr>
+<th>기준</th>
+<th>가중치</th>
+<th>내 수준</th>
+<th>점수</th>
+<th>근거</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>기능 완성도</td>
+<td>0.20</td>
+<td>우수</td>
+<td>3</td>
+<td>두 엔드포인트 + 404·422 에러 응답까지 동작</td>
+</tr>
+<tr>
+<td>검증(테스트)</td>
+<td>0.20</td>
+<td>우수</td>
+<td>3</td>
+<td>완료·404·필터·422를 TDD로 작성, 6개 통과</td>
+</tr>
+<tr>
+<td>안전·절차</td>
+<td>0.15</td>
+<td>우수</td>
+<td>3</td>
+<td>최소 권한·플랜·CLAUDE.md를 M1에서 모두 적용</td>
+</tr>
+<tr>
+<td>협업(커밋·PR)</td>
+<td>0.20</td>
+<td>우수</td>
+<td>3</td>
+<td><code>feat</code>·<code>test</code> 분리 커밋 + 근거·테스트 담은 PR</td>
+</tr>
+<tr>
+<td>리뷰 대응·디버깅</td>
+<td>0.15</td>
+<td>우수</td>
+<td>3</td>
+<td>지적을 재현·검증하고 회귀 테스트로 못 박음</td>
+</tr>
+<tr>
+<td>발표·성찰</td>
+<td>0.10</td>
+<td>보통</td>
+<td>2</td>
+<td>변경 의도는 설명했으나 ADR 근거 연결이 얕음</td>
+</tr>
+</tbody>
+</table>
+<p>가중 평균은 <code>3*0.20 + 3*0.20 + 3*0.15 + 3*0.20 + 3*0.15 + 2*0.10 = 2.90</code>입니다. 점수가 높아도 의미는 마지막 줄에 있습니다. <strong>발표·성찰 기준이 가장 약했고</strong>, "ADR 근거를 발표에 더 분명히 연결한다"가 다음에 보완할 한 가지입니다. 이렇게 루브릭은 잘한 점을 확인하는 동시에 <strong>다음 목표 하나</strong>를 집어 줍니다.</p>
+<div class="project-box">
+<h3 id="_5">연습: 나의 실제 산출물을 루브릭으로 자가 평가하라</h3>
+<p>자신이 <strong>실제로 만든</strong> 첫 기능(team-tasks-api의 완료 처리·상태 필터)을 위 모범 표처럼 직접 평가해 작성하세요. 점수보다 <strong>근거</strong>와 <strong>가장 약한 기준</strong>을 찾는 데 집중합니다. 각 칸은 추측이 아니라, 내가 실제로 한 작업(커밋·테스트·리뷰 대응)에 비추어 적습니다.</p>
+<p>아래 표를 그대로 옮겨, 각 칸을 자신의 산출물로 직접 채우세요.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">| 기준              | 내 수준 | 점수 | 근거(내가 실제로 한 것) |
+| 기능 완성도        | (직접 적기) | (직접) | (내 산출물 근거를 직접 적는다) |
+| 검증(테스트)       | (직접 적기) | (직접) | (내 산출물 근거를 직접 적는다) |
+| 안전·절차          | (직접 적기) | (직접) | (내 산출물 근거를 직접 적는다) |
+| 협업(커밋·PR)      | (직접 적기) | (직접) | (내 산출물 근거를 직접 적는다) |
+| 리뷰 대응·디버깅    | (직접 적기) | (직접) | (내 산출물 근거를 직접 적는다) |
+| 발표·성찰          | (직접 적기) | (직접) | (내 산출물 근거를 직접 적는다) |
+
+가중 평균: (직접 계산해 적기)   가장 약한 기준: (직접 적기)   다음에 보완할 한 가지: (직접 적기)
+</code></pre></div>
+</div>
+<div class="info-box tip">
+<h3 id="_6">루브릭은 채점표가 아니라 길잡이</h3>
+<p>루브릭의 진짜 쓸모는 점수를 매기는 데 있지 않고, "우수"의 모습을 미리 보여 주는 데 있습니다. 예컨대 검증 기준의 "우수"는 "행복 경로만이 아니라 <strong>에러 경로(404·422)까지</strong> TDD로 검증"입니다. 작업을 시작하기 <strong>전에</strong> 이 기준을 읽으면, 무엇을 목표로 삼아야 할지가 분명해집니다. 끝나고 채점하기보다, 시작 전에 목표로 읽으십시오.</p>
+</div>
+<h2 id="_7">동료 피드백 (모의 리뷰)</h2>
+<p>발표 뒤에는 동료의 눈으로 한 번 더 점검합니다. 실제 팀에서는 동료가 PR에 코멘트를 달지만, 여기서는 <strong>모의 동료 리뷰</strong>로 연습합니다. 좋은 동료 리뷰는 비난이 아니라, 같은 기준(루브릭)을 근거로 한 구체적 제안입니다.</p>
+<p>다음은 이 프로젝트에 대한 모의 동료 리뷰의 예입니다.</p>
+<blockquote>
+<p><strong>동료 A (검증 기준)</strong>: 에러 경로(404·422)까지 테스트한 점이 좋습니다. 다만 완료 처리를 <strong>연속 두 번</strong> 호출했을 때도 안전한지 궁금합니다. 멱등성 테스트가 이미 있다면 그 의도를 PR 본문에도 한 줄 적어 주면 리뷰어가 더 빨리 이해할 것 같습니다.</p>
+<p><strong>동료 B (협업 기준)</strong>: 구현과 테스트를 <code>feat</code>·<code>test</code>로 나눈 커밋이 깔끔합니다. PR 제목도 관례를 잘 따랐습니다. 한 가지, "범위 - 제외"에 적힌 완료 취소 기능은 후속 이슈로 등록해 두면 추적이 쉬울 것 같습니다.</p>
+<p><strong>동료 C (설계 기준)</strong>: 상태를 불리언이 아니라 enum으로 택한 결정(ADR2)이 확장에 유리해 보입니다. 다만 enum 값이 늘어날 때를 대비해, 필터가 여러 상태를 받는 경우(예: <code>?status=todo,done</code>)는 어떻게 할지 후속에서 한 번 정리하면 좋겠습니다.</p>
+</blockquote>
+<p>이 리뷰들에 대응하는 방식은 ch_15에서 배운 그대로입니다. <strong>타당한 지적은 반영하고, 확인이 필요하면 재현·검증하며, 부적절하면 근거로 답합니다.</strong> 예컨대 동료 A의 제안은 PR 본문에 한 줄 추가하는 것으로 바로 반영할 수 있고, 동료 C의 제안은 이번 범위 밖이므로 "후속 이슈로 남기겠습니다"라고 근거와 함께 답하면 됩니다.</p>
+<div class="project-box">
+<h3 id="_8">모의 동료 리뷰 작성 연습</h3>
+<p>짝의 산출물(또는 자신의 실제 산출물)에 대해, 루브릭 기준 하나를 골라 동료 리뷰 한 건을 <strong>직접 작성</strong>하세요. 비난이 아니라 <strong>근거 있는 구체적 제안</strong>으로 적습니다. 위 동료 A·B·C 예시를 본떠, 실제로 본 코드·PR에 근거해 적습니다.</p>
+<p>아래 형식을 그대로 옮겨, 각 항목을 직접 작성하세요.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[고른 기준]  (직접 적는다 — 예: 검증)
+[좋은 점]    (직접 적는다)
+[제안]       (직접 적는다)
+[근거]  루브릭의 &quot;우수&quot; 수준은 (직접 적는다) 인데,
+        현재는 (직접 적는다) 이므로 한 걸음 더 가면 좋겠습니다.
+</code></pre></div>
+</div>
+<h2 id="12">성찰 회고: 12개 개념의 적용</h2>
+<p>이 온보딩 여정의 핵심은, 따로 배운 12개 개념이 <strong>한 번의 실제 업무에서 어떻게 하나로 모이는가</strong>를 체득하는 것이었습니다. 첫 기능 추가의 각 단계가 어느 개념에서 왔는지 되짚어 봅니다.</p>
+<table>
+<thead>
+<tr>
+<th>개념</th>
+<th>단원</th>
+<th>첫 기능 추가의 어느 단계로 이어졌나</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>c01 설치·인증·세션</td>
+<td>u1</td>
+<td>작업 시작 전 환경을 갖추고 세션을 열어 첫 작업을 지시</td>
+</tr>
+<tr>
+<td>c02 에이전트 루프</td>
+<td>u2</td>
+<td>구현(M3)에서 관찰→계획→도구→확인의 흐름으로 변경을 진행</td>
+</tr>
+<tr>
+<td>c03 작업 지시 4요소</td>
+<td>u3</td>
+<td>테스트·구현 지시(M2·M3)를 목표·맥락·제약·완료 조건으로 작성</td>
+</tr>
+<tr>
+<td>c04 코드베이스 탐색</td>
+<td>u4</td>
+<td>분석(ch_13)에서 기존 저장소 구조·데이터 흐름을 파악</td>
+</tr>
+<tr>
+<td>c05 권한·승인</td>
+<td>u5</td>
+<td>M1에서 최소 권한 settings.json으로 안전한 명령만 허용</td>
+</tr>
+<tr>
+<td>c06 플랜 모드</td>
+<td>u5</td>
+<td>M1에서 변경 전 계획을 받아 검토·교정해 확정</td>
+</tr>
+<tr>
+<td>c07 실행·테스트 검증</td>
+<td>u6</td>
+<td>M2·M3에서 TDD로 완료 조건을 먼저 세우고 통과를 확인</td>
+</tr>
+<tr>
+<td>c08 CLAUDE.md</td>
+<td>u7</td>
+<td>M1에서 빌드·테스트 명령·컨벤션을 메모리에 영속화</td>
+</tr>
+<tr>
+<td>c09 커밋·PR</td>
+<td>u8</td>
+<td>M4에서 작은 논리 단위 커밋과 첫 PR 초안 작성</td>
+</tr>
+<tr>
+<td>c10 코드 리뷰</td>
+<td>u9</td>
+<td>M5에서 <code>/code-review</code>로 점검하고 지적에 대응</td>
+</tr>
+<tr>
+<td>c11 디버깅</td>
+<td>u10</td>
+<td>M5에서 리뷰 지적을 재현→검증→회귀 테스트로 처리</td>
+</tr>
+<tr>
+<td>c12 서브에이전트·MCP</td>
+<td>u11</td>
+<td>M6(선택)에서 테스트 실행 위임·외부 자료 참조를 맛봄</td>
+</tr>
+</tbody>
+</table>
+<p>이렇게 보면, 12개 개념이 <strong>분석·설계·구현·발표의 한 흐름</strong>에 빠짐없이 녹아 있습니다. 따로 배울 때는 조각이었지만, 한 번의 첫 기능 추가로 엮으니 비로소 "온보딩이 이렇게 하나로 이어지는구나"를 체득하게 됩니다. 이것이 POV에서 말한 통찰 — "기능을 따로 배우는 것과 한 번의 실제 업무로 엮어 쓰는 것은 다르다" — 의 실제 모습입니다.</p>
+<h3 id="_9">성찰 질문</h3>
+<p>다음 다섯 질문에 스스로 답해 보며 여정을 정리합니다.</p>
+<ol>
+<li>12개 개념이 첫 기능 추가의 어느 단계로 이어졌는지, 위 표를 바탕으로 자신의 말로 다시 적어 보세요.</li>
+<li>플랜 모드(M1)로 받은 초기 계획과 실제 구현(M3)이 달라진 부분이 있다면, 그 이유는 무엇이었습니까?</li>
+<li>코드 리뷰(M5)에서 가장 배운 점은 무엇이고, 지적을 방어적으로 받지 않으려면 어떤 태도가 필요합니까?</li>
+<li>테스트를 먼저 쓰는 것(TDD, M2)이 결과 품질에 어떤 차이를 만들었습니까?</li>
+<li>다음 단계로 서브에이전트·MCP를 더 깊이 쓴다면, 어떤 반복 작업부터 자동화하고 싶습니까?</li>
+</ol>
+<h3 id="34">깊이 있는 답을 위한 예시 (질문 3·4)</h3>
+<p>성찰 질문은 한 문장으로 끝내기보다, 구체적 사건과 연결할 때 값이 생깁니다. 두 질문의 모범 답을 봅니다.</p>
+<p><strong>질문 3(리뷰에서 배운 점·방어적이지 않으려면)의 예시 답</strong>: "가장 배운 점은, 리뷰 지적이 '내 코드가 틀렸다'는 비난이 아니라 '여기 확인이 필요하다'는 신호라는 것이었습니다. <code>/code-review</code>가 던진 '빈 status는 어떻게 되나'라는 질문에 처음엔 방어하고 싶었지만, 직접 재현해 보니 이미 422로 막히고 있었습니다. 만약 확인 없이 '괜찮습니다'라고만 답했다면 근거 없는 방어였을 것입니다. 방어적으로 받지 않으려면, 지적을 <strong>검증할 사실</strong>로 바꿔 재현해 보는 습관이 필요합니다."</p>
+<p><strong>질문 4(TDD가 품질에 만든 차이)의 예시 답</strong>: "테스트를 먼저 쓰니(M2) '무엇이 되면 끝인지'가 구현 전에 분명해졌습니다. 특히 404·422 같은 에러 경로를 먼저 테스트로 적어 두니, 구현할 때 그 경우를 빠뜨리지 않았습니다. 만약 구현부터 했다면 정상 경로만 만들고 에러 처리는 잊었을 가능성이 큽니다. TDD는 '완료 조건을 앞당겨 정의'해 구현이 흔들리지 않게 잡아 주었습니다."</p>
+<div class="info-box beginner">
+<h3 id="_10">성찰은 "다음에 무엇을 바꿀까"로 끝낸다</h3>
+<p>성찰의 목적은 잘잘못을 가리는 것이 아니라, <strong>다음 작업에서 바꿀 한 가지</strong>를 건지는 것입니다. 예컨대 질문 2에서 "계획에 없던 회귀 테스트를 나중에야 추가했다"를 깨달았다면, 다음에는 "리뷰 대응 단계를 처음부터 계획에 넣자"가 건진 교훈입니다. 막연한 반성보다 구체적인 다음 행동 하나가 더 값집니다.</p>
+</div>
+<h2 id="mcp">다음 단계: 서브에이전트·MCP 심화로 가는 길</h2>
+<p>이 책은 온보딩, 곧 "첫 기능부터 첫 PR까지"를 다뤘습니다. 여기서부터 더 나아갈 길의 출발점이 단원 11에서 맛본 <strong>서브에이전트와 MCP</strong>입니다. 본서는 맛보기까지만 다뤘으므로(scope_out), 다음 학습 방향을 안내합니다.</p>
+<ul>
+<li><strong>반복 작업의 위임(서브에이전트)</strong>: 이번 프로젝트에서 가장 자주 반복한 일은 "테스트를 돌려 결과를 확인"하는 것이었습니다. 이런 경계가 분명한 작업을 별도 컨텍스트의 서브에이전트(<code>.claude/agents/tester.md</code>)에 맡기면, 메인 대화를 어지럽히지 않고 위임할 수 있습니다. 다음 단계에서는 역할·도구를 더 정교하게 설계하는 법을 익힙니다.</li>
+<li><strong>외부 자료의 표준 연결(MCP)</strong>: 팀의 API 컨벤션 문서나 이슈 트래커처럼 코드 밖의 자료를 MCP 서버로 연결하면, 에이전트가 외부 맥락을 참조하며 일할 수 있습니다. 다음 단계에서는 <code>.mcp.json</code> 등록과 권한·비밀 관리를 더 깊이 다룹니다.</li>
+<li><strong>CI·자동화로의 확장</strong>: 본서는 무인 자동화를 범위 밖으로 두었지만(scope_out), 통과한 테스트와 좋은 PR 습관이 갖춰지면 자연스러운 다음 걸음은 PR마다 자동으로 테스트·리뷰를 도는 흐름입니다.</li>
+</ul>
+<div class="info-box best-practice">
+<h3 id="_11">온보딩 이후의 한 걸음</h3>
+<p>가장 좋은 다음 단계는 거창한 자동화가 아니라, <strong>이번에 가장 자주 반복한 일 하나를 골라 위임해 보는 것</strong>입니다. 성찰 질문 5에 적은 "자동화하고 싶은 반복 작업"이 바로 그 출발점입니다. 작게 시작해 통과를 확인하며 넓혀 가는 리듬은, 온보딩에서 배운 그대로입니다.</p>
+</div>
+<h2 id="2-1">작성형 연습 (2종 1세트)</h2>
+<p>여정을 마무리하는 성찰을 직접 정리합니다. ① 모범 예시를 보고, ② 빈 템플릿을 채운 뒤, ③ 자가체크로 점검합니다.</p>
+<h3 id="_12">모범 예시: 성찰 회고 한 편</h3>
+<p>다음은 한 신입이 작성한 성찰 회고의 모범입니다.</p>
+<blockquote>
+<p><strong>무엇을 했나</strong>: 기존 <code>team-tasks-api</code>에 완료 처리·상태 필터를 추가하고, 여섯 개 테스트로 검증해 #57 PR로 올렸습니다.</p>
+<p><strong>개념 적용</strong>: 가장 크게 와닿은 것은 c07(검증)과 c06(플랜)이었습니다. 테스트를 먼저 쓰니(M2) "무엇이 되면 끝인지"가 분명해져, 구현이 흔들리지 않았습니다. 플랜 모드(M1)로 계획을 먼저 받아 보니, status를 새로 추가할 뻔한 가정을 시작 전에 교정할 수 있었습니다.</p>
+<p><strong>달라진 점</strong>: 초기 계획에는 리뷰 대응 단계가 없었습니다. 막상 <code>/code-review</code>(M5)에서 "빈 status는 어떻게 되나"라는 지적을 받고 나서야, 재현·검증·회귀 테스트가 필요함을 알았습니다.</p>
+<p><strong>다음에 바꿀 것</strong>: 다음에는 리뷰 대응과 회귀 테스트를 처음부터 계획(M1)에 넣겠습니다. 또 반복된 "테스트 실행"을 서브에이전트에 위임해 보겠습니다.</p>
+</blockquote>
+<h3 id="_13">연습: 나의 성찰 회고 채우기</h3>
+<div class="project-box">
+<p>위 모범을 참고해, 자신이 <strong>실제로 거친</strong> 첫 기능 추가 여정을 성찰 회고로 <strong>직접 작성</strong>하세요. 다섯 성찰 질문을 녹여, 추측이 아니라 자신이 실제로 한 것(시연·평가·12개념 적용)을 서술합니다.</p>
+<p>아래 형식을 그대로 옮겨, 각 항목을 자신의 경험으로 직접 채우세요.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[무엇을 했나]  (직접 서술한다: 내가 실제로 추가한 기능과 올린 PR)
+
+[개념 적용]  가장 크게 와닿은 개념과 그 이유를 직접 서술한다.
+  (예: c07 검증, c06 플랜 — 왜 그랬는지 내 경험으로)
+
+[달라진 점]  플랜 모드 초기 계획과 실제 구현이 달라진 부분과 그 이유:
+  (직접 서술한다)
+
+[리뷰에서 배운 점]  내가 받은 리뷰에서 배운 것과, 방어적으로 받지 않으려면:
+  (직접 서술한다)
+
+[다음에 바꿀 것]  다음 작업에서 바꿀 한 가지와 자동화하고 싶은 반복 작업:
+  (직접 서술한다)
+</code></pre></div>
+</div>
+<div class="project-box">
+<h3 id="_14">자가체크</h3>
+<ul>
+<li>[ ] 산출물 시연에 동작하는 기능·통과한 테스트·올린 PR의 <strong>세 증거</strong>를 모두 담았는가</li>
+<li>[ ] 루브릭 여섯 기준으로 자신의 작업을 평가하고, 약한 기준을 찾았는가</li>
+<li>[ ] 12개 개념이 각각 어느 단계로 이어졌는지 자신의 말로 적었는가</li>
+<li>[ ] 성찰을 막연한 반성이 아니라 "다음에 바꿀 한 가지"로 끝맺었는가</li>
+<li>[ ] 다음 학습(서브에이전트·MCP 심화)에서 먼저 시도할 작업을 골랐는가</li>
+</ul>
+</div>
+<h2 id="_15">자주 묻는 질문</h2>
+<div class="faq-section">
+<h3 id="q">Q. 발표 때 코드를 한 줄씩 다 설명해야 하나요?</h3>
+<p>아닙니다. 리뷰어·청중이 알고 싶은 것은 줄 단위 구현이 아니라 <strong>무엇을·왜·어떻게 검증했는가</strong>입니다. "완료 처리·상태 필터를 추가했고(무엇), 상태 확장을 위해 enum을 택했으며(왜·ADR2), 여섯 개 테스트로 검증했습니다(검증)"처럼 핵심 결정과 증거 위주로 말하세요. 세부 구현은 질문이 나올 때 PR의 해당 줄을 열어 보이면 충분합니다.</p>
+<h3 id="q_1">Q. 테스트가 모두 통과했는데도 "보통"보다 낮게 평가될 수 있나요?</h3>
+<p>있습니다. 검증 기준의 "우수"는 단순 통과가 아니라 "<strong>행복 경로와 에러 경로(404·422)를 TDD로</strong> 검증"입니다. 정상 동작만 테스트하고 에러 경로를 빠뜨렸다면, 모두 통과했더라도 "보통"에 머뭅니다. 루브릭은 통과 여부가 아니라 <strong>무엇을 검증했는지의 폭</strong>을 봅니다.</p>
+<h3 id="q_2">Q. 리뷰 지적에 반론해도 괜찮나요? 신입이 건방져 보일까 걱정됩니다.</h3>
+<p>근거가 있다면 괜찮습니다. 중요한 것은 태도가 아니라 <strong>근거의 유무</strong>입니다. "빈 status는 이미 422로 막힙니다. 다음 회귀 테스트로 확인했습니다"처럼 재현·검증 결과를 들어 정중히 답하면, 오히려 "확인하고 말하는 사람"이라는 신뢰를 줍니다. 반대로 확인 없이 "제 코드가 맞아요"라고만 하면 방어로 보입니다. 반론은 감정이 아니라 증거로 합니다.</p>
+<h3 id="q_3">Q. 성찰은 형식적인 글쓰기 아닌가요?</h3>
+<p>성찰이 형식이 되는 것은 "잘 배웠다" 같은 막연한 문장으로 끝낼 때입니다. 성찰의 값은 <strong>다음에 바꿀 구체적 한 가지</strong>를 건지는 데 있습니다. "다음에는 리뷰 대응을 처음부터 계획에 넣겠다"처럼 행동으로 적으면, 그 한 줄이 다음 작업의 품질을 실제로 바꿉니다.</p>
+</div>
+<div class="info-box best-practice">
+<h3 id="_16">이 책 한 줄 정리</h3>
+<p>설치·탐색·권한·플랜·검증·CLAUDE.md·커밋·PR·리뷰·디버깅 — 따로 배운 12개 개념은, 기존 팀 저장소에 작은 기능 하나를 테스트와 함께 추가해 첫 PR로 올리는 <strong>한 번의 실제 업무</strong>로 엮일 때 비로소 하나가 됩니다. 첫 기능을 끝까지 해 본 지금, 여러분은 이미 신입의 첫 통과의례를 지났습니다. 다음 기능은 더 자신 있게, 더 안전하게, 더 빠르게 해낼 수 있습니다.</p>
+</div>
+
+<nav class="chapter-nav"><a href="ch_15.html">← 이전: 종합 프로젝트: 첫 기능·첫 PR — 구현(마일스톤 증분)</a><a href="index.html" style="flex:0 0 auto; text-align:center">목차</a></nav>
+</main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-powershell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+</body>
+</html>

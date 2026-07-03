@@ -1,0 +1,15 @@
+explain analyze select *
+   from order_items oi
+  where oi.product_id = 30
+;
+
+-- index 생성
+create index order_items_product_id_idx
+on order_items(product_id)
+;
+
+
+select *
+  from order_items oi
+ where oi.product_id = 30
+;

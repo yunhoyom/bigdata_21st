@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>01장: 첫날: Claude Code 설치·인증과 첫 세션 - Claude Code 신입 개발자 온보딩 — 첫 기능부터 첫 PR까지</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+<style>
+
+/* 디자인 토큰 — 브랜드 변경 시 여기만 수정 */
+:root {
+  --primary: #1976D2;
+  --primary-light: #E3F2FD;
+  --accent: #FF6F00;
+  --success: #2E7D32;
+  --warning: #F57F17;
+  --danger: #C62828;
+  --bg: #FAFAFA;
+  --text: #212121;
+  --text-secondary: #616161;
+  --border: #E0E0E0;
+  --code-bg: #2d2d2d;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.8; font-size: 16px;
+}
+.container { max-width: 1400px; margin: 0 auto; }
+.main-content { max-width: 1000px; padding: 40px 48px; margin: 0 auto; }
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white; padding: 48px 40px; border-radius: 16px; margin-bottom: 40px;
+}
+.chapter-header .chapter-number {
+  font-size: 14px; opacity: 0.8; text-transform: uppercase; letter-spacing: 2px;
+}
+.chapter-header h1 { font-size: 32px; margin: 8px 0 16px; font-weight: 800; }
+.chapter-header .chapter-meta { font-size: 14px; opacity: 0.9; }
+
+/* 학습 목표 */
+.learning-objectives {
+  background: var(--primary-light); border-left: 4px solid var(--primary);
+  padding: 24px 28px; border-radius: 0 12px 12px 0; margin-bottom: 36px;
+}
+.learning-objectives h3 { color: var(--primary); font-size: 16px; margin-bottom: 12px; }
+.learning-objectives li { margin: 8px 0; padding-left: 8px; }
+
+/* 섹션 / 본문 기본 요소 */
+h1 { font-size: 28px; margin: 36px 0 16px; color: var(--text); }
+h2 {
+  font-size: 26px; color: var(--primary); margin: 48px 0 20px;
+  padding-bottom: 10px; border-bottom: 2px solid var(--primary-light);
+}
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+p { margin: 12px 0; }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin: 6px 0; }
+a { color: var(--primary); }
+img { max-width: 100%; height: auto; border-radius: 12px; }
+blockquote {
+  border-left: 4px solid var(--primary); background: var(--primary-light);
+  padding: 12px 20px; margin: 16px 0; border-radius: 0 12px 12px 0;
+}
+blockquote p:last-child { margin-bottom: 0; }
+/* 인라인 코드 (pre 밖) */
+:not(pre) > code {
+  background: #f0f0f0; padding: 2px 6px; border-radius: 4px;
+  font-size: 0.9em; color: var(--danger);
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+}
+
+/* 코드 블록 (.code-block-wrapper) */
+.code-block-wrapper {
+  margin: 24px 0; border-radius: 12px; overflow: hidden;
+  box-shadow: var(--card-shadow); border: 1px solid var(--border);
+}
+.code-block-header {
+  background: #1a1a2e; color: #a0a0b0; padding: 10px 20px; font-size: 13px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+.code-block-header .lang-badge {
+  background: var(--primary); color: white; padding: 2px 10px;
+  border-radius: 10px; font-size: 11px; font-weight: 700;
+}
+pre[class*="language-"] {
+  margin: 0 !important; border-radius: 0 !important;
+  font-size: 14px !important; line-height: 1.6 !important; padding: 20px !important;
+}
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important; padding-right: 8px !important;
+}
+.code-explanation {
+  background: #f8f9fa; border-top: 1px solid var(--border); padding: 16px 20px;
+  font-size: 14px; color: var(--text-secondary); line-height: 1.7;
+}
+.code-explanation strong { color: var(--text); }
+.code-explanation .explain-title {
+  display: inline-block; background: var(--accent); color: white; font-size: 11px;
+  font-weight: 700; padding: 2px 10px; border-radius: 10px; margin-bottom: 8px;
+}
+.code-output {
+  background: #1e1e1e; color: #4EC9B0; padding: 12px 20px;
+  font-family: monospace; font-size: 13px; border-top: 1px dashed #444;
+}
+.code-output::before {
+  content: "▶ 실행 결과"; display: block; color: #808080;
+  font-size: 11px; margin-bottom: 4px;
+}
+
+/* 특수 박스 (info-box 5종) */
+.info-box { padding: 14px 20px; border-radius: 12px; margin: 16px 0; border-left: 4px solid; }
+.info-box p:last-child, .info-box ul:last-child { margin-bottom: 0; }
+.info-box.tip { background: #E8F5E9; border-color: var(--success); }
+.info-box.warning { background: #FFF8E1; border-color: var(--warning); }
+.info-box.danger { background: #FFEBEE; border-color: var(--danger); }
+.info-box.beginner { background: #F3E5F5; border-color: #7B1FA2; }
+.info-box.best-practice { background: #E0F2F1; border-color: #00695C; }
+.info-box .box-header {
+  display: flex; align-items: center; margin-bottom: 12px;
+  padding-bottom: 10px; border-bottom: 1px solid rgba(123,31,162,0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* 표 */
+.api-reference h3, .library-section h3 {
+  background: var(--primary); color: white; padding: 12px 20px;
+  border-radius: 8px 8px 0 0; margin-bottom: 0; font-size: 16px;
+}
+hr.section-divider, hr {
+  border: none; border-top: 2px solid var(--border); margin: 36px 0;
+}
+.table-responsive { overflow-x: auto; margin: 16px 0; border-radius: 8px; box-shadow: var(--card-shadow); }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+table thead { background: #f5f5f5; }
+table th { padding: 12px 16px; text-align: left; font-weight: 700; border-bottom: 2px solid var(--border); }
+table td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table tr:hover { background: #fafafa; }
+table code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 13px; color: var(--danger); }
+.api-signature {
+  background: var(--code-bg); color: #e0e0e0; padding: 8px 16px; border-radius: 6px;
+  font-family: monospace; font-size: 13px; margin: 4px 0; overflow-x: auto;
+}
+
+/* 다이어그램 */
+.diagram-container { margin: 28px 0; text-align: center; }
+.diagram-container img { max-width: 100%; border-radius: 12px; box-shadow: var(--card-shadow); }
+.diagram-container img.screenshot { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.diagram-container .caption { margin-top: 10px; font-size: 13px; color: var(--text-secondary); font-style: italic; }
+.diagram-container .svg-diagram { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; }
+.diagram-container .svg-diagram svg { max-width: 100%; height: auto; }
+.missing-diagram { color: var(--danger); font-style: italic; padding: 1rem; background: #FFEBEE; border-radius: 8px; }
+.mermaid { margin: 24px auto; text-align: center; }
+
+/* 연습 문제 & 프로젝트 */
+.exercise-box { background: #FFF3E0; border: 2px solid var(--accent); border-radius: 12px; padding: 24px; margin: 28px 0; }
+.exercise-box h4 { color: var(--accent); }
+.project-box { background: linear-gradient(135deg, #E8EAF6, #C5CAE9); border-radius: 12px; padding: 28px; margin: 36px 0; }
+.project-box h3 { color: #283593; margin-bottom: 12px; }
+.project-readme { background: rgba(255,255,255,0.7); border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; }
+.project-file { margin: 12px 0; border-radius: 8px; overflow: hidden; }
+.project-file summary { background: rgba(255,255,255,0.7); padding: 12px 16px; cursor: pointer; font-weight: 600; border-radius: 8px; }
+.project-file pre { margin: 0; }
+
+/* FAQ */
+.faq-section details { border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; }
+.faq-section summary { padding: 14px 20px; cursor: pointer; font-weight: 600; color: var(--primary); background: #fafafa; border-radius: 8px; }
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+.faq-section .faq-answer { padding: 16px 20px; color: var(--text-secondary); }
+
+/* 챕터 네비게이션 */
+.chapter-nav { display: flex; justify-content: space-between; margin: 48px 0 24px; gap: 16px; }
+.chapter-nav a {
+  flex: 1; display: block; padding: 16px 20px; background: white;
+  border: 1px solid var(--border); border-radius: 12px; text-decoration: none;
+  color: var(--text); transition: all 0.2s;
+}
+.chapter-nav a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+
+/* ── 인덱스 페이지 ── */
+.index-container { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+.book-header { text-align: center; margin-bottom: 40px; }
+.book-header h1 { font-size: 36px; color: var(--primary); border: none; margin: 0 0 8px; }
+.book-header p { color: var(--text-secondary); font-size: 18px; }
+.chapter-list { list-style: none; margin: 0; }
+.chapter-list li { margin-bottom: 12px; }
+.chapter-list a {
+  display: flex; align-items: center; gap: 16px; padding: 16px 24px;
+  background: white; border: 1px solid var(--border); border-radius: 12px;
+  text-decoration: none; color: var(--text); transition: all 0.2s;
+}
+.chapter-list a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+.chapter-list .ch-num { font-weight: 700; color: var(--primary); min-width: 3.5rem; }
+.difficulty-group { margin-top: 32px; }
+.difficulty-group h2 { font-size: 18px; border: none; }
+.difficulty { display: inline-block; padding: 2px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; }
+.difficulty-입문 { background: #E8F5E9; color: #166534; }
+.difficulty-기초 { background: #E3F2FD; color: #1e40af; }
+.difficulty-중급 { background: #FFF8E1; color: #92400e; }
+.difficulty-실무 { background: #FCE7F3; color: #9d174d; }
+.difficulty-고급 { background: #FFEBEE; color: #991b1b; }
+
+/* 인쇄 / 반응형 */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper, table, .diagram-container, .project-box { break-inside: avoid; page-break-inside: avoid; }
+  h1, h2, h3, h4 { break-after: avoid; page-break-after: avoid; }
+}
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+  .chapter-nav { flex-direction: column; }
+}
+
+/* === templates/chapter_design_template.html (단일 디자인 소스, 우선 적용) === */
+
+/* ============================================================
+   디자인 토큰 (색상·그림자) — 브랜드 변경 시 여기만 수정
+   ============================================================ */
+:root {
+  --primary: #1976D2;        /* 주조색(파랑) — 헤더/제목/강조 */
+  --primary-light: #E3F2FD;  /* 주조색 옅은 톤 — 박스 배경/밑줄 */
+  --accent: #FF6F00;         /* 강조색(주황) — 해설 라벨/연습문제 */
+  --success: #2E7D32;        /* 성공(초록) */
+  --warning: #F57F17;        /* 경고(노랑) */
+  --danger: #C62828;         /* 위험(빨강) */
+  --bg: #FAFAFA;             /* 페이지 배경 */
+  --text: #212121;           /* 본문 텍스트 */
+  --text-secondary: #616161; /* 보조 텍스트 */
+  --border: #E0E0E0;         /* 테두리 */
+  --code-bg: #2d2d2d;        /* 코드 배경 */
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  font-size: 16px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   메인 콘텐츠
+   ============================================================ */
+.main-content {
+  flex: 1;
+  max-width: 1400px;
+  padding: 40px 48px;
+  margin: 0 auto;
+}
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white;
+  padding: 48px 40px;
+  border-radius: 16px;
+  margin-bottom: 40px;
+}
+
+.chapter-header .chapter-number {
+  font-size: 14px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.chapter-header h1 {
+  font-size: 32px;
+  margin: 8px 0 16px;
+  font-weight: 800;
+}
+
+.chapter-header .chapter-meta {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* 학습 목표 박스 */
+.learning-objectives {
+  background: var(--primary-light);
+  border-left: 4px solid var(--primary);
+  padding: 24px 28px;
+  border-radius: 0 12px 12px 0;
+  margin-bottom: 36px;
+}
+
+.learning-objectives h3 {
+  color: var(--primary);
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.learning-objectives li {
+  margin: 8px 0;
+  padding-left: 8px;
+  color: var(--text);
+}
+
+/* 섹션 */
+h2 {
+  font-size: 26px;
+  color: var(--primary);
+  margin: 48px 0 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--primary-light);
+}
+
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+
+p { margin: 12px 0; }
+
+/* ============================================================
+   코드 블록 - 박스형 + 줄번호 + 실무 설명
+   ============================================================ */
+.code-block-wrapper {
+  margin: 24px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+}
+
+.code-block-header {
+  background: #1a1a2e;
+  color: #a0a0b0;
+  padding: 10px 20px;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+
+.code-block-header .lang-badge {
+  background: var(--primary);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Prism 줄번호 스타일 오버라이드 */
+pre[class*="language-"] {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  padding: 20px !important;
+}
+
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important;
+  padding-right: 8px !important;
+}
+
+/* 코드 실무 설명 박스 */
+.code-explanation {
+  background: #f8f9fa;
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.code-explanation strong { color: var(--text); }
+
+.code-explanation .explain-title {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+/* 코드 실행 결과 */
+.code-output {
+  background: #1e1e1e;
+  color: #4EC9B0;
+  padding: 12px 20px;
+  font-family: monospace;
+  font-size: 13px;
+  border-top: 1px dashed #444;
+}
+
+.code-output::before {
+  content: "▶ 실행 결과";
+  display: block;
+  color: #808080;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+/* ============================================================
+   특수 박스 (팁, 주의, 베스트 프랙티스, 초보자 설명)
+   ============================================================ */
+.info-box {
+  padding: 14px 20px;
+  border-radius: 12px;
+  margin: 16px 0;
+  border-left: 4px solid;
+}
+.info-box p:last-child { margin-bottom: 0; }
+.info-box ul:last-child { margin-bottom: 0; }
+
+.info-box.tip {
+  background: #E8F5E9;
+  border-color: var(--success);
+}
+
+.info-box.warning {
+  background: #FFF8E1;
+  border-color: var(--warning);
+}
+
+.info-box.danger {
+  background: #FFEBEE;
+  border-color: var(--danger);
+}
+
+.info-box.beginner {
+  background: #F3E5F5;
+  border-color: #7B1FA2;
+}
+
+.info-box.best-practice {
+  background: #E0F2F1;
+  border-color: #00695C;
+}
+
+.info-box .box-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(123, 31, 162, 0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* ============================================================
+   라이브러리 & API 레퍼런스 테이블
+   ============================================================ */
+.api-reference, .library-section {
+  margin: 32px 0;
+}
+
+.api-reference h3, .library-section h3 {
+  background: var(--primary);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 0;
+  font-size: 16px;
+}
+
+hr.section-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 36px 0;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  margin: 16px 0;
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  font-size: 14px;
+}
+
+table thead {
+  background: #f5f5f5;
+}
+
+table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 2px solid var(--border);
+}
+
+table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+table tr:hover { background: #fafafa; }
+
+table code {
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+/* API 시그니처 행 */
+.api-signature {
+  background: var(--code-bg);
+  color: #e0e0e0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 13px;
+  margin: 4px 0;
+  overflow-x: auto;
+}
+
+/* ============================================================
+   이미지 / 다이어그램
+   ============================================================ */
+.diagram-container {
+  margin: 28px 0;
+  text-align: center;
+}
+
+.diagram-container img {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+}
+
+.diagram-container .caption {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* PPTX 원본 보존 뱃지 */
+.diagram-container .pptx-badge {
+  display: inline-block;
+  background: #FF6F00;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: normal;
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Mermaid 다이어그램 (인라인 렌더링) */
+.mermaid {
+  margin: 24px auto;
+  text-align: center;
+}
+
+/* ============================================================
+   연습 문제 & 프로젝트
+   ============================================================ */
+.exercise-box {
+  background: #FFF3E0;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 28px 0;
+}
+
+.exercise-box h4 { color: var(--accent); }
+
+.project-box {
+  background: linear-gradient(135deg, #E8EAF6, #C5CAE9);
+  border-radius: 12px;
+  padding: 28px;
+  margin: 36px 0;
+}
+
+/* ============================================================
+   FAQ
+   ============================================================ */
+.faq-section details {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 8px 0;
+  padding: 0;
+}
+
+.faq-section summary {
+  padding: 14px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primary);
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+
+.faq-section details .faq-answer {
+  padding: 16px 20px;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   챕터 네비게이션 (이전/다음)
+   ============================================================ */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  margin: 48px 0 24px;
+  gap: 16px;
+}
+
+.chapter-nav a {
+  flex: 1;
+  display: block;
+  padding: 16px 20px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.chapter-nav a:hover {
+  border-color: var(--primary);
+  box-shadow: var(--card-shadow);
+}
+
+/* ============================================================
+   인쇄용 스타일
+   ============================================================ */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper { break-inside: avoid; }
+}
+
+/* ============================================================
+   반응형 - 모바일
+   ============================================================ */
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+}
+
+</style>
+</head>
+<body>
+<div class="container">
+<main class="main-content">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 01</div>
+    <h1>첫날: Claude Code 설치·인증과 첫 세션</h1>
+    <div class="chapter-meta"><span class="difficulty difficulty-입문">입문</span></div>
+  </div>
+
+<h1 id="claude-code">첫날: Claude Code 설치·인증과 첫 세션</h1>
+<div class="learning-objectives">
+<p><strong>이 장의 학습 목표</strong></p>
+<ul>
+<li>주어진 Windows 11 작업 머신에서 네이티브 설치 관리자 또는 npm으로 Claude Code를 설치하고, <code>claude --version</code>과 Git Bash 실행으로 설치 완료를 확인할 수 있습니다.</li>
+<li>구독(Pro/Max)과 API 키 두 인증 방식의 과금 차이를 한 가지 이상 들어 구분하고, 의도한 방식으로 로그인한 뒤 <code>/status</code>로 그 방식이 맞는지 확인할 수 있습니다.</li>
+<li>주어진 실습 폴더에서 대화형 REPL(<code>claude</code>)을 열어 첫 작업을 지시해 도구 호출 1사이클을 완료하고, 1회성(<code>-p</code>) 실행과 언제 무엇을 쓰는지 구분해 설명할 수 있습니다.</li>
+<li>진행 중 세션을 중단(Esc)·재개(<code>--continue</code>/<code>--resume</code>)해 직전 맥락이 이어지는지 확인하고, <code>/status</code>로 인증·세션 상태를 점검할 수 있습니다.</li>
+</ul>
+</div>
+<p>이 책은 <strong>기존 팀의 FastAPI 저장소에 작은 기능 하나를 추가해 첫 PR(Pull Request, 풀 리퀘스트)까지 올리는</strong> 신입 개발자의 여정을 따라갑니다. 그 여정의 출발점은 단 하나입니다. 옆자리에 앉아 함께 코드를 읽고 고치고 실행해 줄 페어 프로그래머를 내 자리에 들이는 것, 곧 <strong>Claude Code를 설치하고 인증해 첫 세션을 여는 것</strong>입니다.</p>
+<blockquote>
+<p><strong>이 장의 선수 지식:</strong> 이 장은 책의 첫 단원(u1)이며, 앞서 배운 <em>이 책의</em> 개념을 전제하지 않습니다. 다만 책 전체의 선수 지식(Python 기초·터미널·git·HTTP 기초 — 자세한 내용은 머리말 「이 책에 대하여」 참고)은 가정합니다. 설치·인증·첫 세션 자체는 Claude Code가 처음이어도 따라올 수 있도록 모든 동작을 단계로 풀어 설명합니다.</p>
+</blockquote>
+<p>이 장에서 가르치는 개념은 하나입니다.</p>
+<ul>
+<li><strong>개념 c01 — 설치·인증과 첫 세션(installation, authentication, and first session)</strong>: Windows 11에 Claude Code를 설치하고, 내 의도에 맞는 방식으로 인증하고, 대화형 REPL과 1회성 실행을 구분해 첫 작업을 지시하고, 세션을 중단·재개하는 법.</li>
+</ul>
+<hr />
+<h2 id="1">1. 도입: 팀에 합류한 첫날, 페어 프로그래머를 들이다</h2>
+<p>입사 첫날의 풍경은 대개 비슷합니다. 노트북을 받고, 사번으로 로그인하고, 팀의 코드 저장소 주소를 전달받습니다. 그리고 곧바로 막막함이 찾아옵니다. 수백 개의 파일, 한 번도 본 적 없는 폴더 구조, "이게 어디서 호출되는 거지?"라는 질문이 끝없이 이어집니다. 신입에게 가장 비싼 자원은 시간이 아니라 <strong>물어볼 수 있는 사람</strong>입니다. 시니어 개발자는 바쁘고, 같은 질문을 두 번 묻기는 눈치가 보입니다.</p>
+<p>Claude Code는 바로 이 자리를 메우는 도구입니다. 지치지 않고, 같은 질문을 백 번 물어도 괜찮으며, 저장소 전체를 몇 초 만에 훑어 "이 API는 무엇을 하고 엔드포인트가 무엇인지" 설명해 주는 페어 프로그래머입니다. 단순히 설명만 하는 것이 아니라, 파일을 직접 열어 읽고, 코드를 고치고, 테스트를 돌려 결과를 보여 줍니다.</p>
+<p>그런데 이 페어 프로그래머를 제대로 쓰려면 첫날에 세 가지를 정확히 해 두어야 합니다. <strong>설치</strong>(내 컴퓨터에 도구를 올리기), <strong>인증</strong>(내 계정·요금제로 연결하기), 그리고 <strong>첫 세션</strong>(대화를 시작해 도구가 일하는 방식을 직접 보기)입니다. 이 세 가지를 대충 넘기면, 뒤에서 "왜 과금이 되지?", "왜 명령이 안 먹히지?", "어제 하던 작업이 사라졌네?" 같은 문제로 되돌아오게 됩니다. 이 장은 그 세 가지를 한 번에, 정확히 끝내는 것을 목표로 합니다.</p>
+<div class="info-box beginner">
+<p><strong>한눈에 보는 이 장의 지도</strong></p>
+<ul>
+<li>페어 프로그래머를 자리에 앉히기 → <strong>설치</strong>(PowerShell 네이티브 설치 관리자 또는 npm)</li>
+<li>도구가 Bash 명령을 쓸 수 있게 하기 → <strong>Git for Windows(Git Bash) 준비</strong></li>
+<li>내 요금제로 연결하기 → <strong>인증</strong>(구독 Pro/Max 브라우저 로그인 vs API 키)</li>
+<li>대화를 시작하기 → <strong>대화형 REPL(<code>claude</code>)</strong></li>
+<li>한 번만 묻고 답만 받기 → <strong>1회성 실행(<code>claude -p</code>)</strong></li>
+<li>자리를 비웠다 돌아오기 → <strong>세션 재개(<code>--continue</code>·<code>--resume</code>)</strong></li>
+</ul>
+</div>
+<hr />
+<h2 id="2-claude-code-ide">2. 정의: Claude Code란 무엇인가(터미널·IDE·웹)</h2>
+<h4 id="_1">정의</h4>
+<p>이 장의 핵심 개념을 한 문장으로 정의하겠습니다.</p>
+<blockquote>
+<p><strong>Claude Code(클로드 코드)</strong> 는 터미널·IDE·웹에서 동작하는 Anthropic 공식 <strong>에이전트형 코딩 CLI(agentic coding CLI)</strong> 로, 단순히 다음 코드를 제안하는 자동완성이 아니라 파일을 직접 읽고 편집하고 명령을 실행하며 커밋까지 돕는 AI 페어 프로그래머입니다. 그리고 <strong>첫 세션(first session)</strong> 이란 설치·인증을 마친 뒤 대화형 REPL을 처음 열어, 자연어 지시에 에이전트가 도구를 호출해 변경을 만들어 내는 과정을 처음으로 관찰하는 출발점입니다.</p>
+</blockquote>
+<p>용어를 하나씩 정리하겠습니다.</p>
+<ul>
+<li><strong>CLI(Command-Line Interface, 명령줄 인터페이스)</strong>: 마우스 클릭이 아니라 터미널에 명령어를 입력해 쓰는 프로그램입니다. Claude Code의 기본 진입점은 터미널에 <code>claude</code>라고 입력하는 것입니다.</li>
+<li><strong>에이전트(agent)</strong>: 목표를 받아 스스로 도구를 골라 쓰며 여러 단계를 거쳐 작업을 완수하는 프로그램입니다. "다음 한 줄"을 제안하는 데서 그치지 않고, 읽고·계획하고·실행하고·확인하기를 반복합니다.</li>
+<li><strong>REPL(Read-Eval-Print Loop, 읽고-실행하고-출력하는 반복 루프)</strong>: 입력을 받아 처리하고 결과를 보여 주기를 반복하는 대화형 화면입니다. <code>claude</code>를 실행하면 나타나는 대화 화면이 바로 REPL입니다.</li>
+</ul>
+<h4 id="_2">같은 엔진, 여러 표면</h4>
+<p>Claude Code는 하나의 엔진을 여러 <strong>표면(surface)</strong> 에서 쓸 수 있게 제공합니다. 어디서 쓰든 "에이전트가 도구를 호출해 일한다"는 핵심은 같습니다.</p>
+<table>
+<thead>
+<tr>
+<th>표면</th>
+<th>진입 방법</th>
+<th>잘 맞는 상황</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>터미널(CLI)</td>
+<td>셸에서 <code>claude</code> 실행</td>
+<td>대부분의 개발 작업, 스크립트·CI 연동 (이 책의 기본 무대)</td>
+</tr>
+<tr>
+<td>IDE 확장</td>
+<td>VS Code·JetBrains 확장에서 호출</td>
+<td>편집기 안에서 diff를 보며 작업할 때</td>
+</tr>
+<tr>
+<td>웹</td>
+<td>브라우저에서 클라우드 작업공간 실행</td>
+<td>로컬 설치 없이 원격에서 작업할 때</td>
+</tr>
+</tbody>
+</table>
+<p>이 책은 가장 이식성이 좋고 자동화에 직결되는 <strong>터미널(CLI)</strong> 을 기본 무대로 삼습니다. 터미널에서 익힌 개념은 IDE·웹에 그대로 옮겨집니다.</p>
+<div class="info-box tip">
+<p><strong>자동완성과의 한 줄 차이</strong>
+자동완성 도구는 "지금 타이핑하는 커서 주변"만 보고 다음 몇 줄을 제안합니다. Claude Code는 "이 저장소에서 <code>tasks</code> 라우터를 찾아 새 엔드포인트를 추가하고 테스트까지 통과시켜 줘" 같은 <strong>완결된 작업</strong>을 받아 스스로 파일을 탐색·편집·실행합니다. 이 차이는 2장에서 에이전트 루프로 자세히 다룹니다.</p>
+</div>
+<hr />
+<h2 id="3-windows-11-powershell-npm">3. Windows 11 설치: PowerShell 네이티브 설치 관리자와 npm</h2>
+<p>이제 페어 프로그래머를 자리에 앉혀 보겠습니다. 이 책의 대상 환경은 <strong>Windows 11</strong>입니다. 설치 방법은 두 갈래이며 <strong>둘 중 하나만</strong> 고르면 됩니다. 공식이 권장하는 방법은 네이티브 설치 관리자입니다.</p>
+<h4 id="1-powershell">방법 1: PowerShell 네이티브 설치 관리자(권장)</h4>
+<p>Windows 11의 <strong>PowerShell</strong>(시작 메뉴에서 "PowerShell" 검색)을 열고 다음 한 줄을 입력합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">powershell</span></div><pre class="line-numbers"><code class="language-powershell">irm https://claude.ai/install.ps1 | iex
+</code></pre></div>
+<p>이 명령은 두 부분으로 이루어져 있습니다. <code>irm</code>은 <code>Invoke-RestMethod</code>의 별칭으로 주어진 주소에서 설치 스크립트를 내려받고, <code>iex</code>는 <code>Invoke-Expression</code>의 별칭으로 그 스크립트를 실행합니다. 설치가 끝나면 바이너리가 사용자 폴더(<code>C:\Users\사용자이름\.local\bin</code>)에 놓이므로 <strong>관리자 권한이 필요 없습니다.</strong> 네이티브 설치본은 백그라운드에서 자동으로 최신 버전으로 갱신됩니다.</p>
+<div class="info-box warning">
+<p><strong><code>irm</code>이 인식되지 않는다는 오류가 나면</strong>
+<code>'irm' 용어가 cmdlet... 이름으로 인식되지 않습니다</code>라는 메시지가 보이면 지금 연 창이 <strong>PowerShell이 아니라 명령 프롬프트(CMD)</strong> 입니다. <code>irm</code>은 PowerShell 전용 별칭이므로, 시작 메뉴에서 정확히 "PowerShell"을 다시 검색해 실행한 뒤 명령을 입력합니다.</p>
+</div>
+<h4 id="2-npm">방법 2: npm 전역 설치(대안)</h4>
+<p>이미 Node.js가 설치돼 있다면 npm으로 설치할 수도 있습니다. PowerShell이나 Git Bash에서 다음을 입력합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">bash</span></div><pre class="line-numbers"><code class="language-bash">npm install -g @anthropic-ai/claude-code
+</code></pre></div>
+<p><code>-g</code>는 전역(global) 설치라는 뜻으로, 어느 폴더에서나 <code>claude</code> 명령을 쓸 수 있게 합니다. 패키지 이름은 정확히 <code>@anthropic-ai/claude-code</code>입니다.</p>
+<h4 id="_3">설치 확인</h4>
+<p>어느 방법을 썼든 새 터미널 창을 열고 버전을 확인합니다. (설치 직후에는 PATH가 갱신되도록 터미널을 새로 여는 것이 안전합니다.)</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">bash</span></div><pre class="line-numbers"><code class="language-bash">claude --version
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">2.0.x (Claude Code)
+</code></pre></div>
+<p>버전 번호가 출력되면 설치는 성공입니다. 숫자는 시점에 따라 다릅니다.</p>
+<hr />
+<h2 id="4-git-for-windowsbash">4. Git for Windows(Bash 도구)와 작업 디렉터리 준비</h2>
+<p>Claude Code는 명령을 실행할 때 <strong>셸(shell)</strong> 을 빌려 씁니다. Windows에는 기본으로 PowerShell과 CMD가 있지만, Claude Code의 <strong>Bash 도구</strong>는 이름 그대로 Bash 셸을 기대합니다. 그래서 Windows에서는 <strong>Git for Windows</strong>(Git Bash 포함)를 함께 설치하는 것을 권장합니다. Git for Windows가 있으면 Claude Code가 그 Bash를 도구로 사용하고, 없으면 일부 Bash 기반 명령이 어색하게 동작할 수 있습니다. 또한 9장에서 다룰 git 커밋·PR 워크플로에도 Git이 반드시 필요합니다.</p>
+<p><a href="https://git-scm.com">git-scm.com</a>에서 Git for Windows 설치 관리자를 내려받아 설치한 뒤, 설치를 확인합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">bash</span></div><pre class="line-numbers"><code class="language-bash">git --version
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">git version 2.45.0.windows.1
+</code></pre></div>
+<h4 id="_4">작업 디렉터리 준비</h4>
+<p>Claude Code는 "지금 터미널이 위치한 폴더"를 작업 대상으로 삼습니다. 그래서 도구를 열기 전에 <strong>작업할 폴더로 먼저 이동</strong>하는 습관이 중요합니다. 연습용 빈 폴더를 하나 만들어 보겠습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">bash</span></div><pre class="line-numbers"><code class="language-bash">mkdir onboarding-practice
+cd onboarding-practice
+</code></pre></div>
+<p><code>mkdir</code>은 폴더를 만들고, <code>cd</code>는 그 폴더로 이동합니다. 이제 이 폴더 안에서 <code>claude</code>를 실행하면, Claude Code는 이 폴더를 작업 무대로 인식합니다.</p>
+<div class="info-box tip">
+<p><strong>작업 폴더를 먼저 정하는 이유</strong>
+Claude Code는 실행한 위치의 폴더와 그 하위만 기본 작업 범위로 봅니다. 엉뚱한 상위 폴더(예: <code>C:\Users\사용자</code>)에서 도구를 열면 수많은 파일을 작업 대상으로 오해할 수 있습니다. "작업할 폴더로 <code>cd</code> 한 뒤 <code>claude</code>"를 첫날부터 몸에 익히면 사고를 줄입니다.</p>
+</div>
+<hr />
+<h2 id="5-vs-api">5. 동작 원리: 인증 흐름(구독 vs API 키)</h2>
+<p>설치를 마쳤다면, 이제 Claude Code를 <strong>내 계정·요금제</strong>에 연결해야 합니다. 이 단계에서 신입이 가장 자주 혼동하는 지점이 바로 인증 방식입니다. 인증에는 두 갈래가 있고, 둘은 <strong>요금이 청구되는 방식이 다릅니다.</strong></p>
+<div class="diagram-container">
+<div class="svg-diagram" role="img" aria-label="claude 실행 후 ANTHROPIC_API_KEY 환경변수 유무에 따라 구독(브라우저 로그인) 또는 API 키 직접 사용으로 분기되는 인증 흐름도">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" width="800" height="380"
+     font-family="'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif">
+  <rect width="800" height="380" fill="#ffffff"/>
+  <text x="400" y="36" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a1a2e">인증 흐름: 구독 vs API 키</text>
+
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#78909c">
+      <polygon points="0 0, 10 3.5, 0 7"/>
+    </marker>
+    <marker id="arr-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#2ecc71">
+      <polygon points="0 0, 10 3.5, 0 7"/>
+    </marker>
+    <marker id="arr-blue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#90caf9">
+      <polygon points="0 0, 10 3.5, 0 7"/>
+    </marker>
+  </defs>
+
+  <!-- 시작: claude 실행 -->
+  <rect x="300" y="60" width="200" height="52" rx="8" fill="#e1f5fe" stroke="#90caf9" stroke-width="2"/>
+  <text x="400" y="81" text-anchor="middle" font-size="14" font-weight="bold" fill="#37474f">claude 실행</text>
+  <text x="400" y="101" text-anchor="middle" font-size="12" fill="#546e7a">(터미널에서 claude 입력)</text>
+
+  <!-- 판단: API 키 존재 여부 -->
+  <polygon points="400,140 530,185 400,230 270,185" fill="#fff3e0" stroke="#ffb74d" stroke-width="2"/>
+  <text x="400" y="181" text-anchor="middle" font-size="13" font-weight="bold" fill="#37474f">ANTHROPIC_API_KEY</text>
+  <text x="400" y="200" text-anchor="middle" font-size="13" fill="#37474f">설정됨?</text>
+
+  <!-- 화살표: 실행 → 판단 -->
+  <line x1="400" y1="112" x2="400" y2="138" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- 왼쪽: 없음 경로 (구독) -->
+  <line x1="270" y1="185" x2="130" y2="185" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="200" y="175" text-anchor="middle" font-size="12" fill="#37474f">없음</text>
+
+  <rect x="40" y="158" width="170" height="54" rx="8" fill="#e8f5e9" stroke="#81c784" stroke-width="2"/>
+  <text x="125" y="179" text-anchor="middle" font-size="13" font-weight="bold" fill="#37474f">브라우저 로그인</text>
+  <text x="125" y="199" text-anchor="middle" font-size="12" fill="#546e7a">구독(Pro / Max)</text>
+
+  <line x1="125" y1="212" x2="125" y2="270" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="40" y="270" width="170" height="54" rx="8" fill="#e8f5e9" stroke="#81c784" stroke-width="2"/>
+  <text x="125" y="291" text-anchor="middle" font-size="13" font-weight="bold" fill="#37474f">구독 인증 완료</text>
+  <text x="125" y="311" text-anchor="middle" font-size="12" fill="#546e7a">추가 과금 없음</text>
+
+  <!-- 오른쪽: 있음 경로 (API 키) -->
+  <line x1="530" y1="185" x2="660" y2="185" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+  <text x="595" y="175" text-anchor="middle" font-size="12" fill="#37474f">있음</text>
+
+  <rect x="590" y="158" width="170" height="54" rx="8" fill="#fce4ec" stroke="#f48fb1" stroke-width="2"/>
+  <text x="675" y="179" text-anchor="middle" font-size="13" font-weight="bold" fill="#37474f">API 키 직접 사용</text>
+  <text x="675" y="199" text-anchor="middle" font-size="12" fill="#546e7a">사용량 기반 과금</text>
+
+  <line x1="675" y1="212" x2="675" y2="270" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+
+  <rect x="590" y="270" width="170" height="54" rx="8" fill="#fce4ec" stroke="#f48fb1" stroke-width="2"/>
+  <text x="675" y="291" text-anchor="middle" font-size="13" font-weight="bold" fill="#37474f">API 키 인증 완료</text>
+  <text x="675" y="311" text-anchor="middle" font-size="12" fill="#546e7a">토큰당 과금 발생</text>
+
+  <!-- 두 경로 합류 → /status -->
+  <line x1="125" y1="324" x2="125" y2="348" stroke="#78909c" stroke-width="2"/>
+  <line x1="125" y1="348" x2="400" y2="348" stroke="#78909c" stroke-width="2"/>
+  <line x1="675" y1="324" x2="675" y2="348" stroke="#78909c" stroke-width="2"/>
+  <line x1="675" y1="348" x2="400" y2="348" stroke="#78909c" stroke-width="2"/>
+  <line x1="400" y1="348" x2="400" y2="362" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+
+  <text x="400" y="375" text-anchor="middle" font-size="13" fill="#37474f">/status 로 인증 방식 확인</text>
+</svg>
+
+</div>
+</div>
+
+<h4 id="_5">두 가지 인증 방식</h4>
+<table>
+<thead>
+<tr>
+<th>방식</th>
+<th>누가 쓰나</th>
+<th>어떻게 청구되나</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>구독(Pro/Max)</td>
+<td>Claude 구독 요금제를 쓰는 개인·팀원</td>
+<td>월 구독료 안에서 사용량 소진</td>
+</tr>
+<tr>
+<td>API 키(ANTHROPIC_API_KEY)</td>
+<td>Anthropic 플랫폼 API 사용자</td>
+<td>토큰 사용량만큼 종량 과금</td>
+</tr>
+</tbody>
+</table>
+<p><strong>구독 방식</strong>은 Claude Pro 또는 Max 요금제를 결제한 사람이 쓰는 방법입니다. <code>claude</code>를 처음 실행하면 브라우저가 열리고, Claude 계정으로 로그인하면 구독 사용량으로 Claude Code가 동작합니다. 신입 온보딩에서는 대개 이 방식을 씁니다.</p>
+<p><strong>API 키 방식</strong>은 환경 변수 <code>ANTHROPIC_API_KEY</code>에 발급받은 키를 넣어 두는 방법입니다. 이 경우 Anthropic 플랫폼에서 토큰 사용량만큼 <strong>종량 과금</strong>이 발생합니다.</p>
+<h4 id="_6">핵심: 두 방식은 같은 자리를 두고 경쟁한다</h4>
+<p>여기서 가장 중요한 동작 원리는 이것입니다. <strong><code>ANTHROPIC_API_KEY</code> 환경 변수가 설정돼 있으면, Claude Code는 구독 대신 그 API 키를 우선해 사용합니다.</strong> 즉 구독 요금제를 쓰려고 했는데 예전에 실습하느라 설정해 둔 API 키가 환경 변수에 남아 있으면, 본인도 모르게 종량 과금이 발생할 수 있습니다.</p>
+<p>따라서 인증 흐름은 다음 분기로 정리됩니다.</p>
+<ol>
+<li><code>claude</code>를 실행한다.</li>
+<li>Claude Code가 <code>ANTHROPIC_API_KEY</code> 환경 변수를 확인한다.</li>
+<li><strong>변수가 있으면</strong> → 그 API 키로 동작(종량 과금).</li>
+<li><strong>변수가 없으면</strong> → 브라우저 로그인으로 구독(Pro/Max) 사용량을 쓴다.</li>
+<li>어느 쪽으로 인증됐는지 <code>/status</code>로 확인한다.</li>
+</ol>
+<p>그래서 <strong>구독을 쓰려면 <code>ANTHROPIC_API_KEY</code>를 설정하지 않아야 합니다.</strong> 이미 설정돼 있다면 비워 두어야 구독 로그인으로 넘어갑니다.</p>
+<div class="info-box warning">
+<p><strong>Windows에서 환경 변수 확인·제거</strong>
+PowerShell에서 현재 세션의 API 키가 설정돼 있는지 확인하려면 다음을 입력합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">powershell</span></div><pre class="line-numbers"><code class="language-powershell">echo $env:ANTHROPIC_API_KEY
+</code></pre></div>
+<p>아무것도 출력되지 않으면 설정돼 있지 않은 것입니다. 값이 보인다면(그리고 구독을 쓰고 싶다면) 현재 PowerShell 세션에서 임시로 비울 수 있습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">powershell</span></div><pre class="line-numbers"><code class="language-powershell">Remove-Item Env:\ANTHROPIC_API_KEY
+</code></pre></div>
+<p>영구적으로 설정해 둔 경우라면 Windows의 "시스템 환경 변수 편집"에서 사용자 변수 목록의 <code>ANTHROPIC_API_KEY</code>를 제거해야 합니다.</p>
+</div>
+<hr />
+<h2 id="6-worked-example-status">6. worked example: 설치 → 로그인 → /status로 인증 확인</h2>
+<p>지금까지 배운 설치·인증을 처음부터 끝까지 한 번 따라가 보겠습니다. 이것은 첫날 누구나 한 번은 거치는 정확한 절차입니다.</p>
+<h4 id="1_1">1단계: 설치하고 버전 확인</h4>
+<p>PowerShell에서 설치하고 새 터미널에서 버전을 확인합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">powershell</span></div><pre class="line-numbers"><code class="language-powershell">irm https://claude.ai/install.ps1 | iex
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">Claude Code installed to C:\Users\jihoon\.local\bin
+</code></pre></div>
+<p>새 터미널을 열어 확인합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">bash</span></div><pre class="line-numbers"><code class="language-bash">claude --version
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">2.0.x (Claude Code)
+</code></pre></div>
+<h4 id="2">2단계: 작업 폴더로 이동해 첫 실행</h4>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">bash</span></div><pre class="line-numbers"><code class="language-bash">cd onboarding-practice
+claude
+</code></pre></div>
+<p>처음 <code>claude</code>를 실행하면 테마 선택 등 초기 설정을 묻고, 인증이 안 된 상태라면 브라우저가 열립니다. 브라우저에서 Claude 계정으로 로그인하고 권한을 승인하면 터미널로 돌아와 다음과 같은 대화형 REPL 화면이 나타납니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">╭──────────────────────────────────────────────╮
+│ ✻ Welcome to Claude Code                      │
+│   /help 로 도움말, /status 로 상태 확인        │
+╰──────────────────────────────────────────────╯
+
+&gt;
+</code></pre></div>
+<p><code>&gt;</code> 프롬프트가 보이면 이제 자연어로 지시할 준비가 된 것입니다.</p>
+<h4 id="3-status">3단계: /status로 인증 방식 확인</h4>
+<p>REPL 안에서 슬래시 명령 <code>/status</code>를 입력합니다. 슬래시 명령은 자연어 지시가 아니라 Claude Code에 직접 내리는 제어 명령입니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; /status
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">Account: jihoon@team.com
+Login method: Claude Max subscription
+Model: claude-opus-4-x
+Working directory: C:\Users\jihoon\onboarding-practice
+</code></pre></div>
+<p>여기서 <code>Login method</code>가 핵심입니다. <code>Claude Max subscription</code>(또는 <code>Pro</code>)이라고 나오면 구독으로 인증된 것이고, <code>API key</code>라고 나오면 종량 과금 방식으로 연결된 것입니다. 의도와 다르면 5장에서 본 대로 <code>ANTHROPIC_API_KEY</code>를 확인·제거하고 다시 로그인합니다.</p>
+<div class="code-explanation">
+<p><strong>이 절차에서 짚을 것</strong></p>
+<ul>
+<li><strong>설치 → 버전 확인</strong>: 버전 번호가 나와야 PATH에 정상 등록된 것입니다.</li>
+<li><strong><code>cd</code> 후 <code>claude</code></strong>: 작업 폴더 안에서 실행해야 그 폴더가 작업 무대가 됩니다.</li>
+<li><strong>브라우저 로그인</strong>: <code>ANTHROPIC_API_KEY</code>가 없을 때만 구독 로그인으로 넘어갑니다.</li>
+<li><strong><code>/status</code></strong>: "내가 의도한 방식으로 인증됐는가"를 눈으로 확인하는 마지막 관문입니다. 첫날 이것을 확인하지 않으면 과금 방식을 모른 채 쓰게 됩니다.</li>
+</ul>
+</div>
+<hr />
+<h2 id="7-repl-1-p">7. 대화형 REPL과 1회성 실행(-p) 구분</h2>
+<p>Claude Code를 쓰는 방식은 크게 두 가지입니다. 둘의 차이를 처음부터 분명히 해 두면, 상황에 맞는 방식을 골라 쓸 수 있습니다.</p>
+<h4 id="repl-claude">대화형 REPL: <code>claude</code></h4>
+<p><code>claude</code>만 입력하면 앞에서 본 대화 화면(REPL)이 열립니다. 여기서는 사람과 대화하듯 여러 차례 지시를 주고받습니다. 에이전트가 파일을 고치면 검토하고, 추가 지시를 주고, 테스트를 돌리게 하고, 다시 고치게 합니다. <strong>맥락이 누적되는</strong> 작업, 즉 한 번의 대화로 끝나지 않는 대부분의 개발 작업에 적합합니다.</p>
+<h4 id="1-print-claude-p">1회성 실행(print 모드): <code>claude -p "..."</code></h4>
+<p>질문 하나에 답 하나만 받고 끝내고 싶을 때는 <code>-p</code>(print) 플래그를 씁니다. REPL을 열지 않고, 명령 한 줄에 결과를 출력하고 곧바로 종료합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">bash</span></div><pre class="line-numbers"><code class="language-bash">claude -p &quot;이 폴더에 뭐가 있는지 한 줄로 요약해 줘&quot;
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">이 폴더에는 아직 파일이 없는 빈 작업 디렉터리입니다.
+</code></pre></div>
+<p><code>-p</code> 모드는 대화를 이어가지 않고 한 번 답하고 끝나므로, 셸 스크립트나 자동화 파이프라인에 끼워 넣기 좋습니다. "지금 빠르게 한 가지만 묻고 싶다"면 <code>-p</code>, "함께 작업을 진행하겠다"면 REPL입니다.</p>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>대화형 REPL (<code>claude</code>)</th>
+<th>1회성 실행 (<code>claude -p "..."</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>화면</td>
+<td>대화 화면이 열림</td>
+<td>답만 출력하고 종료</td>
+</tr>
+<tr>
+<td>맥락</td>
+<td>여러 턴에 걸쳐 누적</td>
+<td>한 번의 응답으로 끝</td>
+</tr>
+<tr>
+<td>적합한 상황</td>
+<td>함께 코드를 만들고 고치는 작업</td>
+<td>빠른 질의, 스크립트·자동화</td>
+</tr>
+<tr>
+<td>종료</td>
+<td><code>/exit</code> 또는 Ctrl+D</td>
+<td>자동으로 종료</td>
+</tr>
+</tbody>
+</table>
+<div class="info-box tip">
+<p><strong>언제 무엇을 쓰나</strong>
+지금 단계에서는 거의 항상 <strong>대화형 REPL</strong>을 씁니다. <code>-p</code>는 "폴더 요약 한 줄만 받기"처럼 한 번에 끝나는 단순 질의나, 나중에 자동화에 끼워 넣을 때 쓰는 도구라고 기억해 두면 됩니다.</p>
+</div>
+<hr />
+<h2 id="8-worked-example">8. worked example: 빈 폴더에서 첫 파일 생성·실행</h2>
+<p>이제 에이전트가 실제로 <strong>파일을 만들고 실행하는</strong> 모습을 직접 보겠습니다. 자동완성과의 차이를 눈으로 확인하는 순간입니다. 앞서 만든 <code>onboarding-practice</code> 빈 폴더에서 <code>claude</code>를 실행한 상태라고 가정합니다.</p>
+<p>REPL에 다음과 같이 지시합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; hello.py 파일을 만들어 &quot;Hello, Claude Code!&quot;를 출력하게 하고,
+  python으로 실행해서 결과를 보여 줘.
+</code></pre></div>
+<p>에이전트는 먼저 <code>hello.py</code>를 만들겠다는 계획을 보여 주고, 파일을 생성한 뒤(부수효과가 있는 작업이므로 권한을 확인합니다 — 5장에서 상세히 다룹니다), 실행 명령을 돌립니다. 만들어진 파일은 다음과 같습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python">print(&quot;Hello, Claude Code!&quot;)
+# 출력: Hello, Claude Code!
+</code></pre></div>
+<p>그리고 에이전트가 <code>python hello.py</code>를 실행한 결과를 화면에 보여 줍니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; python hello.py
+Hello, Claude Code!
+</code></pre></div>
+<p>여기서 자동완성과의 결정적 차이가 드러납니다. 자동완성이었다면 <code>print(...)</code> 한 줄을 제안하는 데서 끝나고, 파일 생성과 실행은 사람이 직접 해야 합니다. 에이전트는 <strong>파일을 만들고(쓰기), 명령을 실행하고(Bash), 결과를 확인</strong>하는 데까지 스스로 갑니다.</p>
+<h4 id="_7">조금 더 실무에 가까운 예: 작은 함수</h4>
+<p>이 책의 실습 스택은 웹 백엔드(FastAPI)입니다. 본격적인 엔드포인트는 뒤에서 다루지만, 맛보기로 작은 인사 함수를 만들어 실행해 보겠습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; greet.py를 만들어. 이름을 받아 &quot;안녕하세요, {이름}님&quot;을 돌려주는
+  greet 함수와, greet(&quot;지훈&quot;)을 출력하는 코드를 넣고 실행해 줘.
+</code></pre></div>
+<p>에이전트가 만든 파일은 다음과 같습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python">def greet(name: str) -&gt; str:
+    return f&quot;안녕하세요, {name}님&quot;
+
+
+print(greet(&quot;지훈&quot;))
+# 출력: 안녕하세요, 지훈님
+</code></pre></div>
+<div class="code-explanation">
+<p><strong>코드 줄별 해설</strong></p>
+<ul>
+<li><code>def greet(name: str) -&gt; str:</code> — 문자열 <code>name</code>을 받아 문자열을 돌려주는 함수를 정의합니다. <code>: str</code>, <code>-&gt; str</code>은 타입 힌트로, 이 책의 코딩 컨벤션을 따릅니다.</li>
+<li><code>return f"안녕하세요, {name}님"</code> — f-string으로 받은 이름을 문장에 끼워 돌려줍니다.</li>
+<li><code>print(greet("지훈"))</code> — 함수를 호출한 결과를 화면에 출력합니다.</li>
+<li><code># 출력: 안녕하세요, 지훈님</code> — 실제 <code>python greet.py</code> 실행 결과와 정확히 일치합니다.</li>
+</ul>
+</div>
+<p>실행 결과를 직접 확인합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; python greet.py
+안녕하세요, 지훈님
+</code></pre></div>
+<p>이렇게 "지시 → 에이전트가 파일 생성 → 실행 → 결과 확인"까지가 한 흐름으로 이어지는 것이 에이전트형 코딩의 기본 모습입니다.</p>
+<hr />
+<h2 id="9-continue-resume">9. 세션 관리: 중단·재개(--continue/--resume)·종료</h2>
+<p>신입이 처음 당황하는 순간 중 하나가 "어제 하던 대화가 사라진 것 같다"입니다. Claude Code는 세션(대화)을 저장하므로, 닫았다가도 이어서 작업할 수 있습니다. 이 동작을 정확히 알아 두면 작업 맥락을 잃지 않습니다.</p>
+<h4 id="esc">작업 중단: Esc</h4>
+<p>에이전트가 엉뚱한 방향으로 일하고 있을 때, <strong>Esc</strong> 키를 누르면 진행 중인 작업을 멈춥니다. 잘못된 지시를 줬다고 끝까지 기다릴 필요가 없습니다. 멈춘 뒤 지시를 다시 다듬어 주면 됩니다.</p>
+<h4 id="exit-ctrld">세션 종료: /exit 또는 Ctrl+D</h4>
+<p>대화를 끝내고 터미널로 나가려면 REPL에서 <code>/exit</code>를 입력하거나 Ctrl+D를 누릅니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; /exit
+</code></pre></div>
+<h4 id="-continue">직전 세션 이어가기: --continue</h4>
+<p>터미널을 닫았다가 다시 같은 작업을 이어가고 싶으면, 작업 폴더에서 <code>--continue</code>(또는 짧게 <code>-c</code>)로 가장 최근 대화를 곧바로 복원합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">bash</span></div><pre class="line-numbers"><code class="language-bash">claude --continue
+</code></pre></div>
+<p>이렇게 하면 직전 세션의 대화 내용과 맥락이 그대로 살아난 채 REPL이 열립니다. 에이전트는 어제 무엇을 하고 있었는지 기억합니다.</p>
+<h4 id="-resume">여러 세션 중 골라 재개: --resume</h4>
+<p>같은 폴더에서 여러 갈래의 작업을 했다면, <code>--resume</code>(또는 <code>-r</code>)으로 저장된 세션 목록을 보고 골라서 재개합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">bash</span></div><pre class="line-numbers"><code class="language-bash">claude --resume
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">저장된 세션을 선택하세요:
+  1. hello.py 만들고 실행 (3분 전)
+  2. greet 함수 추가 (1시간 전)
+  3. 폴더 구조 질문 (어제)
+</code></pre></div>
+<p>원하는 세션을 고르면 그 시점의 맥락으로 돌아갑니다.</p>
+<table>
+<thead>
+<tr>
+<th>명령</th>
+<th>하는 일</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Esc</td>
+<td>진행 중인 작업 즉시 중단</td>
+</tr>
+<tr>
+<td><code>/exit</code> 또는 Ctrl+D</td>
+<td>현재 세션 종료(터미널로 나감)</td>
+</tr>
+<tr>
+<td><code>claude --continue</code> (<code>-c</code>)</td>
+<td>가장 최근 세션을 바로 이어감</td>
+</tr>
+<tr>
+<td><code>claude --resume</code> (<code>-r</code>)</td>
+<td>저장된 세션 목록에서 골라 재개</td>
+</tr>
+</tbody>
+</table>
+<div class="info-box tip">
+<p><strong><code>--continue</code>와 <code>--resume</code>의 차이</strong>
+<code>--continue</code>는 "묻지 않고 가장 최근 것"을 바로 엽니다. 빠르게 어제 작업을 잇고 싶을 때 씁니다. <code>--resume</code>은 "어느 세션이었지?"를 고를 수 있게 목록을 보여 줍니다. 같은 폴더에서 여러 작업을 병행했을 때 유용합니다.</p>
+</div>
+<hr />
+<h2 id="10-2-1-team-tasks-api">10. 즉시 연습(2종 1세트): team-tasks-api에서 첫 세션을 직접 열어 본다</h2>
+<p>지금까지 읽은 설치·인증·세션 흐름을, <strong>종이에 채우지 말고 실습 저장소 <code>team-tasks-api</code>에서 실제로 돌려 봅니다.</strong> 미리 정한 답을 빈칸에 적는 것이 아니라, <strong>본인 컴퓨터 화면에 실제로 나타난 출력</strong>을 그대로 옮겨 적는 것이 핵심입니다. 한 번 손으로 열어 봐야 "REPL이 어떻게 뜨는지, <code>/status</code>가 무엇을 보여 주는지, <code>--continue</code>가 정말 맥락을 잇는지"가 눈에 들어옵니다.</p>
+<h4 id="team-tasks-api">모범: team-tasks-api 폴더에서 첫 세션을 연 실제 기록(예)</h4>
+<p>아래는 한 신입이 <code>team-tasks-api</code> 폴더에서 실제로 명령을 실행하며 화면 출력을 옮겨 적은 예입니다. 값(버전 번호·로그인 방식·경로)은 사람마다 다르므로, 본인 화면의 값으로 바꿔 적어야 합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[설치 확인] team-tasks-api 폴더에서
+- claude --version → 2.0.x  (성공)
+- git --version → 2.45.x   (Bash 도구 준비됨)
+
+[세션 시작] 같은 폴더에서 claude 실행 → REPL 프롬프트(&gt;)가 떴다
+- /status → Login method: Claude Max subscription / Model: Sonnet
+  (의도한 구독 방식과 일치)
+
+[작은 작업] REPL에 지시:
+&gt; 이 폴더에 NOTES.md를 만들고 &quot;team-tasks-api 온보딩 1일차&quot; 한 줄을 적어 줘.
+→ 에이전트가 Write 도구로 NOTES.md 생성(권한 확인이 떴고 허용함)
+→ 탐색기에서 NOTES.md가 실제로 생긴 것을 눈으로 확인
+
+[세션 재개] /exit로 닫은 뒤 같은 폴더에서 claude --continue
+→ 직전 대화(NOTES.md 작업)가 그대로 이어져 떴다
+</code></pre></div>
+<h4 id="team-tasks-api_1">직접 해보기 (team-tasks-api에서 실제로 실행)</h4>
+<div class="project-box">
+<p><strong>연습 1 — team-tasks-api 폴더에서 첫 세션을 실제로 열고, 화면 출력을 옮겨 적으세요.</strong></p>
+<p>1장에서 받아 둔 <code>team-tasks-api</code> 폴더로 이동해(터미널에서 그 폴더를 연 상태로) 아래를 차례로 실행하고, <strong>본인 화면에 실제로 찍힌 값</strong>을 적으세요. 미리 외운 답이 아니라, 방금 본 출력을 그대로 옮기는 것입니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[설치 확인] team-tasks-api 폴더에서 실행한 결과
+- claude --version 의 실제 출력:
+- git --version 의 실제 출력:
+
+[세션 시작] 그 폴더에서 claude 를 실행했을 때
+- REPL 프롬프트(&gt;)가 떴는가(예/아니오):
+- /status 의 실제 Login method:
+- 그 방식이 내가 의도한 방식과 같은가:
+</code></pre></div>
+</div>
+<div class="project-box">
+<p><strong>연습 2 — 에이전트로 team-tasks-api에 작은 파일을 실제로 만들고 눈으로 확인하세요.</strong></p>
+<p>연습 1에서 연 세션의 REPL에 다음 지시를 <strong>그대로</strong> 주세요(이 작업은 코드를 바꾸지 않고 메모 파일 하나만 만듭니다).</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">&gt; 이 폴더에 NOTES.md를 만들고 &quot;team-tasks-api 온보딩 1일차&quot; 한 줄을 적어 줘.
+</code></pre></div>
+<p>실행되는 동안 <strong>실제로 일어난 일</strong>을 적으세요(추측이 아니라 화면에 나타난 것).</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">- 에이전트가 사용한 도구(화면에 표시된 이름, 예: Write):
+- 권한 확인(승인 요청)이 떴는가:
+- 파일 탐색기 또는 dir 명령으로 NOTES.md가 실제로 생긴 것을 확인했는가:
+</code></pre></div>
+</div>
+<div class="project-box">
+<p><strong>연습 3 — <code>--continue</code>로 세션이 정말 이어지는지 실제로 확인하세요.</strong></p>
+<p>REPL에서 <code>/exit</code>로 세션을 닫은 뒤, 같은 <code>team-tasks-api</code> 폴더에서 <code>claude --continue</code>를 실행하세요. 그리고 직전 대화(NOTES.md 작업)가 이어지는지 확인합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">- claude --continue 실행 후 직전 대화가 이어져 떴는가(예/아니오):
+- 이어진 화면에서 직전에 만든 NOTES.md 작업 내용이 보였는가:
+- (선택) claude --resume 으로는 무엇이 달랐는가(세션 목록이 떴는가):
+</code></pre></div>
+</div>
+<div class="project-box">
+<p><strong>자가체크 — 머리로가 아니라 <em>손으로</em> team-tasks-api에서 했는지 확인하세요.</strong></p>
+<ul>
+<li>[ ] <code>team-tasks-api</code> 폴더에서 <code>claude --version</code>·<code>git --version</code>을 직접 실행해 출력을 봤다.</li>
+<li>[ ] 그 폴더에서 <code>claude</code>를 실행해 REPL 프롬프트가 뜨는 것을 봤고, <code>/status</code>로 내 <code>Login method</code>를 직접 확인했다.</li>
+<li>[ ] 에이전트에 지시해 <code>NOTES.md</code>를 <strong>실제로</strong> 만들고, 파일 탐색기나 <code>dir</code>로 생긴 것을 눈으로 확인했다.</li>
+<li>[ ] 부수효과 도구(Write) 호출 때 권한 확인이 뜬 것을 직접 봤다.</li>
+<li>[ ] <code>/exit</code> 후 <code>claude --continue</code>로 직전 대화가 이어지는 것을 화면으로 확인했다.</li>
+<li>[ ] <code>claude</code>(REPL)·<code>claude -p</code>(1회성)·<code>--continue</code>·<code>--resume</code>의 차이를 내가 겪은 경험으로 설명할 수 있다.</li>
+</ul>
+</div>
+<h4 id="_8">단원 미니 프로젝트: 내 자리 만들기</h4>
+<p>이 단원(u1)에는 개념 챕터가 이 장 하나뿐이므로, 단원 미니 프로젝트도 여기서 마무리합니다.</p>
+<div class="project-box">
+<p><strong>미니 프로젝트 — "내 자리 만들기: 설치·인증하고 첫 세션 기록"</strong>
+목표: Windows 11에 Claude Code를 설치·인증하고, 첫 세션에서 작은 파일을 만들어 실행하며 온보딩 환경을 점검합니다.</p>
+<p>마일스톤(증분):</p>
+<ol>
+<li><strong>M1 설치 확인</strong>: <code>claude --version</code>·<code>git --version</code>이 버전을 출력한다.</li>
+<li><strong>M2 인증 확정</strong>: <code>/status</code>의 <code>Login method</code>가 의도한 방식(구독 또는 API 키)과 일치한다.</li>
+<li><strong>M3 첫 산출물</strong>: 빈 폴더에서 <code>greet.py</code>(이름을 받아 인사말을 돌려주는 함수)를 에이전트로 만들고 실행해 출력을 확인한다.</li>
+<li><strong>M4 세션 재개</strong>: 세션을 <code>/exit</code>로 닫은 뒤 <code>claude --continue</code>로 다시 열어 맥락이 이어지는지 확인한다.</li>
+</ol>
+<p>산출물: 위 4단계의 명령과 결과를 적은 "첫 세션 기록" 메모(위 점검표 형식).</p>
+</div>
+<div class="project-box">
+<p><strong>미니 프로젝트 자가체크</strong></p>
+<ul>
+<li>[ ] M1~M4를 모두 실제로 실행해 결과를 확인했다.</li>
+<li>[ ] <code>greet.py</code>의 출력이 코드의 <code># 출력:</code> 주석과 정확히 일치했다.</li>
+<li>[ ] <code>--continue</code>로 연 세션이 직전 작업을 기억하고 있었다.</li>
+<li>[ ] 인증 방식을 추측이 아니라 <code>/status</code> 출력으로 확정했다.</li>
+</ul>
+</div>
+<hr />
+<h2 id="11">11. 이 책의 실습 저장소 준비 (이후 모든 장의 무대)</h2>
+<p>지금까지는 빈 폴더에서 <code>hello.py</code> 같은 작은 파일을 직접 만들어 보았습니다. 그러나 2장부터
+다루는 일들 — 낯선 코드 파악(4장), 안전한 변경(5~6장), 테스트 검증(7장), CLAUDE.md 작성(8장),
+첫 커밋·PR(9~10장), 그리고 종합 프로젝트(13~16장) — 은 모두 <strong>"팀에서 받은 기존 저장소"</strong>
+하나를 무대로 합니다. 이 책은 그 저장소를 <strong><code>team-tasks-api</code></strong> 라는 작은 FastAPI 서비스로
+함께 제공합니다. 신입이 첫 업무로 받는 "할 일(task) 관리 API"라고 생각하면 됩니다.</p>
+<p>이 저장소는 책과 함께 제공되는 자료의 <code>assets/team-tasks-api/</code> 폴더에 들어 있습니다. 지금
+여러분의 작업 폴더로 복사해 두고, 이후 모든 장의 미니 프로젝트를 <strong>이 한 저장소에 누적</strong>해
+나갑니다.</p>
+<div class="info-box beginner">
+<p><strong>무엇이 들어 있나</strong></p>
+<pre><code>team-tasks-api/
+  main.py            # FastAPI 앱 진입점 + GET /health
+  models.py          # 모델(Task, TaskCreate)과 status 열거형(todo, done)
+  store.py           # 인메모리 저장소(create, get_all, get)
+  routers/tasks.py   # GET /tasks 목록, POST /tasks 생성, GET /tasks/{id}
+  tests/test_tasks.py# 기본 기능 pytest(TestClient)
+  requirements.txt   # fastapi, pytest, httpx
+</code></pre>
+<p>지금은 <strong>완료 처리·상태 필터가 들어가기 전</strong>의 기본 버전입니다. 그 두 기능을 직접 더하는
+것이 13~16장 종합 프로젝트의 과제입니다.</p>
+</div>
+<p>핵심 두 파일만 미리 살펴봅니다. 데이터 모델과 라우터입니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># models.py
+from enum import Enum
+from pydantic import BaseModel
+
+
+class TaskStatus(str, Enum):
+    todo = &quot;todo&quot;
+    done = &quot;done&quot;
+
+
+class Task(BaseModel):
+    id: int
+    title: str
+    status: TaskStatus = TaskStatus.todo
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># routers/tasks.py (발췌)
+@router.get(&quot;&quot;, response_model=list[Task])
+def list_tasks() -&gt; list[Task]:
+    return store.get_all_tasks()
+
+
+@router.get(&quot;/{task_id}&quot;, response_model=Task)
+def get_task(task_id: int) -&gt; Task:
+    task = store.get_task(task_id)
+    if task is None:
+        raise HTTPException(status_code=404, detail=&quot;Task not found&quot;)
+    return task
+</code></pre></div>
+<h4 id="worked-example">worked example: 실습 저장소 셋업과 동작 확인</h4>
+<p>작업 폴더에 <code>team-tasks-api</code>를 복사한 뒤, 그 폴더에서 다음을 차례로 실행합니다(Windows 11,
+PowerShell + Git Bash).</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">bash</span></div><pre class="line-numbers"><code class="language-bash">git init
+git add .
+git commit -m &quot;chore: team-tasks-api 초기 상태&quot;
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">powershell</span></div><pre class="line-numbers"><code class="language-powershell">python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+</code></pre></div>
+<p>테스트가 모두 통과해야 준비가 끝난 것입니다. <strong>"검증 전까지는 끝난 게 아니다"</strong>(7장)를 여기서부터
+습관으로 들입니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; python -m pytest -q
+.......                                                                  [100%]
+7 passed
+</code></pre></div>
+<p>서버를 띄워 브라우저로도 확인할 수 있습니다. <code>http://127.0.0.1:8000/docs</code>(Swagger UI)에서
+<code>GET /tasks</code>를 눌러 보면 됩니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; python -m uvicorn main:app --reload
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+</code></pre></div>
+<h4 id="github-origin">GitHub에 올려 원격(origin) 만들기</h4>
+<p>지금까지는 <strong>내 컴퓨터 안의 로컬 저장소</strong>만 만들었습니다. 그런데 9장에서 변경을 <code>git push</code>로
+올리고 <code>gh</code>로 첫 PR을 만들려면, 이 저장소가 <strong>GitHub에도 있어야</strong> 합니다. 실무에서는 팀의 저장소를
+<code>git clone</code>으로 받으면 원격(<code>origin</code>)이 자동으로 잡히지만, 이 책은 <code>team-tasks-api</code>를 실습용 폴더로
+받았으므로 <strong>내 GitHub 계정에 올려</strong> 원격을 직접 만들어 둡니다. 한 번만 해 두면 됩니다.</p>
+<p>먼저 GitHub CLI(<code>gh</code>, 깃허브 명령줄 도구)를 설치합니다(Windows 11은 winget, 또는
+<a href="https://cli.github.com">cli.github.com</a>에서 설치 관리자).</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">powershell</span></div><pre class="line-numbers"><code class="language-powershell">winget install --id GitHub.cli
+</code></pre></div>
+<p>설치한 새 터미널에서 GitHub 계정으로 한 번 로그인합니다. 브라우저가 열리고 안내대로 인증하면 됩니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">bash</span></div><pre class="line-numbers"><code class="language-bash">gh auth login
+</code></pre></div>
+<p>이제 이 폴더를 내 GitHub 계정의 새 저장소로 올리고 원격 이름 <code>origin</code>으로 연결합니다. 아래 한 명령이
+저장소 생성·<code>origin</code> 연결·첫 푸시까지 한 번에 처리합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">bash</span></div><pre class="line-numbers"><code class="language-bash">gh repo create team-tasks-api --private --source=. --remote=origin --push
+</code></pre></div>
+<p><code>--source=.</code>는 지금 폴더를 올린다는 뜻, <code>--remote=origin</code>은 원격 이름을 <code>origin</code>으로 둔다는 뜻,
+<code>--push</code>는 첫 푸시까지 한 번에 한다는 뜻입니다. 끝나면 원격이 연결됐는지 확인합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">bash</span></div><pre class="line-numbers"><code class="language-bash">git remote -v
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">origin  https://github.com/&lt;내-계정&gt;/team-tasks-api.git (fetch)
+origin  https://github.com/&lt;내-계정&gt;/team-tasks-api.git (push)
+</code></pre></div>
+<p><code>origin</code>이 보이면 준비가 끝났습니다. 9장의 <code>git push -u origin ...</code>과 <code>gh pr create</code>가 이제 동작합니다.</p>
+<div class="info-box warning">
+<p><strong>왜 로컬 git 저장소 + GitHub 원격을 둘 다 준비하나</strong>
+9~10장에서 변경을 브랜치·커밋(로컬)으로 쌓고, <code>push</code>·PR(원격)로 올리려면 <strong>둘 다</strong> 필요합니다.
+지금 <code>git init</code>(로컬 저장소)과 <code>gh repo create</code>(GitHub 원격 <code>origin</code>)를 해 두면, 이후 각 장에서
+만든 변경을 깔끔한 단위로 커밋해 첫 PR까지 올릴 수 있습니다. 앞으로 <strong>장마다 새 작업 브랜치를
+만들어</strong> 실습하고, 끝나면 <code>python -m pytest -q</code>로 검증한 뒤 진행하세요.</p>
+</div>
+<hr />
+<h2 id="12">12. 흔한 오류와 오개념</h2>
+<div class="info-box danger">
+<p><strong>오개념 1: "Claude Code는 똑똑한 자동완성이다."</strong>
+아닙니다. 자동완성은 커서 주변의 다음 몇 줄을 제안하고 멈추며, 파일을 직접 만들거나 명령을 실행하지 못합니다. Claude Code는 <strong>파일을 직접 생성·편집하고 명령을 실행하는 에이전트</strong>입니다. 8장 worked example에서 보았듯 <code>hello.py</code>를 만들고 <code>python hello.py</code>까지 스스로 실행해 결과를 보여 줍니다. "다음 줄 제안기"가 아니라 "옆자리 페어 프로그래머"로 이해해야 도구의 쓰임이 보입니다.</p>
+<p><strong>오개념 2: "구독을 결제했으니 어떻게 로그인하든 구독으로 쓰이겠지."</strong>
+틀립니다. <strong><code>ANTHROPIC_API_KEY</code> 환경 변수가 설정돼 있으면 Claude Code는 구독이 아니라 그 API 키를 우선 사용해 종량 과금이 발생합니다.</strong> 예전에 API 실습을 하며 키를 영구 환경 변수로 박아 둔 신입이 자기도 모르게 종량 과금을 쓰는 일이 흔합니다. 구독을 쓰려면 <code>echo $env:ANTHROPIC_API_KEY</code>로 키가 비어 있는지 확인하고, <code>/status</code>의 <code>Login method</code>가 <code>subscription</code>인지 <strong>눈으로 확인</strong>해야 합니다.</p>
+<p><strong>오개념 3: "터미널을 닫으면 대화가 사라진다."</strong>
+아닙니다. Claude Code는 세션을 저장합니다. 같은 작업 폴더에서 <code>claude --continue</code>를 실행하면 <strong>가장 최근 대화의 맥락이 그대로 복원</strong>되고, <code>claude --resume</code>은 저장된 여러 세션 중 골라 재개합니다. 닫혔다고 처음부터 다시 설명할 필요가 없습니다. 단, 세션은 작업 폴더 기준으로 관리되므로, 재개하려면 <strong>그 작업을 하던 폴더에서</strong> 명령을 실행해야 합니다.</p>
+<p><strong>오개념 4: "<code>claude</code>든 <code>claude -p</code>든 그게 그거다."</strong>
+다릅니다. <code>claude</code>는 대화가 누적되는 REPL을 열어 여러 턴에 걸쳐 함께 작업합니다. <code>claude -p "질문"</code>은 답 한 번을 출력하고 <strong>곧바로 종료</strong>하며 맥락을 이어가지 않습니다. 함께 코드를 만들고 고치는 작업에 <code>-p</code>를 쓰면 매번 맥락이 끊겨 비효율적입니다. 반대로 "폴더 요약 한 줄"처럼 한 번에 끝날 질의에 REPL을 여는 것도 번거롭습니다. 작업 성격에 맞게 고릅니다.</p>
+</div>
+<div class="info-box warning">
+<p><strong>자주 막히는 설치·인증 문제</strong></p>
+<ul>
+<li><code>irm</code>이 인식되지 않는다 → PowerShell이 아니라 CMD를 열었습니다. PowerShell을 다시 엽니다.</li>
+<li><code>claude</code>가 명령으로 인식되지 않는다 → 설치 직후 PATH가 갱신되지 않았습니다. <strong>터미널을 새로 엽니다.</strong></li>
+<li>브라우저 로그인이 열리지 않는다 → <code>ANTHROPIC_API_KEY</code>가 이미 설정돼 API 키 방식으로 넘어갔을 수 있습니다. 변수를 확인합니다.</li>
+<li>Bash 명령이 어색하게 동작한다 → Git for Windows(Git Bash)를 설치하지 않았습니다.</li>
+</ul>
+</div>
+<hr />
+<h2 id="_9">이 장 요약</h2>
+<ul>
+<li><strong>Claude Code</strong>는 터미널·IDE·웹에서 동작하는 에이전트형 코딩 CLI로, 파일을 직접 읽고 편집하고 실행하는 페어 프로그래머입니다.</li>
+<li>Windows 11 설치는 <strong>PowerShell 네이티브 설치 관리자(<code>irm https://claude.ai/install.ps1 | iex</code>, 권장)</strong> 또는 <strong>npm(<code>@anthropic-ai/claude-code</code>)</strong> 입니다. Bash 도구를 위해 <strong>Git for Windows</strong>를 함께 둡니다.</li>
+<li>인증은 <strong>구독(Pro/Max)</strong> 과 <strong>API 키</strong> 두 갈래이며, <strong><code>ANTHROPIC_API_KEY</code>가 있으면 API 키가 우선</strong>됩니다. 구독을 쓰려면 그 변수를 비워 두고, <code>/status</code>로 방식을 확인합니다.</li>
+<li><strong><code>claude</code></strong>(대화형 REPL)와 <strong><code>claude -p</code></strong>(1회성 실행)를 작업 성격에 맞게 고릅니다.</li>
+<li>세션은 저장되며 <strong><code>--continue</code></strong>(최근 바로 잇기)·<strong><code>--resume</code></strong>(목록에서 고르기)으로 맥락을 이어갑니다.</li>
+</ul>
+<p>다음 장에서는 이 페어 프로그래머가 <strong>어떻게</strong> 일하는지, 즉 "관찰 → 계획 → 도구 호출 → 결과 확인"의 에이전트 루프를 자동완성과 대비해 자세히 들여다봅니다.</p>
+<hr />
+<p><strong>참고 출처</strong></p>
+<ul>
+<li><a href="https://docs.claude.com/en/docs/claude-code/setup">Set up Claude Code — Claude Docs</a></li>
+<li><a href="https://code.claude.com/docs/en/setup">Advanced setup — Claude Code Docs</a></li>
+<li><a href="https://support.claude.com/en/articles/14552382-your-first-day-in-claude-code">Your first day in Claude Code — Claude Help Center</a></li>
+<li><a href="https://support.claude.com/en/articles/14552646-troubleshoot-claude-code-installation-and-authentication">Troubleshoot Claude Code installation and authentication — Claude Help Center</a></li>
+</ul>
+
+<nav class="chapter-nav"><a href="index.html" style="flex:0 0 auto; text-align:center">목차</a><a href="ch_02.html" style="text-align:right">다음: 에이전트형 코딩의 작동 방식: 관찰→계획→도구→확인 →</a></nav>
+</main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-powershell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+</body>
+</html>

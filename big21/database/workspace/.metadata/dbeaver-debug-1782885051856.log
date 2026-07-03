@@ -1,0 +1,178 @@
+2026-07-01 12:11:14.623 - DBeaver 26.1.1.202606211757 is starting
+2026-07-01 12:11:14.625 - OS: Windows 10 10.0 (amd64)
+2026-07-01 12:11:14.626 - Java version: 21.0.10 by Eclipse Adoptium (64bit)
+2026-07-01 12:11:14.626 - Install path: 'C:\Users\mega\AppData\Local\DBeaver'
+2026-07-01 12:11:14.626 - Instance path: 'file:/C:/big21/database/workspace/'
+2026-07-01 12:11:14.628 - Memory available 64Mb/1024Mb
+2026-07-01 12:11:14.633 - Initialize desktop platform...
+2026-07-01 12:11:14.893 - BounceCastle bundle found. Use JCE provider BC
+> Start Core File Systems [org.eclipse.core.filesystem 1.11.400.v20251107-0507]
+> Start Core Resource Management [org.eclipse.core.resources 3.24.0.v20260518-1150]
+> Start 팀 지원 핵심 [org.eclipse.team.core 3.10.1000.v20260112-1030]
+> Start DBeaver UI Navigator [org.jkiss.dbeaver.ui.navigator 1.0.181.202606211757]
+> Start JFace 텍스트 [org.eclipse.jface.text 3.31.0.v20260428-1719]
+> Start 텍스트 [org.eclipse.text 3.14.700.v20260326-1107]
+2026-07-01 12:11:15.233 - Initialize base platform...
+2026-07-01 12:11:15.243 - Platform initialized (610ms)
+2026-07-01 12:11:15.248 - 	Create display
+2026-07-01 12:11:15.334 - 	Patch workbench configuration
+2026-07-01 12:11:15.387 - 	Starting instance server at http://localhost:53263
+2026-07-01 12:11:15.394 - Run workbench
+> Start Eclipse IDE UI [org.eclipse.ui.ide 3.23.100.v20260505-0615]
+> Start Eclipse e4 작업영역 SWT [org.eclipse.e4.ui.workbench.swt 0.18.100.v20260430-1313]
+> Start Eclipse Application Services [org.eclipse.e4.core.services 2.5.400.v20260430-1313]
+> Start Eclipse UI Application Services [org.eclipse.e4.ui.services 1.6.700.v20260430-1313]
+> Start Eclipse e4 Progress View [org.eclipse.e4.ui.progress 0.5.100.v20260516-1214]
+> Start Eclipse Bindings Support [org.eclipse.e4.ui.bindings 0.15.100.v20260430-1313]
+> Start Eclipse e4 core commands [org.eclipse.e4.core.commands 1.1.800.v20260430-1313]
+> Start EMF XML/XMI Persistence [org.eclipse.emf.ecore.xmi 2.40.0.v20251210-1145]
+> Start Eclipse CSS SWT Theme Support [org.eclipse.e4.ui.css.swt.theme 0.15.100.v20260507-0340]
+> Start Eclipse e4 작업영역 기능 추가 [org.eclipse.e4.ui.workbench.addons.swt 1.6.100.v20260430-1313]
+Warning: NLS unused message: WorkbenchPreference_reuseEditorsThreshold in: org.eclipse.ui.internal.messages
+Warning: NLS unused message: 이유 in: org.eclipse.ui.internal.messages
+> Start Eclipse e4 작업영역 SWT 렌더러 [org.eclipse.e4.ui.workbench.renderers.swt 0.18.0.v20260508-0707]
+> Start Eclipse Dependency Injection Extensions [org.eclipse.e4.core.di.extensions 0.18.300.v20240413-1529]
+> Start DBeaver AI Model [org.jkiss.dbeaver.model.ai 2.0.24.202606211757]
+> Start DBeaver AI UI [org.jkiss.dbeaver.ui.ai 1.0.83.202606211757]
+> Start Eclipse CSS SWT Support [org.eclipse.e4.ui.css.swt 0.17.0.v20260516-1214]
+Warning: NLS unused message: IDEApplication_workspaceCannotLockTitle in: org.eclipse.ui.internal.ide.messages
+> Start Internet Connection Management [org.eclipse.core.net 1.5.900.v20260507-0401]
+> Start Equinox Java Authentication and Authorization Service (JAAS) [org.eclipse.equinox.security 1.4.700.v20250622-1644]
+> Start 인터넷 연결 관리 사용자 인터페이스 [org.eclipse.ui.net 1.6.0.v20251219-1227]
+> Start GEF Classic Draw2d [org.eclipse.draw2d 3.23.0.202605171958]
+> Start GEF Classic GEF (MVC) [org.eclipse.gef 3.26.0.202605171956]
+2026-07-01 12:11:16.849 - Configure workbench window
+> Start 기본 문서 편집기 [org.eclipse.ui.editors 3.22.0.v20260421-0620]
+> Start 텍스트 편집기 프레임워크 [org.eclipse.ui.workbench.texteditor 3.20.100.v20260505-0620]
+> Start DBeaver SQL Model [org.jkiss.dbeaver.model.sql 1.0.171.202606211757]
+2026-07-01 12:11:17.043 - Total database drivers: 132 (132)
+> Start 도움말 시스템 코어 [org.eclipse.help 3.11.100.v20260408-1441]
+2026-07-01 12:11:17.137 - Create actions
+2026-07-01 12:11:18.482 - Initialize workbench window
+2026-07-01 12:11:18.497 - Finish initialization
+> Start DBeaver UI Editors - Data [org.jkiss.dbeaver.ui.editors.data 1.0.181.202606211757]
+> Start DBeaver UI Editors - SQL [org.jkiss.dbeaver.ui.editors.sql 1.0.181.202606211757]
+> Start DBeaver Dashboard UI [org.jkiss.dbeaver.ui.dashboard 1.0.178.202606211757]
+> Start DBeaver ERD UI [org.jkiss.dbeaver.ui.editors.erd 3.1.22.202606211757]
+> Start DBeaver ERD Model [org.jkiss.dbeaver.model.erd 1.1.22.202606211757]
+> Start DBeaver Sample Database [org.jkiss.dbeaver.ui.config.sample 1.0.218.202606211757]
+2026-07-01 12:11:23.013 - Open [https://dbeaver.io/product/version.xml]
+2026-07-01 12:11:37.396 - Service 'org.jkiss.dbeaver.runtime.IEnvironmentPathMapper' not found
+> Start DBeaver PostgreSQL UI [org.jkiss.dbeaver.ext.postgresql.ui 1.0.157.202606211757]
+> Start DBeaver JDBC Model [org.jkiss.dbeaver.model.jdbc 1.0.74.202606211757]
+> Start DBeaver PostgreSQL Model [org.jkiss.dbeaver.ext.postgresql 2.1.254.202606211757]
+2026-07-01 12:11:50.929 - Service 'org.jkiss.dbeaver.ui.UIServiceConnectionEditor' not found
+2026-07-01 12:11:50.996 - Service 'org.jkiss.dbeaver.runtime.ui.UIServiceSecurity' not found
+2026-07-01 12:13:12.218 - Service 'org.jkiss.dbeaver.ui.UIServiceConnectionEditor' not found
+2026-07-01 12:13:12.260 - Service 'org.jkiss.dbeaver.runtime.ui.UIServiceSecurity' not found
+2026-07-01 12:13:24.970 - Open [https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.11/postgresql-42.7.11.pom]
+2026-07-01 12:13:25.052 - Open [https://repo1.maven.org/maven2/net/postgis/postgis-jdbc/2.5.0/postgis-jdbc-2.5.0.pom]
+2026-07-01 12:13:25.071 - Open [https://repo1.maven.org/maven2/net/postgis/postgis-java-aggregator/2.5.0/postgis-java-aggregator-2.5.0.pom]
+2026-07-01 12:13:25.096 - Open [https://repo1.maven.org/maven2/org/testcontainers/testcontainers-bom/1.13.0/testcontainers-bom-1.13.0.pom]
+2026-07-01 12:13:25.132 - Open [https://repo1.maven.org/maven2/net/postgis/postgis-geometry/2.5.0/postgis-geometry-2.5.0.pom]
+2026-07-01 12:13:25.150 - Open [https://repo1.maven.org/maven2/com/github/waffle/waffle-jna/3.5.1/waffle-jna-3.5.1.pom]
+2026-07-01 12:13:25.171 - Open [https://repo1.maven.org/maven2/com/github/waffle/waffle/3.5.1/waffle-3.5.1.pom]
+2026-07-01 12:13:25.209 - Open [https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.16.0/jna-5.16.0.pom]
+2026-07-01 12:13:25.229 - Open [https://repo1.maven.org/maven2/net/java/dev/jna/jna-platform/5.16.0/jna-platform-5.16.0.pom]
+2026-07-01 12:13:25.248 - Open [https://repo1.maven.org/maven2/org/slf4j/jcl-over-slf4j/2.0.16/jcl-over-slf4j-2.0.16.pom]
+2026-07-01 12:13:25.265 - Open [https://repo1.maven.org/maven2/org/slf4j/slf4j-parent/2.0.16/slf4j-parent-2.0.16.pom]
+2026-07-01 12:13:25.284 - Open [https://repo1.maven.org/maven2/org/slf4j/slf4j-bom/2.0.16/slf4j-bom-2.0.16.pom]
+2026-07-01 12:13:25.302 - Open [https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.16/slf4j-api-2.0.16.pom]
+2026-07-01 12:13:25.319 - Open [https://repo1.maven.org/maven2/com/github/ben-manes/caffeine/caffeine/3.1.8/caffeine-3.1.8.pom]
+2026-07-01 12:13:25.340 - Open [https://repo1.maven.org/maven2/org/checkerframework/checker-qual/3.48.3/checker-qual-3.48.3.pom]
+2026-07-01 12:13:25.357 - Open [https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy/1.15.11/byte-buddy-1.15.11.pom]
+2026-07-01 12:13:25.378 - Open [https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy-parent/1.15.11/byte-buddy-parent-1.15.11.pom]
+2026-07-01 12:13:25.402 - Open [https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.pom]
+2026-07-01 12:13:25.420 - Open [https://repo1.maven.org/maven2/org/checkerframework/checker-qual/3.37.0/checker-qual-3.37.0.pom]
+2026-07-01 12:13:25.438 - Open [https://repo1.maven.org/maven2/com/google/errorprone/error_prone_annotations/2.21.1/error_prone_annotations-2.21.1.pom]
+2026-07-01 12:13:25.457 - Open [https://repo1.maven.org/maven2/com/google/errorprone/error_prone_parent/2.21.1/error_prone_parent-2.21.1.pom]
+2026-07-01 12:13:26.570 - Open [https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.11/postgresql-42.7.11.jar]
+2026-07-01 12:13:26.619 - Open [https://repo1.maven.org/maven2/net/postgis/postgis-jdbc/2.5.0/postgis-jdbc-2.5.0.jar]
+2026-07-01 12:13:26.641 - Open [https://repo1.maven.org/maven2/net/postgis/postgis-geometry/2.5.0/postgis-geometry-2.5.0.jar]
+2026-07-01 12:13:26.665 - Open [https://repo1.maven.org/maven2/com/github/waffle/waffle-jna/3.5.1/waffle-jna-3.5.1.jar]
+2026-07-01 12:13:26.688 - Open [https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.16.0/jna-5.16.0.jar]
+2026-07-01 12:13:26.743 - Open [https://repo1.maven.org/maven2/net/java/dev/jna/jna-platform/5.16.0/jna-platform-5.16.0.jar]
+2026-07-01 12:13:26.794 - Open [https://repo1.maven.org/maven2/org/slf4j/jcl-over-slf4j/2.0.16/jcl-over-slf4j-2.0.16.jar]
+2026-07-01 12:13:26.820 - Open [https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.16/slf4j-api-2.0.16.jar]
+2026-07-01 12:13:26.843 - Open [https://repo1.maven.org/maven2/com/github/ben-manes/caffeine/caffeine/3.1.8/caffeine-3.1.8.jar]
+2026-07-01 12:13:26.880 - Open [https://repo1.maven.org/maven2/org/checkerframework/checker-qual/3.48.3/checker-qual-3.48.3.jar]
+2026-07-01 12:13:26.907 - Open [https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy/1.15.11/byte-buddy-1.15.11.jar]
+2026-07-01 12:13:27.048 - Open [https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar]
+2026-07-01 12:13:27.072 - Open [https://repo1.maven.org/maven2/org/checkerframework/checker-qual/3.37.0/checker-qual-3.37.0.jar]
+2026-07-01 12:13:27.094 - Open [https://repo1.maven.org/maven2/com/google/errorprone/error_prone_annotations/2.21.1/error_prone_annotations-2.21.1.jar]
+2026-07-01 12:13:27.216 - Connect with 'shop-real' (postgres-jdbc-19f1baac722-433e90cf419f8b7e)
+> Start DBeaver GIS Support [org.jkiss.dbeaver.data.gis 1.0.205.202606211757]
+2026-07-01 12:13:27.268 - Execution context opened (shop-real; Main <shop-real>; 0)
+2026-07-01 12:13:27.279 - Initiate connection to PostgreSQL database [shop-real@localhost] for Main <shop-real>
+2026-07-01 12:13:27.405 - Execution context closed (shop-real, 0)
+2026-07-01 12:14:03.272 - Service 'org.jkiss.dbeaver.ui.UIServiceConnectionEditor' not found
+2026-07-01 12:14:03.317 - Service 'org.jkiss.dbeaver.runtime.ui.UIServiceSecurity' not found
+2026-07-01 12:14:20.945 - Connect with 'shop-real' (postgres-jdbc-19f1baba254-6b8884e6079f1c71)
+2026-07-01 12:14:20.946 - Execution context opened (shop-real; Main <shop-real>; 1)
+2026-07-01 12:14:20.946 - Initiate connection to PostgreSQL database [shop-real@localhost] for Main <shop-real>
+2026-07-01 12:14:20.962 - Execution context closed (shop-real, 1)
+2026-07-01 12:14:28.937 - Connect with 'shop_real' (postgres-jdbc-19f1babc18c-7ed9b0d9d64361f8)
+2026-07-01 12:14:28.938 - Execution context opened (shop_real; Main <shop_real>; 2)
+2026-07-01 12:14:28.938 - Initiate connection to PostgreSQL database [shop_real@localhost] for Main <shop_real>
+2026-07-01 12:14:29.075 - Connected (postgres-jdbc-19f1babc18c-7ed9b0d9d64361f8, PostgreSQL JDBC Driver [42.7.11])
+2026-07-01 12:14:29.088 - Execution context closed (shop_real, 2)
+2026-07-01 12:14:29.089 - Disconnected (postgres-jdbc-19f1babc18c-7ed9b0d9d64361f8)
+2026-07-01 12:14:33.257 - Connect with 'shop_real' (postgres-jdbc-19f1bab5d75-2a6a0af253052808)
+2026-07-01 12:14:33.258 - Execution context opened (shop_real; Main <shop_real>; 3)
+2026-07-01 12:14:33.258 - Initiate connection to PostgreSQL database [shop_real@localhost] for Main <shop_real>
+2026-07-01 12:14:33.284 - Execution context opened (shop_real; Metadata <shop_real>; 4)
+2026-07-01 12:14:33.285 - Initiate connection to PostgreSQL database [shop_real@localhost] for Metadata <shop_real>
+2026-07-01 12:14:33.329 - Connected (postgres-jdbc-19f1bab5d75-2a6a0af253052808, PostgreSQL JDBC Driver [42.7.11])
+Warning: NLS unused message: FindReplace_RegExCheckbox_label in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_WrapCheckBox_label in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_IncrementalCheckBox_label in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_Options in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_ReplaceSelectionButton_label in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_SelectedRangeRadioButton_label in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_SelectAllButton_label in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_GlobalRadioButton_label in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_WholeWordCheckBox_label in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_ReplaceFindButton_label in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_BackwardRadioButton_label in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_CloseButton_label in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_Replace_label in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_CaseCheckBox_label in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_Status_replacements_label in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_title in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_Direction in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_ReplaceAllButton_label in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_Scope in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_Find_label in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_ForwardRadioButton_label in: org.eclipse.ui.texteditor.EditorMessages
+Warning: NLS unused message: FindReplace_FindNextButton_label in: org.eclipse.ui.texteditor.EditorMessages
+> Start DBeaver SQL Terminal [org.jkiss.dbeaver.ui.editors.sql.terminal 1.0.157.202606211757]
+> Start 핵심 비교 지원 [org.eclipse.compare.core 3.8.800.v20250718-1505]
+> Start 콘솔 [org.eclipse.ui.console 3.17.0.v20260430-1810]
+> Start 디버그 핵심 [org.eclipse.debug.core 3.23.300.v20260513-0740]
+2026-07-01 12:14:39.478 - Execution context opened (shop_real; SQLEditor <Script-4.sql>; 5)
+2026-07-01 12:14:39.479 - Initiate connection to PostgreSQL database [shop_real@localhost] for SQLEditor <Script-4.sql>
+> Start DBeaver Tasks - Native Tools UI [org.jkiss.dbeaver.tasks.native.ui 1.0.159.202606211757]
+> Start DBeaver Tasks - General UI [org.jkiss.dbeaver.tasks.ui 1.0.159.202606211757]
+2026-07-01 12:14:44.394 - Delete empty SQL script '\General\Scripts\Script-4.sql'
+2026-07-01 12:14:44.400 - Execution context closed (shop_real, 5)
+2026-07-01 12:15:11.499 - Execution context opened (shop_real; SQLEditor <Script-4.sql>; 6)
+2026-07-01 12:15:11.500 - Initiate connection to PostgreSQL database [shop_real@localhost] for SQLEditor <Script-4.sql>
+> Start DBeaver SQL Language Semantic Model [org.jkiss.dbeaver.model.lsm 1.0.76.202606211757]
+2026-07-01 12:15:48.464 - Execution context opened (shop_real; SQLEditor <연습문제81~92.sql>; 7)
+2026-07-01 12:15:48.464 - Initiate connection to PostgreSQL database [shop_real@localhost] for SQLEditor <연습문제81~92.sql>
+2026-07-01 12:15:53.496 - Table 'price_rnk' not found in metadata catalog
+2026-07-01 12:21:43.874 - Execution context opened (shop_real; SQLEditor <0626.sql>; 8)
+2026-07-01 12:21:43.875 - Initiate connection to PostgreSQL database [shop_real@localhost] for SQLEditor <0626.sql>
+2026-07-01 12:30:09.180 - Execution context closed (shop_real, 7)
+2026-07-01 12:30:09.264 - Execution context closed (shop_real, 8)
+2026-07-01 12:30:09.332 - Execution context closed (shop_real, 6)
+2026-07-01 12:30:09.518 - Dispose navigator model
+2026-07-01 12:30:09.544 - DBeaver is stopping
+2026-07-01 12:30:09.547 - Stop instance server
+2026-07-01 12:30:09.548 - Instance server has been stopped
+2026-07-01 12:30:09.559 - DBeaver shutdown completed
+2026-07-01 12:30:09.590 - Shutdown desktop platform...
+2026-07-01 12:30:09.603 - Execution context closed (shop_real, 3)
+2026-07-01 12:30:09.614 - Execution context closed (shop_real, 4)
+2026-07-01 12:30:09.614 - Disconnected (postgres-jdbc-19f1bab5d75-2a6a0af253052808)
+2026-07-01 12:30:09.717 - Platform shutdown completed (127ms)

@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>11장: 에이전트와 함께 디버깅하기 - Claude Code 신입 개발자 온보딩 — 첫 기능부터 첫 PR까지</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+<style>
+
+/* 디자인 토큰 — 브랜드 변경 시 여기만 수정 */
+:root {
+  --primary: #1976D2;
+  --primary-light: #E3F2FD;
+  --accent: #FF6F00;
+  --success: #2E7D32;
+  --warning: #F57F17;
+  --danger: #C62828;
+  --bg: #FAFAFA;
+  --text: #212121;
+  --text-secondary: #616161;
+  --border: #E0E0E0;
+  --code-bg: #2d2d2d;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.8; font-size: 16px;
+}
+.container { max-width: 1400px; margin: 0 auto; }
+.main-content { max-width: 1000px; padding: 40px 48px; margin: 0 auto; }
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white; padding: 48px 40px; border-radius: 16px; margin-bottom: 40px;
+}
+.chapter-header .chapter-number {
+  font-size: 14px; opacity: 0.8; text-transform: uppercase; letter-spacing: 2px;
+}
+.chapter-header h1 { font-size: 32px; margin: 8px 0 16px; font-weight: 800; }
+.chapter-header .chapter-meta { font-size: 14px; opacity: 0.9; }
+
+/* 학습 목표 */
+.learning-objectives {
+  background: var(--primary-light); border-left: 4px solid var(--primary);
+  padding: 24px 28px; border-radius: 0 12px 12px 0; margin-bottom: 36px;
+}
+.learning-objectives h3 { color: var(--primary); font-size: 16px; margin-bottom: 12px; }
+.learning-objectives li { margin: 8px 0; padding-left: 8px; }
+
+/* 섹션 / 본문 기본 요소 */
+h1 { font-size: 28px; margin: 36px 0 16px; color: var(--text); }
+h2 {
+  font-size: 26px; color: var(--primary); margin: 48px 0 20px;
+  padding-bottom: 10px; border-bottom: 2px solid var(--primary-light);
+}
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+p { margin: 12px 0; }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin: 6px 0; }
+a { color: var(--primary); }
+img { max-width: 100%; height: auto; border-radius: 12px; }
+blockquote {
+  border-left: 4px solid var(--primary); background: var(--primary-light);
+  padding: 12px 20px; margin: 16px 0; border-radius: 0 12px 12px 0;
+}
+blockquote p:last-child { margin-bottom: 0; }
+/* 인라인 코드 (pre 밖) */
+:not(pre) > code {
+  background: #f0f0f0; padding: 2px 6px; border-radius: 4px;
+  font-size: 0.9em; color: var(--danger);
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+}
+
+/* 코드 블록 (.code-block-wrapper) */
+.code-block-wrapper {
+  margin: 24px 0; border-radius: 12px; overflow: hidden;
+  box-shadow: var(--card-shadow); border: 1px solid var(--border);
+}
+.code-block-header {
+  background: #1a1a2e; color: #a0a0b0; padding: 10px 20px; font-size: 13px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+.code-block-header .lang-badge {
+  background: var(--primary); color: white; padding: 2px 10px;
+  border-radius: 10px; font-size: 11px; font-weight: 700;
+}
+pre[class*="language-"] {
+  margin: 0 !important; border-radius: 0 !important;
+  font-size: 14px !important; line-height: 1.6 !important; padding: 20px !important;
+}
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important; padding-right: 8px !important;
+}
+.code-explanation {
+  background: #f8f9fa; border-top: 1px solid var(--border); padding: 16px 20px;
+  font-size: 14px; color: var(--text-secondary); line-height: 1.7;
+}
+.code-explanation strong { color: var(--text); }
+.code-explanation .explain-title {
+  display: inline-block; background: var(--accent); color: white; font-size: 11px;
+  font-weight: 700; padding: 2px 10px; border-radius: 10px; margin-bottom: 8px;
+}
+.code-output {
+  background: #1e1e1e; color: #4EC9B0; padding: 12px 20px;
+  font-family: monospace; font-size: 13px; border-top: 1px dashed #444;
+}
+.code-output::before {
+  content: "▶ 실행 결과"; display: block; color: #808080;
+  font-size: 11px; margin-bottom: 4px;
+}
+
+/* 특수 박스 (info-box 5종) */
+.info-box { padding: 14px 20px; border-radius: 12px; margin: 16px 0; border-left: 4px solid; }
+.info-box p:last-child, .info-box ul:last-child { margin-bottom: 0; }
+.info-box.tip { background: #E8F5E9; border-color: var(--success); }
+.info-box.warning { background: #FFF8E1; border-color: var(--warning); }
+.info-box.danger { background: #FFEBEE; border-color: var(--danger); }
+.info-box.beginner { background: #F3E5F5; border-color: #7B1FA2; }
+.info-box.best-practice { background: #E0F2F1; border-color: #00695C; }
+.info-box .box-header {
+  display: flex; align-items: center; margin-bottom: 12px;
+  padding-bottom: 10px; border-bottom: 1px solid rgba(123,31,162,0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* 표 */
+.api-reference h3, .library-section h3 {
+  background: var(--primary); color: white; padding: 12px 20px;
+  border-radius: 8px 8px 0 0; margin-bottom: 0; font-size: 16px;
+}
+hr.section-divider, hr {
+  border: none; border-top: 2px solid var(--border); margin: 36px 0;
+}
+.table-responsive { overflow-x: auto; margin: 16px 0; border-radius: 8px; box-shadow: var(--card-shadow); }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+table thead { background: #f5f5f5; }
+table th { padding: 12px 16px; text-align: left; font-weight: 700; border-bottom: 2px solid var(--border); }
+table td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table tr:hover { background: #fafafa; }
+table code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 13px; color: var(--danger); }
+.api-signature {
+  background: var(--code-bg); color: #e0e0e0; padding: 8px 16px; border-radius: 6px;
+  font-family: monospace; font-size: 13px; margin: 4px 0; overflow-x: auto;
+}
+
+/* 다이어그램 */
+.diagram-container { margin: 28px 0; text-align: center; }
+.diagram-container img { max-width: 100%; border-radius: 12px; box-shadow: var(--card-shadow); }
+.diagram-container img.screenshot { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.diagram-container .caption { margin-top: 10px; font-size: 13px; color: var(--text-secondary); font-style: italic; }
+.diagram-container .svg-diagram { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; }
+.diagram-container .svg-diagram svg { max-width: 100%; height: auto; }
+.missing-diagram { color: var(--danger); font-style: italic; padding: 1rem; background: #FFEBEE; border-radius: 8px; }
+.mermaid { margin: 24px auto; text-align: center; }
+
+/* 연습 문제 & 프로젝트 */
+.exercise-box { background: #FFF3E0; border: 2px solid var(--accent); border-radius: 12px; padding: 24px; margin: 28px 0; }
+.exercise-box h4 { color: var(--accent); }
+.project-box { background: linear-gradient(135deg, #E8EAF6, #C5CAE9); border-radius: 12px; padding: 28px; margin: 36px 0; }
+.project-box h3 { color: #283593; margin-bottom: 12px; }
+.project-readme { background: rgba(255,255,255,0.7); border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; }
+.project-file { margin: 12px 0; border-radius: 8px; overflow: hidden; }
+.project-file summary { background: rgba(255,255,255,0.7); padding: 12px 16px; cursor: pointer; font-weight: 600; border-radius: 8px; }
+.project-file pre { margin: 0; }
+
+/* FAQ */
+.faq-section details { border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; }
+.faq-section summary { padding: 14px 20px; cursor: pointer; font-weight: 600; color: var(--primary); background: #fafafa; border-radius: 8px; }
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+.faq-section .faq-answer { padding: 16px 20px; color: var(--text-secondary); }
+
+/* 챕터 네비게이션 */
+.chapter-nav { display: flex; justify-content: space-between; margin: 48px 0 24px; gap: 16px; }
+.chapter-nav a {
+  flex: 1; display: block; padding: 16px 20px; background: white;
+  border: 1px solid var(--border); border-radius: 12px; text-decoration: none;
+  color: var(--text); transition: all 0.2s;
+}
+.chapter-nav a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+
+/* ── 인덱스 페이지 ── */
+.index-container { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+.book-header { text-align: center; margin-bottom: 40px; }
+.book-header h1 { font-size: 36px; color: var(--primary); border: none; margin: 0 0 8px; }
+.book-header p { color: var(--text-secondary); font-size: 18px; }
+.chapter-list { list-style: none; margin: 0; }
+.chapter-list li { margin-bottom: 12px; }
+.chapter-list a {
+  display: flex; align-items: center; gap: 16px; padding: 16px 24px;
+  background: white; border: 1px solid var(--border); border-radius: 12px;
+  text-decoration: none; color: var(--text); transition: all 0.2s;
+}
+.chapter-list a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+.chapter-list .ch-num { font-weight: 700; color: var(--primary); min-width: 3.5rem; }
+.difficulty-group { margin-top: 32px; }
+.difficulty-group h2 { font-size: 18px; border: none; }
+.difficulty { display: inline-block; padding: 2px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; }
+.difficulty-입문 { background: #E8F5E9; color: #166534; }
+.difficulty-기초 { background: #E3F2FD; color: #1e40af; }
+.difficulty-중급 { background: #FFF8E1; color: #92400e; }
+.difficulty-실무 { background: #FCE7F3; color: #9d174d; }
+.difficulty-고급 { background: #FFEBEE; color: #991b1b; }
+
+/* 인쇄 / 반응형 */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper, table, .diagram-container, .project-box { break-inside: avoid; page-break-inside: avoid; }
+  h1, h2, h3, h4 { break-after: avoid; page-break-after: avoid; }
+}
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+  .chapter-nav { flex-direction: column; }
+}
+
+/* === templates/chapter_design_template.html (단일 디자인 소스, 우선 적용) === */
+
+/* ============================================================
+   디자인 토큰 (색상·그림자) — 브랜드 변경 시 여기만 수정
+   ============================================================ */
+:root {
+  --primary: #1976D2;        /* 주조색(파랑) — 헤더/제목/강조 */
+  --primary-light: #E3F2FD;  /* 주조색 옅은 톤 — 박스 배경/밑줄 */
+  --accent: #FF6F00;         /* 강조색(주황) — 해설 라벨/연습문제 */
+  --success: #2E7D32;        /* 성공(초록) */
+  --warning: #F57F17;        /* 경고(노랑) */
+  --danger: #C62828;         /* 위험(빨강) */
+  --bg: #FAFAFA;             /* 페이지 배경 */
+  --text: #212121;           /* 본문 텍스트 */
+  --text-secondary: #616161; /* 보조 텍스트 */
+  --border: #E0E0E0;         /* 테두리 */
+  --code-bg: #2d2d2d;        /* 코드 배경 */
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  font-size: 16px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   메인 콘텐츠
+   ============================================================ */
+.main-content {
+  flex: 1;
+  max-width: 1400px;
+  padding: 40px 48px;
+  margin: 0 auto;
+}
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white;
+  padding: 48px 40px;
+  border-radius: 16px;
+  margin-bottom: 40px;
+}
+
+.chapter-header .chapter-number {
+  font-size: 14px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.chapter-header h1 {
+  font-size: 32px;
+  margin: 8px 0 16px;
+  font-weight: 800;
+}
+
+.chapter-header .chapter-meta {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* 학습 목표 박스 */
+.learning-objectives {
+  background: var(--primary-light);
+  border-left: 4px solid var(--primary);
+  padding: 24px 28px;
+  border-radius: 0 12px 12px 0;
+  margin-bottom: 36px;
+}
+
+.learning-objectives h3 {
+  color: var(--primary);
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.learning-objectives li {
+  margin: 8px 0;
+  padding-left: 8px;
+  color: var(--text);
+}
+
+/* 섹션 */
+h2 {
+  font-size: 26px;
+  color: var(--primary);
+  margin: 48px 0 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--primary-light);
+}
+
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+
+p { margin: 12px 0; }
+
+/* ============================================================
+   코드 블록 - 박스형 + 줄번호 + 실무 설명
+   ============================================================ */
+.code-block-wrapper {
+  margin: 24px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+}
+
+.code-block-header {
+  background: #1a1a2e;
+  color: #a0a0b0;
+  padding: 10px 20px;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+
+.code-block-header .lang-badge {
+  background: var(--primary);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Prism 줄번호 스타일 오버라이드 */
+pre[class*="language-"] {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  padding: 20px !important;
+}
+
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important;
+  padding-right: 8px !important;
+}
+
+/* 코드 실무 설명 박스 */
+.code-explanation {
+  background: #f8f9fa;
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.code-explanation strong { color: var(--text); }
+
+.code-explanation .explain-title {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+/* 코드 실행 결과 */
+.code-output {
+  background: #1e1e1e;
+  color: #4EC9B0;
+  padding: 12px 20px;
+  font-family: monospace;
+  font-size: 13px;
+  border-top: 1px dashed #444;
+}
+
+.code-output::before {
+  content: "▶ 실행 결과";
+  display: block;
+  color: #808080;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+/* ============================================================
+   특수 박스 (팁, 주의, 베스트 프랙티스, 초보자 설명)
+   ============================================================ */
+.info-box {
+  padding: 14px 20px;
+  border-radius: 12px;
+  margin: 16px 0;
+  border-left: 4px solid;
+}
+.info-box p:last-child { margin-bottom: 0; }
+.info-box ul:last-child { margin-bottom: 0; }
+
+.info-box.tip {
+  background: #E8F5E9;
+  border-color: var(--success);
+}
+
+.info-box.warning {
+  background: #FFF8E1;
+  border-color: var(--warning);
+}
+
+.info-box.danger {
+  background: #FFEBEE;
+  border-color: var(--danger);
+}
+
+.info-box.beginner {
+  background: #F3E5F5;
+  border-color: #7B1FA2;
+}
+
+.info-box.best-practice {
+  background: #E0F2F1;
+  border-color: #00695C;
+}
+
+.info-box .box-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(123, 31, 162, 0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* ============================================================
+   라이브러리 & API 레퍼런스 테이블
+   ============================================================ */
+.api-reference, .library-section {
+  margin: 32px 0;
+}
+
+.api-reference h3, .library-section h3 {
+  background: var(--primary);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 0;
+  font-size: 16px;
+}
+
+hr.section-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 36px 0;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  margin: 16px 0;
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  font-size: 14px;
+}
+
+table thead {
+  background: #f5f5f5;
+}
+
+table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 2px solid var(--border);
+}
+
+table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+table tr:hover { background: #fafafa; }
+
+table code {
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+/* API 시그니처 행 */
+.api-signature {
+  background: var(--code-bg);
+  color: #e0e0e0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 13px;
+  margin: 4px 0;
+  overflow-x: auto;
+}
+
+/* ============================================================
+   이미지 / 다이어그램
+   ============================================================ */
+.diagram-container {
+  margin: 28px 0;
+  text-align: center;
+}
+
+.diagram-container img {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+}
+
+.diagram-container .caption {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* PPTX 원본 보존 뱃지 */
+.diagram-container .pptx-badge {
+  display: inline-block;
+  background: #FF6F00;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: normal;
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Mermaid 다이어그램 (인라인 렌더링) */
+.mermaid {
+  margin: 24px auto;
+  text-align: center;
+}
+
+/* ============================================================
+   연습 문제 & 프로젝트
+   ============================================================ */
+.exercise-box {
+  background: #FFF3E0;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 28px 0;
+}
+
+.exercise-box h4 { color: var(--accent); }
+
+.project-box {
+  background: linear-gradient(135deg, #E8EAF6, #C5CAE9);
+  border-radius: 12px;
+  padding: 28px;
+  margin: 36px 0;
+}
+
+/* ============================================================
+   FAQ
+   ============================================================ */
+.faq-section details {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 8px 0;
+  padding: 0;
+}
+
+.faq-section summary {
+  padding: 14px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primary);
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+
+.faq-section details .faq-answer {
+  padding: 16px 20px;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   챕터 네비게이션 (이전/다음)
+   ============================================================ */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  margin: 48px 0 24px;
+  gap: 16px;
+}
+
+.chapter-nav a {
+  flex: 1;
+  display: block;
+  padding: 16px 20px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.chapter-nav a:hover {
+  border-color: var(--primary);
+  box-shadow: var(--card-shadow);
+}
+
+/* ============================================================
+   인쇄용 스타일
+   ============================================================ */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper { break-inside: avoid; }
+}
+
+/* ============================================================
+   반응형 - 모바일
+   ============================================================ */
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+}
+
+</style>
+</head>
+<body>
+<div class="container">
+<main class="main-content">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 11</div>
+    <h1>에이전트와 함께 디버깅하기</h1>
+    <div class="chapter-meta"><span class="difficulty difficulty-실무">실무</span></div>
+  </div>
+
+<h1 id="11">11장 에이전트와 함께 디버깅하기</h1>
+<p>이 장은 단원 10 "에이전트와 함께 디버깅하기"의 단일 챕터입니다. 여기서는 개념 <strong>에이전트와 함께 디버깅하기(debugging with the agent)</strong> 하나를 깊이 있게 배웁니다. 신입 개발자는 자주 막힙니다. 그리고 그 막힘을 얼마나 빠르고 정확하게 푸느냐가 곧 생산성입니다. 이 장을 마치면 에러 메시지를 에이전트에게 제대로 건네 원인을 진단하고, 재현 → 가설 → 최소 수정 → 회귀 테스트의 루프로 버그를 잡고, 같은 버그가 다시 나지 않게 막는 방법을 갖게 됩니다.</p>
+<div class="learning-objectives">
+<h2 id="_1">이 장의 학습 목표</h2>
+<ul>
+<li>실패한 테스트나 예외의 전체 에러 메시지·스택 트레이스를 에이전트에게 그대로 주어 원인을 진단시킬 수 있습니다.</li>
+<li>막연한 '고쳐 줘' 대신 증상·기대·실제 동작을 구체적으로 전달해 더 정확한 진단을 끌어낼 수 있습니다.</li>
+<li>재현 → 가설 → 최소 수정 → 회귀 테스트의 디버깅 루프를 한 바퀴 돌려 버그를 해결할 수 있습니다.</li>
+<li>수정 후 회귀 테스트를 실행해 다른 곳이 깨지지 않았는지 확인하고, 같은 버그의 재발을 막을 수 있습니다.</li>
+</ul>
+</div>
+<hr />
+<h2 id="111">11.1 도입: 막힘을 푸는 능력이 곧 생산성이다</h2>
+<p>신입으로 팀에 합류해 첫 몇 주를 보내면, 코드를 새로 쓰는 시간보다 <strong>막혀서 멈춰 있는 시간</strong>이 더 길다는 사실을 곧 알게 됩니다. 테스트가 빨갛게 떨어지고, 서버가 500을 뱉고, 분명 맞게 짠 것 같은 코드가 422를 돌려줍니다. 베테랑과 신입의 차이는 "버그를 안 만드느냐"가 아니라 "막혔을 때 얼마나 빨리 빠져나오느냐"에서 더 크게 벌어집니다. 누구나 버그를 만듭니다. 다만 어떤 사람은 30초 만에 원인을 찾고, 어떤 사람은 한나절을 헤맵니다.</p>
+<p>이 장 직전까지 우리는 변경을 안전하게 만들고(5장 권한·6장 플랜 모드) 실행·테스트로 검증하는 법(7장)을 배웠습니다. 특히 7장에서 "검증 전까지는 끝난 게 아니다"라는 습관을 들였습니다. 그런데 검증을 하면 필연적으로 <strong>실패하는 검증</strong>을 만나게 됩니다. 테스트가 빨갛게 뜨는 순간이 바로 디버깅의 출발점입니다.</p>
+<div class="info-box beginner">
+<p><strong>선수 개념 한 줄 상기.</strong> 7장에서 배운 "변경 → 실행 → 테스트 → 통과 확인" 루프(개념 c07)에서, 테스트가 <strong>실패</strong>했을 때 무엇을 해야 하는가를 다루는 것이 이 장입니다. 실패한 테스트는 디버깅의 시작 신호이고, 회귀 테스트는 디버깅의 마무리 도구입니다.</p>
+</div>
+<p>좋은 소식은, 디버깅이야말로 에이전트와 함께할 때 가장 큰 도움을 받는 작업이라는 점입니다. 에이전트는 에러 메시지를 읽고, 스택 트레이스가 가리키는 파일을 직접 열어 보고, 관련 코드를 추적해 원인을 짚어 줍니다. 하지만 여기에는 함정이 있습니다. 신입이 가장 흔히 저지르는 실수는 막연하게 "에러 나는데 고쳐 줘"라고 말하는 것입니다. 정보가 부족하면 에이전트도 추측에 의존하게 되고, 추측은 엉뚱한 수정으로 이어집니다. 이 장의 핵심은 <strong>에이전트가 정확히 진단할 수 있도록 정보를 제대로 건네는 기술</strong>과, <strong>고친 뒤 그것이 진짜 고쳐졌는지 증명하는 절차</strong>입니다.</p>
+<hr />
+<h2 id="112">11.2 에러 메시지·스택 트레이스를 통째로 전달하기</h2>
+<p>디버깅의 첫 단추는 정보 전달입니다. 에이전트는 여러분의 화면에 무엇이 떴는지 직접 보지 못합니다. 여러분이 건네는 만큼만 압니다. 그래서 <strong>에러 메시지와 스택 트레이스를 자르지 말고 통째로</strong> 주는 것이 디버깅의 가장 기본적이면서도 가장 자주 빠뜨리는 원칙입니다.</p>
+<p>스택 트레이스(stack trace, 호출 추적)는 에러가 발생한 순간까지 어떤 함수가 어떤 함수를 불렀는지의 경로를 보여 주는 기록입니다. 파이썬은 보통 가장 바깥쪽 호출부터 시작해 마지막 줄에 실제 예외 종류와 메시지를 보여 줍니다. 신입이 흔히 저지르는 실수는 "마지막 한 줄만" 복사해 주는 것입니다. 예를 들어 <code>KeyError: 'done'</code>만 건네면, 에이전트는 그 키가 어느 파일 몇 번째 줄에서, 어떤 호출 경로를 거쳐 터졌는지 알 수 없어 다시 되물어야 합니다.</p>
+<p>다음은 잘라서 주는 나쁜 예와, 통째로 주는 좋은 예의 비교입니다.</p>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>나쁜 전달</th>
+<th>좋은 전달</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>내용</td>
+<td>"<code>KeyError</code> 나는데 고쳐 줘"</td>
+<td>명령 + 전체 스택 트레이스 + 마지막 예외 줄 전부</td>
+</tr>
+<tr>
+<td>위치 정보</td>
+<td>없음</td>
+<td>파일·줄 번호가 트레이스에 포함</td>
+</tr>
+<tr>
+<td>호출 경로</td>
+<td>없음</td>
+<td>어떤 함수가 어디서 불렸는지 전부</td>
+</tr>
+<tr>
+<td>에이전트 행동</td>
+<td>어디를 볼지 되물음, 추측 시작</td>
+<td>즉시 해당 파일을 열어 추적 시작</td>
+</tr>
+</tbody>
+</table>
+<p>에이전트에게 건넬 때는 다음 세 가지를 함께 주는 것이 좋습니다. 첫째, <strong>무엇을 실행했더니</strong> 에러가 났는지(예: <code>python -m pytest tests/test_services.py</code>). 둘째, <strong>전체 출력</strong>(스택 트레이스의 처음부터 끝까지). 셋째, <strong>무엇을 기대했는지</strong>(다음 절에서 자세히 다룹니다). 셸에서 실행한 명령과 출력을 한 덩어리로 복사해 붙여 넣으면, 에이전트가 가장 빠르게 일을 시작할 수 있습니다.</p>
+<div class="info-box tip">
+<p><strong>실무 팁.</strong> 터미널에서 직접 명령을 실행해 에이전트가 출력을 그대로 보게 하면 가장 좋습니다. Claude Code에게 "<code>python -m pytest</code>를 실행하고 실패하는 테스트의 원인을 진단해 줘"라고 지시하면, 에이전트가 직접 명령을 돌려 전체 출력을 읽고 스택 트레이스가 가리키는 파일을 열어 추적합니다. 사람이 손으로 복사·붙여넣기 하다가 일부를 빠뜨리는 위험도 없습니다.</p>
+</div>
+<hr />
+<h2 id="113">11.3 동작 원리: 재현 → 가설 → 최소 수정 → 회귀 테스트 루프</h2>
+<div class="diagram-container">
+<div class="svg-diagram" role="img" aria-label="버그 재현에서 시작해 원인 가설 수립, 최소 수정 적용, 회귀 테스트 확인으로 이어지는 디버깅 루프. 테스트 실패 시 다시 가설로 돌아간다.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 420" width="820" height="420"
+     font-family="'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#78909c">
+      <polygon points="0 0,10 3.5,0 7"/>
+    </marker>
+    <marker id="arr-g" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#2ecc71">
+      <polygon points="0 0,10 3.5,0 7"/>
+    </marker>
+    <marker id="arr-r" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#e74c3c">
+      <polygon points="0 0,10 3.5,0 7"/>
+    </marker>
+  </defs>
+  <rect width="820" height="420" fill="#ffffff"/>
+
+  <!-- 제목 -->
+  <text x="410" y="36" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a1a2e">재현 → 가설 → 최소 수정 → 회귀 테스트 루프</text>
+
+  <!-- Box 1: 재현 -->
+  <rect x="30" y="145" width="130" height="70" rx="8" fill="#e1f5fe" stroke="#90caf9" stroke-width="2"/>
+  <text x="95" y="176" text-anchor="middle" font-size="14" font-weight="bold" fill="#37474f">재현</text>
+  <text x="95" y="196" text-anchor="middle" font-size="11" fill="#546e7a">에러·스택 전달</text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="160" y1="180" x2="208" y2="180" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Box 2: 가설 -->
+  <rect x="210" y="145" width="130" height="70" rx="8" fill="#fff3e0" stroke="#ffcc80" stroke-width="2"/>
+  <text x="275" y="176" text-anchor="middle" font-size="14" font-weight="bold" fill="#37474f">가설</text>
+  <text x="275" y="196" text-anchor="middle" font-size="11" fill="#546e7a">원인 추정</text>
+
+  <!-- Arrow 2→3 -->
+  <line x1="340" y1="180" x2="388" y2="180" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Box 3: 최소 수정 -->
+  <rect x="390" y="145" width="140" height="70" rx="8" fill="#fff3e0" stroke="#ffcc80" stroke-width="2"/>
+  <text x="460" y="173" text-anchor="middle" font-size="14" font-weight="bold" fill="#37474f">최소</text>
+  <text x="460" y="193" text-anchor="middle" font-size="14" font-weight="bold" fill="#37474f">수정</text>
+
+  <!-- Arrow 3→4 -->
+  <line x1="530" y1="180" x2="578" y2="180" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Box 4: 회귀 테스트 -->
+  <rect x="580" y="145" width="140" height="70" rx="8" fill="#fff3e0" stroke="#ffcc80" stroke-width="2"/>
+  <text x="650" y="173" text-anchor="middle" font-size="14" font-weight="bold" fill="#37474f">회귀</text>
+  <text x="650" y="193" text-anchor="middle" font-size="14" font-weight="bold" fill="#37474f">테스트</text>
+
+  <!-- Arrow 4→ 통과? diamond -->
+  <line x1="720" y1="180" x2="748" y2="180" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Diamond: 통과? center=(770, 180), half-w=40, half-h=30 -->
+  <!-- Actually 748 to 810, so center at 779? Let me adjust the diamond center -->
+  <!-- Diamond at right edge. Since viewBox is 820, center at (790,180) half-w=28 -->
+  <!-- points: 790,150  818,180  790,210  762,180 -->
+  <!-- Hmm, 790+28=818 which is tight. Let me move diagram left. -->
+
+  <!-- Actually let me reconsider layout. The diamond is a decision node. -->
+  <!-- Let me put the diamond below the main flow for cleaner layout. -->
+  <!-- Main flow: 재현→가설→최소 수정→회귀 테스트 (horizontal) -->
+  <!-- Then arrow down from 회귀테스트 to diamond, then: right→해결, left-loop back→다시 가설 -->
+
+  <!-- Diamond: center=(650, 305) -->
+  <line x1="650" y1="215" x2="650" y2="278" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+  <polygon points="650,280 695,305 650,330 605,305" fill="#f3e5f5" stroke="#ce93d8" stroke-width="2"/>
+  <text x="650" y="310" text-anchor="middle" font-size="13" fill="#37474f">통과?</text>
+
+  <!-- 통과 → 해결 (오른쪽) -->
+  <line x1="695" y1="305" x2="728" y2="305" stroke="#2ecc71" stroke-width="2" marker-end="url(#arr-g)"/>
+  <text x="711" y="296" text-anchor="middle" font-size="11" fill="#2ecc71">통과</text>
+  <rect x="730" y="278" width="70" height="55" rx="8" fill="#e8f5e9" stroke="#a5d6a7" stroke-width="2"/>
+  <text x="765" y="309" text-anchor="middle" font-size="13" font-weight="bold" fill="#1b5e20">해결</text>
+
+  <!-- 실패 → 다시 가설로 (왼쪽 피드백 루프) -->
+  <path d="M 605 305 L 275 305 L 275 216" fill="none" stroke="#e74c3c" stroke-width="2" marker-end="url(#arr-r)"/>
+  <text x="590" y="297" text-anchor="end" font-size="12" fill="#e74c3c">실패</text>
+
+  <!-- 피드백 경로 레이블 박스 -->
+  <rect x="310" y="291" width="190" height="28" rx="5" fill="#fce4ec" stroke="#ef9a9a" stroke-width="1.5"/>
+  <text x="405" y="310" text-anchor="middle" font-size="12" fill="#c62828">다시 가설 수립·수정</text>
+
+  <!-- 최소 수정 원칙 강조 -->
+  <text x="460" y="232" text-anchor="middle" font-size="10" fill="#e65100">한 번에 한 가설</text>
+
+  <!-- 하단 주석 -->
+  <text x="410" y="385" text-anchor="middle" font-size="11" fill="#78909c">증상·기대·실제 동작을 구체적으로 전달할수록 정확한 가설을 얻는다</text>
+</svg>
+
+</div>
+</div>
+
+<p>좋은 디버깅은 즉흥적인 시도의 반복이 아니라 <strong>정해진 루프</strong>를 도는 일입니다. 막무가내로 이것저것 바꿔 보다 우연히 고쳐지는 것은 디버깅이 아니라 도박입니다. 그렇게 고치면 왜 고쳐졌는지 모르고, 같은 버그가 다시 나며, 그 과정에서 멀쩡한 코드를 망가뜨리기 쉽습니다. 프로다운 디버깅은 다음 네 단계를 순서대로 돕니다.</p>
+<ol>
+<li>
+<p><strong>재현(reproduce).</strong> 버그를 <strong>항상 똑같이 일으키는</strong> 방법을 먼저 확보합니다. 가장 좋은 재현 수단은 실패하는 테스트입니다. "가끔 안 돼요"는 디버깅의 적입니다. 같은 입력으로 같은 실패가 반복돼야 원인을 좁히고, 고친 뒤 진짜 고쳐졌는지 확인할 수 있습니다. 실패하는 pytest 한 개가 있다면 이미 재현을 손에 쥔 것입니다.</p>
+</li>
+<li>
+<p><strong>가설(hypothesis).</strong> 에러 메시지·스택 트레이스·코드를 근거로 "원인은 아마 여기일 것"이라는 <strong>한 가지</strong> 추정을 세웁니다. 핵심은 한 번에 하나입니다. "키 이름이 틀렸거나, 조건이 반대거나, 타입이 안 맞거나…" 여러 개를 동시에 손대면 무엇이 진짜 원인이었는지 영영 알 수 없습니다.</p>
+</li>
+<li>
+<p><strong>최소 수정(minimal fix).</strong> 세운 가설을 검증할 <strong>가장 작은 변경</strong>만 합니다. 한 줄이면 한 줄만 바꿉니다. "온 김에" 다른 곳을 정리하거나 리팩터링하지 않습니다. 수정 범위가 작아야 결과의 인과가 분명하고, 틀렸을 때 되돌리기도 쉽습니다.</p>
+</li>
+<li>
+<p><strong>회귀 테스트(regression test).</strong> 재현용 테스트를 다시 돌려 <strong>통과로 바뀌는지</strong> 확인하고, 동시에 <strong>나머지 테스트도 모두 통과하는지</strong>를 확인합니다. 내 수정이 이 버그는 고쳤지만 다른 기능을 깨뜨렸을 수 있기 때문입니다. 통과하면 해결, 실패하면 가설이 틀린 것이니 2단계로 돌아갑니다.</p>
+</li>
+</ol>
+<p>이 루프의 가치는 <strong>각 단계가 다음 단계의 근거가 된다</strong>는 데 있습니다. 재현이 있어야 가설을 시험할 수 있고, 최소 수정이라야 통과·실패의 원인이 명확하며, 회귀 테스트가 있어야 "정말 고쳤다"고 말할 자격이 생깁니다.</p>
+<div class="info-box beginner">
+<p><strong>에이전트는 이 루프의 어디를 돕나요?</strong> 에이전트는 모든 단계를 함께 돕습니다. 재현 단계에서는 실패를 일으키는 테스트를 작성하고, 가설 단계에서는 스택 트레이스가 가리키는 코드를 읽어 원인을 설명하며, 최소 수정 단계에서는 작은 변경을 diff로 제안하고, 회귀 단계에서는 <code>pytest</code>를 다시 돌려 결과를 보여 줍니다. 여러분이 할 일은 <strong>루프를 통제하는 것</strong>입니다. "한 번에 한 가설만", "고쳤으면 전체 테스트를 돌려 확인"이라는 규율을 잡아 주는 것이 신입의 몫입니다.</p>
+</div>
+<hr />
+<h2 id="114-worked-example-pytest">11.4 worked example: 실패한 pytest 메시지로 원인 진단·수정</h2>
+<p>이제 루프를 실제로 한 바퀴 돌려 봅니다. 여러분이 팀에서 받은 FastAPI 기반 할 일(tasks) 서비스에 작은 요약 기능이 있다고 합시다. 할 일 목록을 받아 전체·완료·미완료 개수를 돌려주는 함수입니다.</p>
+<p>다음은 <code>team-tasks-api</code>에 새로 추가한 요약 헬퍼 <code>services.py</code>의 코드입니다(할 일을 dict로 받는 작은 순수 함수). 어딘가에 버그가 숨어 있습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># services.py
+def summarize_tasks(tasks: list[dict]) -&gt; dict:
+    &quot;&quot;&quot;할 일 목록을 받아 전체·완료·미완료 개수를 요약합니다.&quot;&quot;&quot;
+    done = [t for t in tasks if not t[&quot;done&quot;]]
+    pending = len(tasks) - len(done)
+    return {
+        &quot;total&quot;: len(tasks),
+        &quot;done&quot;: len(done),
+        &quot;pending&quot;: pending,
+    }
+</code></pre></div>
+<p>그리고 팀이 함께 쓰는 테스트가 <code>tests/test_services.py</code>에 있습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># tests/test_services.py
+from services import summarize_tasks
+
+
+def test_summarize_counts():
+    tasks = [
+        {&quot;id&quot;: 1, &quot;title&quot;: &quot;배포&quot;, &quot;done&quot;: True},
+        {&quot;id&quot;: 2, &quot;title&quot;: &quot;리뷰&quot;, &quot;done&quot;: False},
+        {&quot;id&quot;: 3, &quot;title&quot;: &quot;문서&quot;, &quot;done&quot;: True},
+    ]
+    result = summarize_tasks(tasks)
+    assert result[&quot;done&quot;] == 2
+    assert result[&quot;pending&quot;] == 1
+</code></pre></div>
+<p><strong>1단계 재현.</strong> 먼저 테스트를 돌려 실패를 확인합니다. 에이전트에게 "<code>tests/test_services.py</code>를 pytest로 실행하고 결과를 보여 줘"라고 지시하면 다음과 같은 출력을 받습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ python -m pytest tests/test_services.py -q
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____________________________ test_summarize_counts ____________________________
+
+    def test_summarize_counts():
+        tasks = [
+            {&quot;id&quot;: 1, &quot;title&quot;: &quot;배포&quot;, &quot;done&quot;: True},
+            {&quot;id&quot;: 2, &quot;title&quot;: &quot;리뷰&quot;, &quot;done&quot;: False},
+            {&quot;id&quot;: 3, &quot;title&quot;: &quot;문서&quot;, &quot;done&quot;: True},
+        ]
+        result = summarize_tasks(tasks)
+&gt;       assert result[&quot;done&quot;] == 2
+E       assert 1 == 2
+
+tests/test_services.py:11: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_services.py::test_summarize_counts - assert 1 == 2
+1 failed in 0.04s
+</code></pre></div>
+<p>이 출력이 곧 재현입니다. 같은 명령으로 언제나 같은 실패가 납니다. 이제 이 <strong>전체 출력을 통째로</strong> 에이전트에게 줍니다(11.2의 원칙). 잘라서 <code>assert 1 == 2</code>만 주지 않습니다.</p>
+<p><strong>2단계 가설.</strong> 출력을 읽어 봅니다. <code>result["done"]</code>이 <code>2</code>가 아니라 <code>1</code>이 나왔습니다. 완료 처리한 할 일은 <code>배포</code>, <code>문서</code> 두 개인데 <code>1</code>만 셌습니다. 거꾸로 미완료(<code>리뷰</code>)는 한 개입니다. 즉 함수가 <strong>완료와 미완료를 거꾸로 세고 있다</strong>는 가설이 섭니다. 코드를 보면 원인이 보입니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python">done = [t for t in tasks if not t[&quot;done&quot;]]
+</code></pre></div>
+<p><code>done</code>이라는 변수에 담으려는 것은 <strong>완료된</strong> 할 일인데, 조건에 <code>not</code>이 붙어 <strong>미완료</strong>를 담고 있습니다. 가설: "<code>not</code>이 잘못 들어가 완료/미완료가 뒤바뀌었다."</p>
+<p><strong>3단계 최소 수정.</strong> 가설을 검증하는 가장 작은 변경은 <code>not</code> 한 단어를 지우는 것입니다. 에이전트에게 "<code>summarize_tasks</code>에서 완료/미완료가 뒤바뀐 것 같다. <code>done</code> 리스트의 조건을 최소한으로 고쳐 줘"라고 지시합니다. 에이전트는 다음 diff를 제안합니다.</p>
+<div class="code-explanation">
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># services.py (수정 후)
+def summarize_tasks(tasks: list[dict]) -&gt; dict:
+    &quot;&quot;&quot;할 일 목록을 받아 전체·완료·미완료 개수를 요약합니다.&quot;&quot;&quot;
+    done = [t for t in tasks if t[&quot;done&quot;]]   # not 제거
+    pending = len(tasks) - len(done)
+    return {
+        &quot;total&quot;: len(tasks),
+        &quot;done&quot;: len(done),
+        &quot;pending&quot;: pending,
+    }
+</code></pre></div>
+<ul>
+<li><strong><code>if t["done"]</code></strong>: 조건에서 <code>not</code>만 제거했습니다. 이제 <code>done</code> 리스트에는 <code>done</code>이 참인(완료된) 할 일만 담깁니다.</li>
+<li><strong>나머지는 손대지 않음</strong>: <code>pending</code> 계산식·반환 구조는 그대로 둡니다. 가설은 "완료/미완료가 뒤바뀜" 하나뿐이므로 수정도 한 곳뿐입니다. 이것이 최소 수정 원칙입니다.</li>
+</ul>
+</div>
+<p><strong>4단계 회귀 테스트.</strong> 같은 명령으로 테스트를 다시 돌립니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ python -m pytest tests/test_services.py -q
+.                                                                        [100%]
+1 passed in 0.03s
+</code></pre></div>
+<p>통과로 바뀌었습니다. 재현용 테스트가 빨강에서 초록으로 바뀐 것이 "고쳤다"의 증거입니다. 여기에 더해 저장소 전체 테스트(<code>python -m pytest</code>)도 돌려, 이 수정이 다른 기능을 깨지 않았는지까지 확인하면 한 바퀴가 완성됩니다. 이것이 디버깅 루프의 모범적인 한 회전입니다.</p>
+<hr />
+<h2 id="115">11.5 증상·기대·실제 동작을 구체적으로 진술하기</h2>
+<p>에이전트에게 디버깅을 부탁할 때 가장 큰 차이를 만드는 것은 <strong>진술의 구체성</strong>입니다. "안 돼요", "고쳐 줘"는 정보가 거의 없습니다. 좋은 디버깅 요청은 다음 세 가지를 분명히 담습니다.</p>
+<ul>
+<li><strong>증상(symptom)</strong>: 무엇이 어떻게 잘못됐나. "POST <code>/tasks</code>에 요청하면 422가 돌아온다."</li>
+<li><strong>기대(expected)</strong>: 원래 어떻게 동작해야 하나. "201과 함께 생성된 할 일이 돌아와야 한다."</li>
+<li><strong>실제(actual)</strong>: 지금 실제로 무슨 일이 일어나나. "응답 본문에 <code>priority</code> 필드가 필수라는 검증 에러가 담겨 온다."</li>
+</ul>
+<p>이 세 가지는 사실 의사에게 증상을 설명하는 것과 같습니다. "아파요"가 아니라 "어제부터 오른쪽 아랫배가, 누르면 더, 열은 없이"라고 말해야 정확한 진단이 나옵니다. 코드도 똑같습니다.</p>
+<p>다음은 같은 버그를 두 가지 방식으로 전달한 비교입니다.</p>
+<table>
+<thead>
+<tr>
+<th>구분</th>
+<th>막연한 요청</th>
+<th>구체적 요청(증상·기대·실제)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>말</td>
+<td>"엔드포인트가 안 됩니다. 고쳐 주세요."</td>
+<td>"POST <code>/tasks</code>에 <code>{\"title\": \"배포\"}</code>를 보내면(증상) 422가 난다. 201로 생성되길 기대(기대)했는데, 응답에 <code>priority</code> 필드가 필수라는 검증 에러가 온다(실제). 전체 응답 본문은 아래와 같다."</td>
+</tr>
+<tr>
+<td>에이전트 행동</td>
+<td>어디가 안 되는지 되묻거나, 엉뚱한 곳을 추측</td>
+<td>모델 정의와 핸들러를 바로 열어 <code>priority</code> 필수 여부를 확인</td>
+</tr>
+<tr>
+<td>결과</td>
+<td>왕복이 늘어남</td>
+<td>한 번에 원인 지점으로 직행</td>
+</tr>
+</tbody>
+</table>
+<div class="info-box tip">
+<p><strong>한 문장 틀.</strong> 디버깅 요청을 이 틀에 맞춰 적는 습관을 들이세요. "<strong>[무엇을 했더니]</strong> <strong>[실제 무슨 일]</strong>이 일어난다. <strong>[기대한 동작]</strong>이어야 한다. 전체 메시지는 다음과 같다: <strong>[전체 출력]</strong>." 이 틀 하나면 신입의 디버깅 요청 품질이 단번에 올라갑니다.</p>
+</div>
+<hr />
+<h2 id="116-worked-example-fastapi-422">11.6 worked example: FastAPI 422 검증 에러를 최소 수정</h2>
+<p>이번에는 FastAPI에서 신입이 가장 자주 만나는 422 검증 에러를 루프로 잡아 봅니다. 422 Unprocessable Entity는 요청은 도달했지만 본문이 모델이 요구하는 형식에 맞지 않을 때 FastAPI가 자동으로 돌려주는 응답입니다. 즉 <strong>서버 버그가 아니라 데이터 계약 불일치</strong> 신호인 경우가 많습니다.</p>
+<p><code>team-tasks-api</code>에서 작업을 우선순위로 다루려고, <code>models.py</code>의 <code>TaskCreate</code>에 <strong>우선순위(<code>priority</code>) 필드를 새로 추가</strong>했다고 합시다. 생성 엔드포인트는 1장에서 본 대로 <code>routers/tasks.py</code>의 <code>POST /tasks</code>(<code>store.create_task</code>에 위임)에 있습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># models.py — TaskCreate 에 priority 필드를 새로 추가한 변경
+class TaskCreate(BaseModel):
+    &quot;&quot;&quot;새 할 일 생성 요청 모델&quot;&quot;&quot;
+    title: str
+    priority: int   # 새로 추가 — 기본값을 빠뜨렸다
+</code></pre></div>
+<p>그리고 신입이 새로 추가한 테스트가 있습니다. 제목만 주면 기본 우선순위로 할 일이 만들어지길 기대합니다(테스트는 1장 저장소의 관례대로 <code>from main import app</code>으로 앱을 가져옵니다).</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># tests/test_tasks_priority.py
+import sys
+import os
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from fastapi.testclient import TestClient
+from main import app
+
+client = TestClient(app)
+
+
+def test_create_task_minimal():
+    response = client.post(&quot;/tasks&quot;, json={&quot;title&quot;: &quot;배포&quot;})
+    assert response.status_code == 201
+</code></pre></div>
+<p><strong>1단계 재현.</strong> 테스트를 돌립니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ python -m pytest tests/test_tasks_priority.py -q
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________________________ test_create_task_minimal ___________________________
+
+    def test_create_task_minimal():
+        response = client.post(&quot;/tasks&quot;, json={&quot;title&quot;: &quot;배포&quot;})
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422]&gt;.status_code
+
+tests/test_tasks_priority.py:14: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_tasks_priority.py::test_create_task_minimal - assert 422 == 201
+1 failed in 0.12s
+</code></pre></div>
+<p>201을 기대했는데 422가 왔습니다. <strong>증상·기대·실제</strong>로 정리합니다. 증상: 제목만 보내면 422가 난다. 기대: 201로 생성된다. 실제: 검증 에러가 돌아온다. 그런데 422 응답 본문에는 더 정확한 단서가 들어 있습니다. 에이전트에게 "이 요청의 422 응답 본문(<code>response.json()</code>)을 보여 줘"라고 하면 다음을 확인합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">json</span></div><pre class="line-numbers"><code class="language-json">{
+  &quot;detail&quot;: [
+    {
+      &quot;type&quot;: &quot;missing&quot;,
+      &quot;loc&quot;: [&quot;body&quot;, &quot;priority&quot;],
+      &quot;msg&quot;: &quot;Field required&quot;,
+      &quot;input&quot;: {&quot;title&quot;: &quot;배포&quot;}
+    }
+  ]
+}
+</code></pre></div>
+<p><strong>2단계 가설.</strong> 이 본문이 원인을 명확히 가리킵니다. <code>loc</code>가 <code>["body", "priority"]</code>, <code>msg</code>가 <code>Field required</code>, <code>type</code>이 <code>missing</code>입니다. 즉 <strong>요청 본문에 <code>priority</code>가 없는데, 모델이 그것을 필수로 요구</strong>하고 있습니다. <code>TaskCreate</code>를 보면 <code>priority: int</code>라서 기본값이 없어 필수 필드입니다. 가설: "<code>priority</code>에 기본값이 없어 제목만 보내면 검증에 걸린다. 우선순위를 선택 항목으로 만들면 된다."</p>
+<p>422 응답 본문의 세 열쇠를 읽는 법을 정리해 둡니다.</p>
+<table>
+<thead>
+<tr>
+<th>필드</th>
+<th>의미</th>
+<th>이 예에서</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td>검증 실패 종류</td>
+<td><code>missing</code>(필드 없음)</td>
+</tr>
+<tr>
+<td><code>loc</code></td>
+<td>문제가 난 위치 경로</td>
+<td><code>["body", "priority"]</code>(본문의 priority)</td>
+</tr>
+<tr>
+<td><code>msg</code></td>
+<td>사람이 읽을 설명</td>
+<td><code>Field required</code>(필수 필드)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>3단계 최소 수정.</strong> 가설을 검증하는 최소 변경은 <code>priority</code>에 기본값을 주는 것입니다. 핸들러·반환 구조·다른 필드는 건드리지 않습니다.</p>
+<div class="code-explanation">
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># models.py (수정 후 — 모델만 변경)
+class TaskCreate(BaseModel):
+    &quot;&quot;&quot;새 할 일 생성 요청 모델&quot;&quot;&quot;
+    title: str
+    priority: int = 3   # 기본값 부여 → 선택 필드가 됨
+</code></pre></div>
+<ul>
+<li><strong><code>priority: int = 3</code></strong>: 기본값 <code>3</code>을 주어 <code>priority</code>를 선택 필드로 바꿨습니다. 클라이언트가 <code>priority</code>를 보내지 않으면 <code>3</code>이 채워지고, 보내면 그 값이 쓰입니다.</li>
+<li><strong>타입은 그대로 <code>int</code></strong>: 우선순위는 여전히 정수여야 하므로 타입 검증은 유지합니다. 기본값만 더했을 뿐, 검증 규칙을 느슨하게 풀지 않았습니다.</li>
+<li><strong>핸들러 무수정</strong>: <code>create_task</code> 함수와 응답 구조는 손대지 않았습니다. 가설이 "필수 여부" 하나였으므로 수정도 한 줄입니다.</li>
+</ul>
+</div>
+<p><strong>4단계 회귀 테스트.</strong> 다시 돌립니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">$ python -m pytest tests/test_tasks_priority.py -q
+.                                                                        [100%]
+1 passed in 0.10s
+</code></pre></div>
+<p>통과했습니다. 여기서 한 걸음 더 나아가, <strong>우선순위를 명시한 요청도 여전히 잘 동작하는지</strong>까지 확인하는 회귀 테스트를 추가하면(다음 절) 수정이 기존 동작을 깨지 않았음을 증명할 수 있습니다.</p>
+<div class="info-box warning">
+<p><strong>주의: 422를 무조건 모델 완화로 풀지 마세요.</strong> 이 예에서는 "제목만으로 생성"이 정당한 요구라 기본값이 맞는 해법이었습니다. 하지만 422가 진짜로 <strong>클라이언트가 필수 데이터를 빠뜨린</strong> 경우라면, 모델을 느슨하게 푸는 것은 버그를 가리는 잘못된 수정입니다. 그때는 요청 쪽을 고쳐야 합니다. 422를 만나면 "이 필드가 정말 선택이어도 되는가"를 먼저 판단하세요.</p>
+</div>
+<hr />
+<h2 id="117">11.7 최소 수정 원칙: 한 번에 한 가설</h2>
+<p>앞의 두 예제에서 반복된 규율이 있습니다. 바로 <strong>한 번에 한 가설, 한 번에 최소 변경</strong>입니다. 이 원칙이 왜 그토록 중요한지 짚어 봅니다.</p>
+<p>버그를 만나면 머릿속에 동시에 여러 의심이 떠오릅니다. "키 이름이 틀렸나? 조건이 반댄가? 타입이 안 맞나? 저 함수도 좀 이상한데 같이 고칠까?" 이때 욕심을 내 한꺼번에 여러 곳을 손대면 두 가지 문제가 생깁니다.</p>
+<ol>
+<li><strong>인과가 흐려진다.</strong> 세 곳을 고치고 테스트가 통과하면, 그중 무엇이 진짜 원인이었는지 알 수 없습니다. 다음에 비슷한 버그를 만나도 배운 것이 없습니다.</li>
+<li><strong>새 버그를 심는다.</strong> "온 김에" 손댄 곳이 멀쩡했다면, 그 변경이 오히려 새로운 문제를 만들 수 있습니다. 그러면 원래 버그와 새 버그가 뒤엉켜 디버깅이 훨씬 어려워집니다.</li>
+</ol>
+<p>그래서 가설은 하나씩 세우고, 수정은 그 가설을 검증할 <strong>가장 작은 변경</strong>으로 제한합니다. 통과하면 그 가설이 맞았던 것이고, 실패하면 그 가설이 틀렸으니 변경을 되돌리고 다음 가설로 넘어갑니다. 이렇게 하면 매 회전이 명확한 정보를 남깁니다.</p>
+<div class="info-box tip">
+<p><strong>에이전트에게 규율을 거는 지시.</strong> 에이전트는 때로 여러 개선을 한꺼번에 제안합니다. 이때 "지금은 이 버그만 최소한으로 고치고, 다른 개선 제안은 별도로 정리만 해 줘"라고 명시하세요. 6장에서 배운 <strong>플랜 모드</strong>로 먼저 계획을 받아 "이 수정 한 줄만"으로 범위를 좁히는 것도 좋은 방법입니다. 리팩터링과 버그 수정은 섞지 않습니다.</p>
+</div>
+<hr />
+<h2 id="118">11.8 회귀 테스트로 수정 검증·재발 방지</h2>
+<p>디버깅 루프의 마지막 단계이자, 신입이 가장 자주 빠뜨리는 단계가 <strong>회귀 테스트</strong>입니다. 회귀(regression)란 한 곳을 고쳤더니 멀쩡하던 다른 곳이 망가지는 현상을 말합니다. 회귀 테스트는 이를 잡아내고 같은 버그의 재발을 막는 안전망입니다. 회귀 테스트는 두 가지 일을 합니다.</p>
+<p>첫째, <strong>이 수정이 정말 고쳤는지</strong> 증명합니다. 재현용으로 쓴 실패 테스트가 통과로 바뀌면, "고친 것 같다"가 아니라 "고쳤다"가 됩니다. 둘째, <strong>다른 곳을 깨지 않았는지</strong> 확인합니다. 저장소 전체 테스트를 돌려 모두 통과하면, 내 수정이 의도한 곳만 바꿨다는 증거가 됩니다.</p>
+<p>여기에 한 가지를 더합니다. 방금 잡은 버그가 <strong>다시는 같은 모습으로 돌아오지 못하게</strong> 못 박는 테스트를 추가하는 것입니다. 11.6의 422 버그를 예로 들면, "제목만으로도 생성된다"와 "우선순위를 줘도 정상 생성된다"를 각각 테스트로 남깁니다(응답 모델은 1장의 <code>Task</code>라 <code>priority</code>를 본문에 포함하지 않으므로, 여기서는 생성 성공 여부만 검증합니다).</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># tests/test_tasks_priority.py (회귀 테스트 보강)
+def test_create_task_minimal():
+    # 제목만 보내도 (기본 우선순위로) 생성된다 — 이번에 고친 버그를 못 박음
+    response = client.post(&quot;/tasks&quot;, json={&quot;title&quot;: &quot;배포&quot;})
+    assert response.status_code == 201
+
+
+def test_create_task_with_priority():
+    # 우선순위를 명시해도 정상 생성된다 — 기존 동작이 깨지지 않았는지 확인
+    response = client.post(&quot;/tasks&quot;, json={&quot;title&quot;: &quot;리뷰&quot;, &quot;priority&quot;: 1})
+    assert response.status_code == 201
+</code></pre></div>
+<p>이렇게 해 두면, 나중에 누군가 <code>priority</code>를 다시 필수로 바꾸는 변경을 하면 첫 번째 테스트가 빨갛게 떠 즉시 경고합니다. 버그를 한 번 잡은 경험이 영구적인 안전망으로 남는 것입니다. 이것이 디버깅을 단순한 "땜질"에서 "재발 방지"로 끌어올리는 핵심 습관입니다.</p>
+<div class="info-box beginner">
+<p><strong>왜 버그를 잡을 때마다 테스트를 남기나요?</strong> 버그가 났다는 것은 그 경우를 검증하는 테스트가 없었다는 뜻이기도 합니다. 잡은 김에 그 빈틈을 테스트로 메우면, 코드베이스의 안전망이 버그를 만날 때마다 촘촘해집니다. 7장에서 배운 "테스트로 완료를 증명한다"가 디버깅에서는 "테스트로 재발을 막는다"로 이어집니다.</p>
+</div>
+<hr />
+<h2 id="119-2-1">11.9 즉시 연습(2종 1세트)과 단원 미니 프로젝트</h2>
+<p>이 단원은 단일 챕터이므로, 즉시 연습과 단원 미니 프로젝트를 여기서 함께 진행합니다. 먼저 모범 예시를 보고, 그다음 빈 템플릿을 직접 채운 뒤 자가체크로 점검합니다.</p>
+<h3 id="1">연습 1 (모범): 디버깅 진술 작성</h3>
+<p>다음은 잘 작성된 디버깅 요청의 모범입니다. 증상·기대·실제·전체 출력이 모두 담겨 있습니다.</p>
+<blockquote>
+<p>GET <code>/tasks?status=done</code>에 요청하면(증상) 빈 목록 <code>[]</code>이 돌아온다. 완료된 할 일 2건이 돌아와야(기대) 하는데, 실제로는 완료 항목이 하나도 안 잡힌다(실제). 아래는 실패한 pytest 전체 출력이다.</p>
+<p>```text</p>
+<blockquote>
+<pre><code>  assert len(response.json()) == 2
+</code></pre>
+<p>E       assert 0 == 2
+tests/test_filter.py:14: AssertionError
+```</p>
+</blockquote>
+<p>재현은 <code>python -m pytest tests/test_filter.py</code>다. 한 번에 한 가설로, 필터 조건부터 최소 수정으로 확인해 줘.</p>
+</blockquote>
+<h3 id="1_1">연습 1 (직접 해보기): 실제 실패 메시지로 디버깅 진술 쓰기</h3>
+<p>종이에 빈칸을 채우는 대신, 1장에서 준비한 <strong>실제 <code>team-tasks-api</code> 저장소에 작은 실패를 일부러 만들어</strong> 진짜 pytest 메시지를 뽑고, 그 <em>실제 출력</em>으로 디버깅 진술을 완성합니다. 추측한 메시지가 아니라 화면에 찍힌 그대로를 옮기는 것이 핵심입니다.</p>
+<div class="project-box">
+<p><strong>과제 — 실패를 <em>실제로</em> 재현하고, 그 출력으로 진술을 채워라.</strong></p>
+<p>team-tasks-api의 <code>routers/tasks.py</code>에서 <code>get_task</code>가 없는 할 일에 던지는 <code>HTTPException</code>의 상태 코드를 <code>404</code>에서 <code>400</code>으로 잠깐 바꿔, 일부러 실패를 만드세요(기존 테스트에 없는 작업 조회는 404를 기대하는 단언이 있다면 빨갛게 떨어집니다). 그다음 <code>python -m pytest -q</code>를 돌려 <strong>화면에 실제로 나타난 실패 메시지</strong>를 그대로 옮겨 적으세요.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[실제 실패 출력] python -m pytest -q에 찍힌 실패 테스트와 단언(화면 그대로):
+</code></pre></div>
+<p>이제 위 <em>실제 출력</em>을 근거로 디버깅 진술을 채웁니다(빈칸에 추측이 아니라 방금 본 사실을 적습니다).</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[증상] (어느 엔드포인트/명령에서 무엇이 일어났는가 — 실제로 본 것)
+[기대] (원래 어떤 상태 코드/결과여야 하는가)
+[실제] (지금 무엇이 일어나는가 — 위 출력 기준)
+[재현] (항상 재현되는 명령: python -m pytest -q 등)
+[전체 출력] (위에 옮긴 실제 pytest 출력을 그대로)
+[요청] 한 번에 한 가설로, (어디부터) 최소 수정으로 확인해 줘.
+</code></pre></div>
+<p>작성한 진술을 에이전트에게 실제로 주고, 진단·최소 수정으로 다시 <code>python -m pytest -q</code>가 통과(7 passed)로 돌아오는지 확인하세요(바꿨던 상태 코드를 원래대로 되돌리는 것이 정답입니다).</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[수정 후 검증] python -m pytest -q 실제 출력(초록으로 돌아왔는가?):
+</code></pre></div>
+<p><strong>자가체크 — 머리로가 아니라 <em>손으로</em> 했는지 확인하세요.</strong></p>
+<ul>
+<li>[ ] 일부러 만든 실패를 <code>python -m pytest -q</code>로 <strong>실제로 재현</strong>하고 출력을 화면에서 봤다.</li>
+<li>[ ] [전체 출력]에 적은 것이 추측이 아니라 화면에 찍힌 실제 pytest 메시지다.</li>
+<li>[ ] 증상·기대·실제를 각각 구체적으로, 위 실제 출력을 근거로 적었다.</li>
+<li>[ ] "한 번에 한 가설", "최소 수정" 규율을 요청에 명시했다.</li>
+<li>[ ] 수정 뒤 <code>python -m pytest -q</code>가 통과(7 passed)로 돌아온 것을 직접 확인했다.</li>
+</ul>
+</div>
+<h3 id="_2">단원 미니 프로젝트 (모범): 버그를 에이전트와 함께 잡기</h3>
+<p>이 단원에서 배운 개념만으로 완성하는 작은 산출물입니다. 이번에는 1장에서 준비한 <strong>실제 <code>team-tasks-api</code> 저장소</strong>에 일부러 버그를 심어, 그 저장소의 진짜 테스트(<code>python -m pytest -q</code>)로 재현하고 디버깅 루프로 잡습니다. 마일스톤을 증분으로 진행합니다.</p>
+<ul>
+<li><strong>M1 재현 확보.</strong> 실패하는 테스트를 돌려 같은 실패가 반복됨을 확인하고, 전체 출력을 확보합니다. (적용 개념: 재현, 에러 통째 전달)</li>
+<li><strong>M2 진술·진단.</strong> 증상·기대·실제를 한 문장 틀로 적어 에이전트에게 전체 출력과 함께 건네고, 원인 가설 하나를 받습니다. (적용 개념: 구체적 진술, 가설)</li>
+<li><strong>M3 최소 수정.</strong> 가설을 검증할 가장 작은 변경 하나만 적용합니다. 리팩터링·다른 개선은 섞지 않습니다. (적용 개념: 최소 수정, 한 번에 한 가설)</li>
+<li><strong>M4 회귀 검증·재발 방지.</strong> 재현 테스트가 통과로 바뀌는지 + 전체 테스트가 모두 통과하는지 확인하고, 이 버그를 못 박는 회귀 테스트를 추가합니다. (적용 개념: 회귀 테스트)</li>
+</ul>
+<p>각 마일스톤 끝에서 다음 체크포인트(단위 테스트 통과)를 확인합니다. M1은 "실패가 재현됨", M3은 "재현 테스트가 통과로 바뀜", M4는 "전체 테스트 초록 + 새 회귀 테스트 추가됨"입니다.</p>
+<h3 id="_3">단원 미니 프로젝트 (학생 작성형 빈 스타터)</h3>
+<div class="project-box">
+<p><strong>스타터.</strong> <code>team-tasks-api</code> 저장소의 <code>store.py</code>에 아래처럼 <strong>일부러 버그를 심어</strong> 시작합니다. 새로 만든 할 일의 상태(<code>status</code>)를 <code>todo</code>가 아니라 <code>done</code>으로 잘못 설정하는 한 줄입니다. 이렇게 하면 1장에서 받은 기존 테스트(<code>tests/test_tasks.py</code>)가 빨갛게 떨어지므로, <strong>추가 테스트 없이도</strong> 실패를 재현할 수 있습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># store.py — create_task 에 일부러 심은 버그
+def create_task(data: TaskCreate) -&gt; Task:
+    &quot;&quot;&quot;새 할 일을 저장하고 반환&quot;&quot;&quot;
+    global _next_id
+    task = Task(id=_next_id, title=data.title, status=TaskStatus.done)  # 버그: todo 여야 한다
+    _db[_next_id] = task
+    _next_id += 1
+    return task
+</code></pre></div>
+<p>기존 테스트 <code>tests/test_tasks.py</code>에는 "생성 직후 상태는 <code>todo</code>"를 검증하는 단언이 이미 들어 있습니다(예: <code>assert items[0]["status"] == "todo"</code>). 이 버그를 심으면 그 단언이 실패합니다.</p>
+<p><strong>직접 실행·기록할 것</strong> (추측을 적지 말고, <code>team-tasks-api</code>에서 실제로 돌린 뒤 화면 출력을 그대로 옮깁니다)</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">1. [M1 재현] 위 버그를 심은 뒤 python -m pytest -q를 실제로 돌려, 어떤 테스트가
+   어떤 단언에서 실패하는지 전체 출력을 그대로 붙입니다:
+2. [M2 진술·진단] 증상·기대·실제를 한 문장 틀로 적고, 에이전트에게 전체 출력과
+   함께 건넸을 때 받은 원인 가설을 그대로 적습니다:
+3. [M3 최소 수정] 실제로 적용한 최소 수정 한 줄(힌트: status= 인자)과,
+   에이전트가 제시한 diff의 + 줄을 그대로 적습니다:
+</code></pre></div>
+<ol>
+<li><code>python -m pytest -q</code>를 다시 돌려 <strong>7 passed</strong>(빨강 → 초록)로 바뀌는지 화면 출력으로 확인하고, 그 출력을 위 3번 아래에 적습니다.</li>
+<li>재발을 막기 위해, "생성 직후 상태가 <code>todo</code>"임을 명시적으로 검증하는 회귀 테스트가 이미 있는지 확인하고(없다면 보강), 전체 통과를 확인합니다.</li>
+</ol>
+<p><strong>자가체크</strong></p>
+<ul>
+<li>[ ] 기대값을 코드 실행 전에 스스로 정했는가</li>
+<li>[ ] 한 번에 한 가설만 세우고 그 가설을 검증할 최소 변경만 했는가</li>
+<li>[ ] 재현 테스트가 빨강 → 초록으로 바뀐 것을 확인했는가</li>
+<li>[ ] 전체 테스트가 모두 통과하는지 확인했는가</li>
+<li>[ ] 잡은 버그를 못 박는 회귀 테스트를 추가했는가</li>
+</ul>
+</div>
+<hr />
+<h2 id="1110">11.10 흔한 오류와 오개념</h2>
+<div class="info-box danger">
+<p><strong>오개념 1: "그냥 고쳐 줘"라고만 해도 에이전트가 알아서 잘 고친다.</strong>
+막연한 요청은 에이전트를 추측에 의존하게 만들고, 추측은 엉뚱한 수정으로 이어집니다. 증상·기대·실제를 구체적으로 주지 않으면, 에이전트는 무엇이 "올바른 동작"인지조차 모릅니다. 11.5의 한 문장 틀("무엇을 했더니 무슨 일이 일어난다, 무엇을 기대한다, 전체 출력은 이렇다")로 적는 습관을 들이세요. 정보를 주는 만큼 진단이 정확해집니다.</p>
+</div>
+<div class="info-box danger">
+<p><strong>오개념 2: 에러 메시지는 핵심 한 줄만 주면 된다.</strong>
+스택 트레이스를 마지막 줄(<code>KeyError: 'done'</code>)만 잘라 주면, 에이전트는 그 에러가 <strong>어느 파일 몇 번째 줄에서, 어떤 호출 경로로</strong> 터졌는지 알 수 없습니다. 결국 다시 되묻거나 추측합니다. 스택 트레이스는 처음부터 끝까지 통째로 주세요. 가장 좋은 방법은 에이전트가 직접 명령을 실행해 전체 출력을 읽게 하는 것입니다.</p>
+</div>
+<div class="info-box danger">
+<p><strong>오개념 3: 테스트가 초록이면 디버깅은 끝이다(회귀는 안 봐도 된다).</strong>
+방금 고친 그 테스트만 통과하는 것으로는 부족합니다. 내 수정이 다른 기능을 깨뜨렸을 수 있기 때문입니다. 반드시 저장소 <strong>전체 테스트</strong>를 돌려 모두 통과하는지 확인하고, 잡은 버그를 못 박는 회귀 테스트를 추가하세요. 회귀 확인 없이 "고쳤다"고 말하는 것은 절반만 한 것입니다.</p>
+</div>
+<div class="info-box danger">
+<p><strong>오개념 4: 의심되는 곳을 한꺼번에 다 고치면 빨리 끝난다.</strong>
+여러 곳을 동시에 손대면 무엇이 진짜 원인이었는지 알 수 없고, "온 김에" 고친 곳에서 새 버그가 생기기 쉽습니다. 한 번에 한 가설, 그 가설을 검증할 최소 변경만 적용하세요. 통과하면 그 가설이 맞았던 것이고, 실패하면 되돌리고 다음 가설로 갑니다. 느려 보이지만 결국 가장 빠르고 안전한 길입니다.</p>
+</div>
+<hr />
+<h2 id="1111">11.11 정리</h2>
+<p>이 장에서 우리는 에이전트와 함께 디버깅하는 법을 배웠습니다. 핵심은 세 가지입니다. 첫째, <strong>정보를 제대로 건넨다</strong> — 에러 메시지·스택 트레이스를 통째로, 증상·기대·실제를 구체적으로. 둘째, <strong>루프를 통제한다</strong> — 재현 → 가설(한 번에 하나) → 최소 수정 → 회귀 테스트. 셋째, <strong>재발을 막는다</strong> — 잡은 버그를 회귀 테스트로 못 박는다.</p>
+<p>다음 장에서는 온보딩 이후 더 나아갈 길로, 서브에이전트와 MCP를 맛봅니다. 디버깅 같은 경계가 분명한 작업을 별도 컨텍스트의 서브에이전트에 위임하고, 외부 도구·데이터를 표준 방식으로 연결하는 방법을 가볍게 살펴봅니다.</p>
+
+<nav class="chapter-nav"><a href="ch_10.html">← 이전: 코드 리뷰 받기·대응하기</a><a href="index.html" style="flex:0 0 auto; text-align:center">목차</a><a href="ch_12.html" style="text-align:right">다음: 더 나아가기(맛보기): 서브에이전트와 MCP →</a></nav>
+</main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-powershell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+</body>
+</html>

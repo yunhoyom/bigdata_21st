@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<items>
+	<item id="NodeList/PostgreDependency">
+		<column name="Name" visible="true" order="0" width="164"/>
+		<column name="Type" visible="true" order="1" width="100"/>
+		<column name="Table" visible="true" order="2" width="152"/>
+		<column name="Schema" visible="true" order="3" width="100"/>
+		<column name="Object" visible="true" order="4" width="100"/>
+	</item>
+	<item id="Suggestion/NodeList/PostgreTableColumn">
+		<column name="컬럼명" visible="true" order="0" width="99"/>
+		<column name="#" visible="true" order="1" width="39"/>
+		<column name="Data type" visible="true" order="2" width="87"/>
+		<column name="Identity" visible="true" order="3" width="66"/>
+		<column name="Collation" visible="false" order="4" width="100"/>
+		<column name="Not Null" visible="false" order="5" width="100"/>
+		<column name="Default" visible="false" order="6" width="100"/>
+		<column name="Comment" visible="true" order="4" width="80"/>
+	</item>
+</items>

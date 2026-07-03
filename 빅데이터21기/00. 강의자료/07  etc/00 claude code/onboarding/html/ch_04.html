@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>04장: 낯선 팀 코드 파악하기: 에이전트로 코드베이스 탐색 - Claude Code 신입 개발자 온보딩 — 첫 기능부터 첫 PR까지</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+<style>
+
+/* 디자인 토큰 — 브랜드 변경 시 여기만 수정 */
+:root {
+  --primary: #1976D2;
+  --primary-light: #E3F2FD;
+  --accent: #FF6F00;
+  --success: #2E7D32;
+  --warning: #F57F17;
+  --danger: #C62828;
+  --bg: #FAFAFA;
+  --text: #212121;
+  --text-secondary: #616161;
+  --border: #E0E0E0;
+  --code-bg: #2d2d2d;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.8; font-size: 16px;
+}
+.container { max-width: 1400px; margin: 0 auto; }
+.main-content { max-width: 1000px; padding: 40px 48px; margin: 0 auto; }
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white; padding: 48px 40px; border-radius: 16px; margin-bottom: 40px;
+}
+.chapter-header .chapter-number {
+  font-size: 14px; opacity: 0.8; text-transform: uppercase; letter-spacing: 2px;
+}
+.chapter-header h1 { font-size: 32px; margin: 8px 0 16px; font-weight: 800; }
+.chapter-header .chapter-meta { font-size: 14px; opacity: 0.9; }
+
+/* 학습 목표 */
+.learning-objectives {
+  background: var(--primary-light); border-left: 4px solid var(--primary);
+  padding: 24px 28px; border-radius: 0 12px 12px 0; margin-bottom: 36px;
+}
+.learning-objectives h3 { color: var(--primary); font-size: 16px; margin-bottom: 12px; }
+.learning-objectives li { margin: 8px 0; padding-left: 8px; }
+
+/* 섹션 / 본문 기본 요소 */
+h1 { font-size: 28px; margin: 36px 0 16px; color: var(--text); }
+h2 {
+  font-size: 26px; color: var(--primary); margin: 48px 0 20px;
+  padding-bottom: 10px; border-bottom: 2px solid var(--primary-light);
+}
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+p { margin: 12px 0; }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin: 6px 0; }
+a { color: var(--primary); }
+img { max-width: 100%; height: auto; border-radius: 12px; }
+blockquote {
+  border-left: 4px solid var(--primary); background: var(--primary-light);
+  padding: 12px 20px; margin: 16px 0; border-radius: 0 12px 12px 0;
+}
+blockquote p:last-child { margin-bottom: 0; }
+/* 인라인 코드 (pre 밖) */
+:not(pre) > code {
+  background: #f0f0f0; padding: 2px 6px; border-radius: 4px;
+  font-size: 0.9em; color: var(--danger);
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+}
+
+/* 코드 블록 (.code-block-wrapper) */
+.code-block-wrapper {
+  margin: 24px 0; border-radius: 12px; overflow: hidden;
+  box-shadow: var(--card-shadow); border: 1px solid var(--border);
+}
+.code-block-header {
+  background: #1a1a2e; color: #a0a0b0; padding: 10px 20px; font-size: 13px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+.code-block-header .lang-badge {
+  background: var(--primary); color: white; padding: 2px 10px;
+  border-radius: 10px; font-size: 11px; font-weight: 700;
+}
+pre[class*="language-"] {
+  margin: 0 !important; border-radius: 0 !important;
+  font-size: 14px !important; line-height: 1.6 !important; padding: 20px !important;
+}
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important; padding-right: 8px !important;
+}
+.code-explanation {
+  background: #f8f9fa; border-top: 1px solid var(--border); padding: 16px 20px;
+  font-size: 14px; color: var(--text-secondary); line-height: 1.7;
+}
+.code-explanation strong { color: var(--text); }
+.code-explanation .explain-title {
+  display: inline-block; background: var(--accent); color: white; font-size: 11px;
+  font-weight: 700; padding: 2px 10px; border-radius: 10px; margin-bottom: 8px;
+}
+.code-output {
+  background: #1e1e1e; color: #4EC9B0; padding: 12px 20px;
+  font-family: monospace; font-size: 13px; border-top: 1px dashed #444;
+}
+.code-output::before {
+  content: "▶ 실행 결과"; display: block; color: #808080;
+  font-size: 11px; margin-bottom: 4px;
+}
+
+/* 특수 박스 (info-box 5종) */
+.info-box { padding: 14px 20px; border-radius: 12px; margin: 16px 0; border-left: 4px solid; }
+.info-box p:last-child, .info-box ul:last-child { margin-bottom: 0; }
+.info-box.tip { background: #E8F5E9; border-color: var(--success); }
+.info-box.warning { background: #FFF8E1; border-color: var(--warning); }
+.info-box.danger { background: #FFEBEE; border-color: var(--danger); }
+.info-box.beginner { background: #F3E5F5; border-color: #7B1FA2; }
+.info-box.best-practice { background: #E0F2F1; border-color: #00695C; }
+.info-box .box-header {
+  display: flex; align-items: center; margin-bottom: 12px;
+  padding-bottom: 10px; border-bottom: 1px solid rgba(123,31,162,0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* 표 */
+.api-reference h3, .library-section h3 {
+  background: var(--primary); color: white; padding: 12px 20px;
+  border-radius: 8px 8px 0 0; margin-bottom: 0; font-size: 16px;
+}
+hr.section-divider, hr {
+  border: none; border-top: 2px solid var(--border); margin: 36px 0;
+}
+.table-responsive { overflow-x: auto; margin: 16px 0; border-radius: 8px; box-shadow: var(--card-shadow); }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+table thead { background: #f5f5f5; }
+table th { padding: 12px 16px; text-align: left; font-weight: 700; border-bottom: 2px solid var(--border); }
+table td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table tr:hover { background: #fafafa; }
+table code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 13px; color: var(--danger); }
+.api-signature {
+  background: var(--code-bg); color: #e0e0e0; padding: 8px 16px; border-radius: 6px;
+  font-family: monospace; font-size: 13px; margin: 4px 0; overflow-x: auto;
+}
+
+/* 다이어그램 */
+.diagram-container { margin: 28px 0; text-align: center; }
+.diagram-container img { max-width: 100%; border-radius: 12px; box-shadow: var(--card-shadow); }
+.diagram-container img.screenshot { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.diagram-container .caption { margin-top: 10px; font-size: 13px; color: var(--text-secondary); font-style: italic; }
+.diagram-container .svg-diagram { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; }
+.diagram-container .svg-diagram svg { max-width: 100%; height: auto; }
+.missing-diagram { color: var(--danger); font-style: italic; padding: 1rem; background: #FFEBEE; border-radius: 8px; }
+.mermaid { margin: 24px auto; text-align: center; }
+
+/* 연습 문제 & 프로젝트 */
+.exercise-box { background: #FFF3E0; border: 2px solid var(--accent); border-radius: 12px; padding: 24px; margin: 28px 0; }
+.exercise-box h4 { color: var(--accent); }
+.project-box { background: linear-gradient(135deg, #E8EAF6, #C5CAE9); border-radius: 12px; padding: 28px; margin: 36px 0; }
+.project-box h3 { color: #283593; margin-bottom: 12px; }
+.project-readme { background: rgba(255,255,255,0.7); border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; }
+.project-file { margin: 12px 0; border-radius: 8px; overflow: hidden; }
+.project-file summary { background: rgba(255,255,255,0.7); padding: 12px 16px; cursor: pointer; font-weight: 600; border-radius: 8px; }
+.project-file pre { margin: 0; }
+
+/* FAQ */
+.faq-section details { border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; }
+.faq-section summary { padding: 14px 20px; cursor: pointer; font-weight: 600; color: var(--primary); background: #fafafa; border-radius: 8px; }
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+.faq-section .faq-answer { padding: 16px 20px; color: var(--text-secondary); }
+
+/* 챕터 네비게이션 */
+.chapter-nav { display: flex; justify-content: space-between; margin: 48px 0 24px; gap: 16px; }
+.chapter-nav a {
+  flex: 1; display: block; padding: 16px 20px; background: white;
+  border: 1px solid var(--border); border-radius: 12px; text-decoration: none;
+  color: var(--text); transition: all 0.2s;
+}
+.chapter-nav a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+
+/* ── 인덱스 페이지 ── */
+.index-container { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+.book-header { text-align: center; margin-bottom: 40px; }
+.book-header h1 { font-size: 36px; color: var(--primary); border: none; margin: 0 0 8px; }
+.book-header p { color: var(--text-secondary); font-size: 18px; }
+.chapter-list { list-style: none; margin: 0; }
+.chapter-list li { margin-bottom: 12px; }
+.chapter-list a {
+  display: flex; align-items: center; gap: 16px; padding: 16px 24px;
+  background: white; border: 1px solid var(--border); border-radius: 12px;
+  text-decoration: none; color: var(--text); transition: all 0.2s;
+}
+.chapter-list a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+.chapter-list .ch-num { font-weight: 700; color: var(--primary); min-width: 3.5rem; }
+.difficulty-group { margin-top: 32px; }
+.difficulty-group h2 { font-size: 18px; border: none; }
+.difficulty { display: inline-block; padding: 2px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; }
+.difficulty-입문 { background: #E8F5E9; color: #166534; }
+.difficulty-기초 { background: #E3F2FD; color: #1e40af; }
+.difficulty-중급 { background: #FFF8E1; color: #92400e; }
+.difficulty-실무 { background: #FCE7F3; color: #9d174d; }
+.difficulty-고급 { background: #FFEBEE; color: #991b1b; }
+
+/* 인쇄 / 반응형 */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper, table, .diagram-container, .project-box { break-inside: avoid; page-break-inside: avoid; }
+  h1, h2, h3, h4 { break-after: avoid; page-break-after: avoid; }
+}
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+  .chapter-nav { flex-direction: column; }
+}
+
+/* === templates/chapter_design_template.html (단일 디자인 소스, 우선 적용) === */
+
+/* ============================================================
+   디자인 토큰 (색상·그림자) — 브랜드 변경 시 여기만 수정
+   ============================================================ */
+:root {
+  --primary: #1976D2;        /* 주조색(파랑) — 헤더/제목/강조 */
+  --primary-light: #E3F2FD;  /* 주조색 옅은 톤 — 박스 배경/밑줄 */
+  --accent: #FF6F00;         /* 강조색(주황) — 해설 라벨/연습문제 */
+  --success: #2E7D32;        /* 성공(초록) */
+  --warning: #F57F17;        /* 경고(노랑) */
+  --danger: #C62828;         /* 위험(빨강) */
+  --bg: #FAFAFA;             /* 페이지 배경 */
+  --text: #212121;           /* 본문 텍스트 */
+  --text-secondary: #616161; /* 보조 텍스트 */
+  --border: #E0E0E0;         /* 테두리 */
+  --code-bg: #2d2d2d;        /* 코드 배경 */
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  font-size: 16px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   메인 콘텐츠
+   ============================================================ */
+.main-content {
+  flex: 1;
+  max-width: 1400px;
+  padding: 40px 48px;
+  margin: 0 auto;
+}
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white;
+  padding: 48px 40px;
+  border-radius: 16px;
+  margin-bottom: 40px;
+}
+
+.chapter-header .chapter-number {
+  font-size: 14px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.chapter-header h1 {
+  font-size: 32px;
+  margin: 8px 0 16px;
+  font-weight: 800;
+}
+
+.chapter-header .chapter-meta {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* 학습 목표 박스 */
+.learning-objectives {
+  background: var(--primary-light);
+  border-left: 4px solid var(--primary);
+  padding: 24px 28px;
+  border-radius: 0 12px 12px 0;
+  margin-bottom: 36px;
+}
+
+.learning-objectives h3 {
+  color: var(--primary);
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.learning-objectives li {
+  margin: 8px 0;
+  padding-left: 8px;
+  color: var(--text);
+}
+
+/* 섹션 */
+h2 {
+  font-size: 26px;
+  color: var(--primary);
+  margin: 48px 0 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--primary-light);
+}
+
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+
+p { margin: 12px 0; }
+
+/* ============================================================
+   코드 블록 - 박스형 + 줄번호 + 실무 설명
+   ============================================================ */
+.code-block-wrapper {
+  margin: 24px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+}
+
+.code-block-header {
+  background: #1a1a2e;
+  color: #a0a0b0;
+  padding: 10px 20px;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+
+.code-block-header .lang-badge {
+  background: var(--primary);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Prism 줄번호 스타일 오버라이드 */
+pre[class*="language-"] {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  padding: 20px !important;
+}
+
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important;
+  padding-right: 8px !important;
+}
+
+/* 코드 실무 설명 박스 */
+.code-explanation {
+  background: #f8f9fa;
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.code-explanation strong { color: var(--text); }
+
+.code-explanation .explain-title {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+/* 코드 실행 결과 */
+.code-output {
+  background: #1e1e1e;
+  color: #4EC9B0;
+  padding: 12px 20px;
+  font-family: monospace;
+  font-size: 13px;
+  border-top: 1px dashed #444;
+}
+
+.code-output::before {
+  content: "▶ 실행 결과";
+  display: block;
+  color: #808080;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+/* ============================================================
+   특수 박스 (팁, 주의, 베스트 프랙티스, 초보자 설명)
+   ============================================================ */
+.info-box {
+  padding: 14px 20px;
+  border-radius: 12px;
+  margin: 16px 0;
+  border-left: 4px solid;
+}
+.info-box p:last-child { margin-bottom: 0; }
+.info-box ul:last-child { margin-bottom: 0; }
+
+.info-box.tip {
+  background: #E8F5E9;
+  border-color: var(--success);
+}
+
+.info-box.warning {
+  background: #FFF8E1;
+  border-color: var(--warning);
+}
+
+.info-box.danger {
+  background: #FFEBEE;
+  border-color: var(--danger);
+}
+
+.info-box.beginner {
+  background: #F3E5F5;
+  border-color: #7B1FA2;
+}
+
+.info-box.best-practice {
+  background: #E0F2F1;
+  border-color: #00695C;
+}
+
+.info-box .box-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(123, 31, 162, 0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* ============================================================
+   라이브러리 & API 레퍼런스 테이블
+   ============================================================ */
+.api-reference, .library-section {
+  margin: 32px 0;
+}
+
+.api-reference h3, .library-section h3 {
+  background: var(--primary);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 0;
+  font-size: 16px;
+}
+
+hr.section-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 36px 0;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  margin: 16px 0;
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  font-size: 14px;
+}
+
+table thead {
+  background: #f5f5f5;
+}
+
+table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 2px solid var(--border);
+}
+
+table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+table tr:hover { background: #fafafa; }
+
+table code {
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+/* API 시그니처 행 */
+.api-signature {
+  background: var(--code-bg);
+  color: #e0e0e0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 13px;
+  margin: 4px 0;
+  overflow-x: auto;
+}
+
+/* ============================================================
+   이미지 / 다이어그램
+   ============================================================ */
+.diagram-container {
+  margin: 28px 0;
+  text-align: center;
+}
+
+.diagram-container img {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+}
+
+.diagram-container .caption {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* PPTX 원본 보존 뱃지 */
+.diagram-container .pptx-badge {
+  display: inline-block;
+  background: #FF6F00;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: normal;
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Mermaid 다이어그램 (인라인 렌더링) */
+.mermaid {
+  margin: 24px auto;
+  text-align: center;
+}
+
+/* ============================================================
+   연습 문제 & 프로젝트
+   ============================================================ */
+.exercise-box {
+  background: #FFF3E0;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 28px 0;
+}
+
+.exercise-box h4 { color: var(--accent); }
+
+.project-box {
+  background: linear-gradient(135deg, #E8EAF6, #C5CAE9);
+  border-radius: 12px;
+  padding: 28px;
+  margin: 36px 0;
+}
+
+/* ============================================================
+   FAQ
+   ============================================================ */
+.faq-section details {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 8px 0;
+  padding: 0;
+}
+
+.faq-section summary {
+  padding: 14px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primary);
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+
+.faq-section details .faq-answer {
+  padding: 16px 20px;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   챕터 네비게이션 (이전/다음)
+   ============================================================ */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  margin: 48px 0 24px;
+  gap: 16px;
+}
+
+.chapter-nav a {
+  flex: 1;
+  display: block;
+  padding: 16px 20px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.chapter-nav a:hover {
+  border-color: var(--primary);
+  box-shadow: var(--card-shadow);
+}
+
+/* ============================================================
+   인쇄용 스타일
+   ============================================================ */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper { break-inside: avoid; }
+}
+
+/* ============================================================
+   반응형 - 모바일
+   ============================================================ */
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+}
+
+</style>
+</head>
+<body>
+<div class="container">
+<main class="main-content">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 04</div>
+    <h1>낯선 팀 코드 파악하기: 에이전트로 코드베이스 탐색</h1>
+    <div class="chapter-meta"><span class="difficulty difficulty-기초">기초</span></div>
+  </div>
+
+<h1 id="4">4장 낯선 팀 코드 파악하기: 에이전트로 코드베이스 탐색</h1>
+<blockquote>
+<p>이 장은 단원 4(u4)의 유일한 챕터이며, 여기서 배우는 개념은 <strong>기존 코드베이스 탐색·이해시키기(exploring and understanding an existing codebase, c04)</strong> 한 가지입니다. 앞 단원에서 익힌 작업 지시 기술(c03)을 <em>낯선 팀 코드를 이해하는 일</em>에 적용합니다. 무엇을 바꿀지 정하기 전에, 코드를 안전하게 파악하는 법을 다룹니다.</p>
+</blockquote>
+<div class="learning-objectives">
+<p><strong>이 장을 마치면 할 수 있는 것</strong></p>
+<ul>
+<li>처음 받은 FastAPI 저장소에서 에이전트에게 구조와 핵심 흐름을 요약시켜, 엔드포인트·핵심 모듈을 담은 구조 지도 1장을 작성할 수 있습니다.</li>
+<li>낯선 코드에 대해 시니어 엔지니어에게 묻듯 구체적 질문 3개 이상을 던져 동작·책임을 파악할 수 있습니다.</li>
+<li>특정 라우터·함수가 어디서 정의·사용되는지 에이전트에게 추적시켜 그 위치(파일·줄)를 특정할 수 있습니다.</li>
+<li>주어진 작업이 변경 없이 이해만 하는 읽기 전용 탐색인지 변경 작업인지 구분해, 탐색 단계에서 파일을 바꾸지 않도록 판단할 수 있습니다.</li>
+</ul>
+</div>
+<hr />
+<h2 id="41">4.1 도입: 신입의 첫 난관은 낯선 코드다</h2>
+<p>팀에 합류한 신입이 가장 먼저 마주하는 벽은 <em>기능이 어렵다</em>가 아니라 <em>코드가 낯설다</em>입니다. 처음 받은 저장소를 열면 폴더가 수십 개, 파일이 수백 개이고, 어디서부터 봐야 할지, 이 함수가 어디서 불리는지, 데이터가 어디를 거쳐 흐르는지 막막합니다. 예전 같으면 며칠을 들여 파일을 하나씩 열어 보거나, 바쁜 시니어를 붙잡고 물어봐야 했습니다.</p>
+<p>Claude Code는 이 벽을 낮춰 줍니다. 에이전트가 <em>직접 저장소를 훑어</em> 구조·의존성·흐름을 몇 초 만에 설명할 수 있기 때문입니다. 신입은 시니어 동료에게 묻듯 "이 프로젝트는 무엇을 하나요?", "할 일은 어디에 저장되나요?", "이 함수가 던지는 예외는 뭐죠?"라고 물으면 됩니다. 다른 점은, 이 시니어는 24시간 옆에 있고, 같은 질문을 백 번 물어도 귀찮아하지 않으며, 답의 근거가 된 실제 파일·줄까지 짚어 준다는 것입니다.</p>
+<div class="info-box beginner">
+<p><strong>왜 이 개념이 지금 필요한가</strong></p>
+<p>종합 프로젝트에서 여러분은 <em>기존 팀 FastAPI 저장소에 첫 기능을 추가</em>하게 됩니다. <strong>이 책이 제공하는 <code>team-tasks-api</code>(1장에서 셋업한 그 저장소)가 바로 그 "기존 팀 저장소"입니다.</strong> 그런데 낯선 코드를 이해하지 못한 채로 바꾸면, 기존 동작을 깨뜨리거나 팀 스타일과 어긋나기 쉽습니다. 그래서 "안전하게 변경하기"(5~6장)보다 <strong>먼저</strong> "안전하게 이해하기"를 배웁니다. 탐색은 변경의 선행 단계이고, 잘 묻는 능력은 잘 바꾸는 능력의 토대입니다.</p>
+</div>
+<p><strong>선수 개념 한 줄 상기(c03).</strong> 앞 장에서 좋은 작업 지시는 목표·맥락·제약·완료 조건을 담는다고 배웠습니다. 탐색 질문에도 같은 원칙이 적용됩니다. "코드 좀 설명해 줘"(모호)보다 "<code>app/</code> 아래 구조를 폴더별 역할로 요약하고, 엔드포인트 목록을 표로 정리해 줘"(목표·맥락·완료 조건이 있음)가 훨씬 쓸모 있는 답을 끌어냅니다. 잘 묻는 것은 잘 지시하는 것의 한 갈래입니다.</p>
+<hr />
+<h2 id="42">4.2 정의: 에이전트 검색으로 구조·의존성·흐름을 자동 파악</h2>
+<p>개념을 한 문장으로 못 박습니다.</p>
+<blockquote>
+<p><strong>기존 코드베이스 탐색·이해시키기(c04)</strong>란, Claude Code의 <strong>에이전트 검색(agentic search)</strong>을 이용해 저장소의 구조·의존성·핵심 흐름을 스스로 훑게 하고, 시니어에게 묻듯 구체적 질문을 던져, 코드를 <em>바꾸지 않고</em> 이해만 하는 읽기 전용(read-only) 활동을 말합니다.</p>
+</blockquote>
+<p>여기서 <strong>에이전트 검색</strong>이 무슨 뜻인지 풀어 봅니다. 2장에서 에이전트는 관찰 단계에서 <strong>Glob(파일 이름 찾기)·Grep(내용 검색)·Read(파일 읽기)</strong> 같은 읽기 전용 도구를 쓴다고 배웠습니다. 에이전트 검색이란 바로 이 도구들을 <em>에이전트가 스스로 조합해</em> 코드베이스를 훑는 것입니다. 여러분이 "이 프로젝트 뭐 하는 거야?"라고 물으면, 에이전트는 다음과 같이 알아서 움직입니다.</p>
+<ol>
+<li><strong>Glob</strong>으로 어떤 파일들이 있는지 목록을 봅니다(<code>**/*.py</code>, <code>README*</code> 등).</li>
+<li><strong>Read</strong>로 진입점(<code>main.py</code>)·설정(<code>requirements.txt</code>·<code>README</code>)을 읽습니다.</li>
+<li><strong>Grep</strong>으로 핵심 키워드(<code>FastAPI</code>, <code>APIRouter</code>, <code>include_router</code> 등)가 어디 있는지 찾습니다.</li>
+<li>모은 정보를 종합해 <strong>구조·역할·흐름을 설명</strong>합니다.</li>
+</ol>
+<p>핵심은, <strong>여러분이 컨텍스트 파일을 일일이 고를 필요가 없다</strong>는 점입니다. 어떤 파일을 봐야 답할 수 있는지 에이전트가 스스로 판단해 찾아 읽습니다. 신입이 "어느 파일을 봐야 할지 모르겠다"는 바로 그 막막함을, 에이전트 검색이 대신 풀어 줍니다.</p>
+<div class="info-box beginner">
+<p><strong>탐색은 "읽기 전용"이 기본입니다</strong></p>
+<p>이 장의 활동은 전부 <em>읽고 답만 받는</em> 것입니다. 파일을 바꾸지 않으므로 위험이 없고, 따라서 마음껏 물어봐도 됩니다. 관찰에 쓰이는 Glob·Grep·Read는 부수효과가 없어 권한 확인 없이 자유롭게 실행됩니다(권한은 5장에서 다룹니다). "이해가 먼저, 변경은 나중"이라는 순서를 몸에 익히는 것이 이 장의 큰 목표입니다.</p>
+</div>
+<hr />
+<h2 id="43">4.3 동작 원리: 탐색 질문이 코드 이해로 이어지는 흐름</h2>
+<div class="diagram-container">
+<div class="svg-diagram" role="img" aria-label="저장소 → 에이전트 검색(구조·의존성·데이터 흐름) → 온보딩 질문(무엇을·어디서·예외는) → 이해 지도(엔드포인트·데이터 흐름·책임 모듈)로 이어지는 좌→우 탐색 흐름도">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" width="800" height="360"
+     font-family="'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif">
+  <rect width="800" height="360" fill="#ffffff"/>
+  <text x="400" y="36" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a1a2e">탐색 흐름: 탐색 질문 → 코드 이해</text>
+
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#78909c">
+      <polygon points="0 0, 10 3.5, 0 7"/>
+    </marker>
+  </defs>
+
+  <!-- 1. 저장소 (왼쪽) -->
+  <rect x="30" y="130" width="160" height="80" rx="8" fill="#e1f5fe" stroke="#90caf9" stroke-width="2"/>
+  <text x="110" y="162" text-anchor="middle" font-size="14" font-weight="bold" fill="#37474f">저장소</text>
+  <text x="110" y="182" text-anchor="middle" font-size="12" fill="#546e7a">낯선 팀 코드베이스</text>
+  <text x="110" y="200" text-anchor="middle" font-size="12" fill="#546e7a">(신입이 처음 마주침)</text>
+
+  <line x1="190" y1="170" x2="228" y2="170" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- 2. 에이전트 검색 -->
+  <rect x="228" y="110" width="180" height="120" rx="8" fill="#fff3e0" stroke="#ffb74d" stroke-width="2"/>
+  <text x="318" y="138" text-anchor="middle" font-size="14" font-weight="bold" fill="#e65100">에이전트 검색</text>
+  <line x1="258" y1="148" x2="378" y2="148" stroke="#ffb74d" stroke-width="1"/>
+  <text x="318" y="166" text-anchor="middle" font-size="12" fill="#546e7a">구조 파악</text>
+  <text x="318" y="184" text-anchor="middle" font-size="12" fill="#546e7a">의존성 분석</text>
+  <text x="318" y="202" text-anchor="middle" font-size="12" fill="#546e7a">데이터 흐름 추적</text>
+  <text x="318" y="220" text-anchor="middle" font-size="11" fill="#8a6914">(Read·Glob·Grep)</text>
+
+  <line x1="408" y1="170" x2="448" y2="170" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- 3. 온보딩 질문 -->
+  <rect x="448" y="110" width="180" height="120" rx="8" fill="#f3e5f5" stroke="#ce93d8" stroke-width="2"/>
+  <text x="538" y="138" text-anchor="middle" font-size="14" font-weight="bold" fill="#6a1b9a">온보딩 질문</text>
+  <line x1="468" y1="148" x2="608" y2="148" stroke="#ce93d8" stroke-width="1"/>
+  <text x="538" y="166" text-anchor="middle" font-size="12" fill="#546e7a">무엇을 하는 코드인가?</text>
+  <text x="538" y="184" text-anchor="middle" font-size="12" fill="#546e7a">어디서 정의되었나?</text>
+  <text x="538" y="202" text-anchor="middle" font-size="12" fill="#546e7a">예외·엣지케이스는?</text>
+  <text x="538" y="220" text-anchor="middle" font-size="11" fill="#6a1b9a">(시니어에게 묻듯)</text>
+
+  <line x1="628" y1="170" x2="668" y2="170" stroke="#78909c" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- 4. 이해 지도 -->
+  <rect x="668" y="110" width="102" height="120" rx="8" fill="#e8f5e9" stroke="#81c784" stroke-width="2"/>
+  <text x="719" y="138" text-anchor="middle" font-size="13" font-weight="bold" fill="#2e7d32">이해 지도</text>
+  <line x1="680" y1="148" x2="758" y2="148" stroke="#81c784" stroke-width="1"/>
+  <text x="719" y="166" text-anchor="middle" font-size="11" fill="#546e7a">엔드포인트</text>
+  <text x="719" y="184" text-anchor="middle" font-size="11" fill="#546e7a">데이터 흐름</text>
+  <text x="719" y="202" text-anchor="middle" font-size="11" fill="#546e7a">책임 모듈</text>
+  <text x="719" y="220" text-anchor="middle" font-size="11" fill="#2e7d32">메모로 정리</text>
+
+  <!-- 하단: 읽기 전용 강조 -->
+  <rect x="228" y="258" width="400" height="40" rx="6" fill="#e3f2fd" stroke="#90caf9" stroke-width="1.5"/>
+  <text x="428" y="284" text-anchor="middle" font-size="13" fill="#1565c0">탐색은 읽기 전용 — 파악 완료 후 변경 착수</text>
+
+  <!-- 화살표: 에이전트 검색 → 설명 박스 -->
+  <line x1="318" y1="230" x2="318" y2="256" stroke="#ffb74d" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <line x1="538" y1="230" x2="538" y2="256" stroke="#ce93d8" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+  <!-- 단계 번호 -->
+  <text x="110" y="300" text-anchor="middle" font-size="11" fill="#78909c">① 출발점</text>
+  <text x="318" y="300" text-anchor="middle" font-size="11" fill="#78909c">② 자동 파악</text>
+  <text x="538" y="300" text-anchor="middle" font-size="11" fill="#78909c">③ 구체 질문</text>
+  <text x="719" y="300" text-anchor="middle" font-size="11" fill="#78909c">④ 이해 완성</text>
+</svg>
+
+</div>
+</div>
+
+<p>낯선 저장소를 이해하는 데에는 효과적인 <em>질문의 순서</em>가 있습니다. 넓게 시작해 점점 좁혀 들어가는 깔때기(funnel) 모양입니다.</p>
+<table>
+<thead>
+<tr>
+<th>단계</th>
+<th>질문의 성격</th>
+<th>예</th>
+<th>얻는 것</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 전체 조망</td>
+<td>"이 프로젝트는 무엇을 하나?"</td>
+<td>"이 API가 무슨 일을 하고, 폴더 구조는 어떻게 나뉘나요?"</td>
+<td>큰 그림·진입점</td>
+</tr>
+<tr>
+<td>2. 표면 목록</td>
+<td>"무엇이 노출돼 있나?"</td>
+<td>"엔드포인트 목록을 메서드·경로·역할 표로 정리해 주세요."</td>
+<td>기능의 목록</td>
+</tr>
+<tr>
+<td>3. 흐름 추적</td>
+<td>"데이터가 어디를 거치나?"</td>
+<td>"할 일을 만들면 요청이 어느 함수들을 거쳐 저장되나요?"</td>
+<td>모듈 간 연결</td>
+</tr>
+<tr>
+<td>4. 국소 심화</td>
+<td>"이 한 곳은 어떻게 동작하나?"</td>
+<td>"<code>create_task</code>가 처리하는 입력과 던지는 예외는 무엇인가요?"</td>
+<td>변경할 지점의 세부</td>
+</tr>
+</tbody>
+</table>
+<p>이 순서가 중요한 이유는, <strong>위에서 아래로 좁혀야 길을 잃지 않기 때문</strong>입니다. 처음부터 한 함수의 세부(4단계)로 뛰어들면 그 함수가 전체에서 어떤 역할인지 몰라 맥락이 붕 뜹니다. 반대로 1~2단계로 큰 지도를 먼저 그리면, 이후의 세부 질문이 그 지도 위에 정확히 꽂힙니다.</p>
+<p>각 단계의 답은 다음 질문을 <em>낳습니다</em>. 2단계에서 "할 일을 만드는 <code>POST /tasks</code>가 있구나"를 알면, 3단계에서 "그럼 만든 할 일은 어디에 저장되지?"가 자연스럽게 나오고, 그 답이 <code>store.py</code>를 가리키면 4단계에서 "<code>store.create_task</code>는 정확히 무엇을 하지?"로 이어집니다. 이렇게 <strong>질문 → 답 → 다음 질문</strong>이 사슬처럼 연결되며 이해가 쌓입니다. 이것이 탐색 질문이 코드 이해로 이어지는 흐름입니다.</p>
+<hr />
+<h2 id="44-worked-example-fastapi">4.4 worked example: FastAPI 저장소 구조·엔드포인트 요약시키기</h2>
+<p>이제 실제로 해 봅니다. 무대는 팀에서 처음 받은 FastAPI 저장소 — 바로 1장에서 셋업한 실습 저장소 <strong><code>team-tasks-api</code></strong> — 이고, 구조는 다음과 같습니다(이 저장소는 이 장 전체에서 계속 씁니다).</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">team-tasks-api/
+├── main.py             # FastAPI 앱 생성, 라우터 등록, GET /health
+├── models.py           # TaskStatus, TaskCreate, Task (pydantic 모델)
+├── store.py            # 메모리 저장소 함수
+├── routers/
+│   ├── __init__.py
+│   └── tasks.py        # /tasks 엔드포인트들
+├── tests/
+│   └── test_tasks.py
+└── requirements.txt
+</code></pre></div>
+<p>각 파일의 실제 내용은 다음과 같습니다. 신입의 눈으로는 처음엔 이게 어떻게 연결되는지 한눈에 안 보입니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># main.py
+from fastapi import FastAPI
+from routers import tasks
+
+app = FastAPI(title=&quot;Tasks API&quot;)
+app.include_router(tasks.router)
+
+
+@app.get(&quot;/health&quot;)
+def health_check() -&gt; dict[str, str]:
+    return {&quot;status&quot;: &quot;ok&quot;}
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># models.py
+from enum import Enum
+from pydantic import BaseModel
+
+
+class TaskStatus(str, Enum):
+    todo = &quot;todo&quot;
+    done = &quot;done&quot;
+
+
+class TaskCreate(BaseModel):
+    title: str
+
+
+class Task(BaseModel):
+    id: int
+    title: str
+    status: TaskStatus = TaskStatus.todo
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># store.py
+from typing import Optional
+from models import Task, TaskCreate, TaskStatus
+
+_db: dict[int, Task] = {}
+_next_id: int = 1
+
+
+def create_task(data: TaskCreate) -&gt; Task:
+    global _next_id
+    task = Task(id=_next_id, title=data.title, status=TaskStatus.todo)
+    _db[_next_id] = task
+    _next_id += 1
+    return task
+
+
+def get_all_tasks() -&gt; list[Task]:
+    return list(_db.values())
+
+
+def get_task(task_id: int) -&gt; Optional[Task]:
+    return _db.get(task_id)
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># routers/tasks.py
+from fastapi import APIRouter, HTTPException
+from models import Task, TaskCreate
+import store
+
+router = APIRouter(prefix=&quot;/tasks&quot;, tags=[&quot;tasks&quot;])
+
+
+@router.get(&quot;&quot;, response_model=list[Task])
+def list_tasks() -&gt; list[Task]:
+    return store.get_all_tasks()
+
+
+@router.post(&quot;&quot;, response_model=Task, status_code=201)
+def create_task(data: TaskCreate) -&gt; Task:
+    return store.create_task(data)
+
+
+@router.get(&quot;/{task_id}&quot;, response_model=Task)
+def get_task(task_id: int) -&gt; Task:
+    task = store.get_task(task_id)
+    if task is None:
+        raise HTTPException(status_code=404, detail=&quot;Task not found&quot;)
+    return task
+</code></pre></div>
+<p>이 저장소를 열고, 대화형 세션에서 <strong>전체 조망(1단계)</strong>과 <strong>표면 목록(2단계)</strong>을 한 번에 물어봅니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; 이 저장소가 무슨 일을 하는 API인지, 루트의 폴더·파일 구조를 역할별로 요약해 줘.
+  그리고 노출된 엔드포인트를 메서드·경로·하는 일 표로 정리해 줘.
+</code></pre></div>
+<p>에이전트는 에이전트 검색으로 <code>main.py</code>·<code>routers/tasks.py</code>·<code>models.py</code>·<code>store.py</code>를 찾아 읽고, 다음과 같이 답합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">이 프로젝트는 &quot;할 일(task)&quot;을 만들고 조회하는 작은 FastAPI 기반 REST API입니다.
+
+구조:
+- main.py     : FastAPI 앱을 만들고 tasks 라우터를 등록하는 진입점(+ /health)
+- models.py   : 요청·응답 데이터 구조(TaskCreate, Task)와 상태 열거형(TaskStatus)
+- store.py    : 메모리(dict)에 할 일을 보관·조회하는 저장소 함수
+- routers/tasks.py : /tasks 경로의 엔드포인트들
+
+엔드포인트:
+| 메서드 | 경로            | 하는 일                                   |
+|--------|-----------------|-------------------------------------------|
+| GET    | /health         | 서버 상태 확인({&quot;status&quot;: &quot;ok&quot;})          |
+| GET    | /tasks          | 모든 할 일 목록 반환                       |
+| POST   | /tasks          | 새 할 일 생성(201), status는 todo로 시작   |
+| GET    | /tasks/{task_id}| 단건 조회, 없으면 404                      |
+</code></pre></div>
+<p>이 한 번의 질문으로, 며칠 걸릴 "구조 파악"이 몇 초로 줄었습니다. 이제 큰 지도가 손에 들어왔습니다.</p>
+<div class="code-explanation">
+<p><strong>이 질문이 좋은 답을 끌어낸 이유</strong></p>
+<ul>
+<li><strong>넓게 시작(1~2단계)</strong>: 세부 함수가 아니라 "무엇을 하는 API인가 + 구조 + 엔드포인트 목록"이라는 큰 그림을 먼저 물었습니다.</li>
+<li><strong>완료 조건 명시</strong>: "역할별로 요약", "메서드·경로·하는 일 표"처럼 <em>답의 형태</em>를 지정해, 산만한 설명 대신 정리된 표를 받았습니다(c03의 완료 조건이 탐색 질문에도 그대로 적용됩니다).</li>
+<li><strong>읽기 전용</strong>: 이 과정에서 파일은 한 글자도 바뀌지 않았습니다. 에이전트는 Read·Grep으로 읽기만 했습니다.</li>
+</ul>
+</div>
+<hr />
+<h2 id="45">4.5 온보딩 질문법: 시니어에게 묻듯 질문하기</h2>
+<p>큰 지도를 그렸으면, 이제 <em>시니어에게 묻듯</em> 구체적으로 파고들 차례입니다. 좋은 온보딩 질문에는 공통된 형태가 있습니다. 신입이 막연하게 "이거 어떻게 되나요?"라고 묻는 대신, 다음 네 종류의 질문을 의식적으로 던지면 이해가 빠릅니다.</p>
+<table>
+<thead>
+<tr>
+<th>질문 유형</th>
+<th>무엇을 알아내나</th>
+<th>예</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>무엇을(what)</strong></td>
+<td>책임·역할</td>
+<td>"<code>store.py</code>는 무슨 책임을 지나요?"</td>
+</tr>
+<tr>
+<td><strong>어디서(where)</strong></td>
+<td>정의·사용 위치</td>
+<td>"<code>Task</code> 모델은 어디서 정의되고 어디서 쓰이나요?"</td>
+</tr>
+<tr>
+<td><strong>어떻게(how)</strong></td>
+<td>흐름·연결</td>
+<td>"할 일을 만들면 요청이 어느 함수들을 차례로 거치나요?"</td>
+</tr>
+<tr>
+<td><strong>만약(what if)</strong></td>
+<td>예외·엣지 케이스</td>
+<td>"빈 제목으로 만들면 어떻게 되나요? 없는 id를 조회하면요?"</td>
+</tr>
+</tbody>
+</table>
+<p>이 네 가지는 사실 <em>실제 시니어에게 온보딩 받을 때 묻는 질문</em>과 똑같습니다. 다른 점은, 에이전트는 답하면서 <strong>근거가 된 파일과 줄을 함께 짚어 준다</strong>는 것입니다. 그래서 답을 받은 뒤 "그 부분을 직접 열어 확인"하기가 쉽습니다.</p>
+<div class="info-box tip">
+<p><strong>질문에 "근거를 보여 줘"를 붙이세요</strong></p>
+<p>탐색 질문 끝에 "그 근거가 되는 파일·함수도 같이 알려 줘"를 붙이면, 에이전트가 추측이 아니라 <em>실제 코드</em>를 짚어 답하게 유도할 수 있습니다. 예: "할 일이 어디 저장되는지, 그 근거 함수까지 알려 줘." 이러면 "<code>store.py</code>의 <code>create_task</code>가 <code>_db</code> 딕셔너리에 넣습니다"처럼 검증 가능한 답이 옵니다. 요약을 곧이곧대로 믿지 않고 <em>근거로 확인</em>하는 습관이 신입에게 특히 중요합니다(4.10 참고).</p>
+</div>
+<p>이제 이 네 유형 질문을 <strong>종이에 만들지 말고 team-tasks-api 에이전트에게 실제로 물어</strong> 봅니다. 이 장의 모든 연습은 <em>읽기 전용 탐색</em>이므로 코드를 바꾸지 않습니다.</p>
+<h4 id="_1">모범: 네 유형 질문을 실제로 물어 근거까지 받은 예</h4>
+<p>team-tasks-api에서 <code>claude</code>를 실행하고 네 유형 질문을 던지면, 에이전트는 답과 함께 근거 파일·함수를 짚어 줍니다(아래는 화면 답을 요약해 옮긴 예).</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[무엇을] &quot;이 저장소는 무엇을 하나요? 한 줄로.&quot; → 할 일을 만들고 조회하는 FastAPI REST API
+[어디서] &quot;할 일이 실제로 어디에 저장되나요? 근거 함수까지.&quot; → store.py의 create_task가 _db(dict)에 저장
+[어떻게] &quot;할 일을 만들면 요청이 어느 함수를 차례로 거치나요?&quot; → create_task(routers) → store.create_task → _db
+[만약]   &quot;빈 제목으로 만들면 어떻게 되나요?&quot; → models.py TaskCreate.title 검증, 없으면 422
+</code></pre></div>
+<h4 id="team-tasks-api">직접 해보기 (team-tasks-api 에이전트에게 실제로 물어보기)</h4>
+<div class="project-box">
+<p><strong>즉시 연습 A — 네 유형 질문을 <em>실제로</em> 물어 답과 근거를 기록하라 (2종 1세트 · 1/2)</strong></p>
+<p>team-tasks-api에서 <code>claude</code>를 실행하고, 네 유형(무엇을·어디서·어떻게·만약) 질문을 각각 하나씩 <strong>실제로 물어보세요</strong>(4.4의 예와 겹치지 않게). 각 질문 끝에 "그 근거가 되는 파일·함수도 같이 알려 줘"를 붙입니다. 그리고 <strong>에이전트가 실제로 답한 내용과 짚어 준 근거</strong>를 옮겨 적으세요.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[무엇을] 내가 물은 질문 / 에이전트 답 / 짚어 준 파일:
+[어디서] 내가 물은 질문 / 에이전트 답 / 짚어 준 파일·함수:
+[어떻게] 내가 물은 질문 / 에이전트 답(거치는 함수 순서):
+[만약]   내가 물은 질문 / 에이전트 답 / 검증이 일어나는 위치:
+</code></pre></div>
+<p>확인: 위 답 중 하나를 골라, 에이전트가 짚어 준 파일을 직접 열어(Read 또는 에디터로) 답이 실제 코드와 맞는지 한 번 대조하세요.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">직접 열어 대조한 파일과, 답이 실제 코드와 맞았는지:
+</code></pre></div>
+</div>
+<div class="project-box">
+<p><strong>즉시 연습 A 자가체크 — 손으로 물어봤는지 확인하세요.</strong></p>
+<ul>
+<li>[ ] 네 유형 질문을 team-tasks-api 에이전트에게 <strong>실제로</strong> 물었다.</li>
+<li>[ ] 각 답에 에이전트가 짚어 준 근거 파일·함수를 함께 기록했다.</li>
+<li>[ ] 답 하나 이상을 실제 파일을 열어 대조해, 요약을 맹신하지 않고 근거로 확인했다.</li>
+<li>[ ] 이 연습 동안 코드를 한 줄도 바꾸지 않았다(읽기 전용 유지).</li>
+</ul>
+</div>
+<hr />
+<h2 id="46-worked-example-tasks">4.6 worked example: tasks 데이터 흐름·검증 경로 추적</h2>
+<p>이번에는 <strong>흐름 추적(3단계)</strong>을 해 봅니다. "할 일을 만들 때 요청이 어디를 거쳐 저장되고, 어디서 검증되는가"를 추적시킵니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; POST /tasks로 할 일을 만들면, 요청이 어느 함수들을 차례로 거쳐 저장되는지
+  흐름을 단계로 정리해 줘. 제목 검증은 어디서 일어나는지도 근거 코드와 함께 알려 줘.
+</code></pre></div>
+<p>에이전트는 <code>routers/tasks.py</code> → <code>store.py</code> → <code>models.py</code>를 따라가며 다음과 같이 답합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">POST /tasks 요청의 흐름:
+1. routers/tasks.py 의 create_task(data: TaskCreate)가 요청을 받습니다.
+   - FastAPI가 요청 본문을 TaskCreate로 만들면서 *검증*이 먼저 일어납니다.
+2. 검증 통과 시, store.create_task(data)를 호출합니다.
+3. store.create_task는 새 id를 매겨 Task(id=..., title=..., status=todo)를 만들고
+   _db 딕셔너리에 저장한 뒤 그 Task를 반환합니다.
+4. 반환된 Task가 201 상태로 응답됩니다.
+
+검증 경로:
+- models.py 의 TaskCreate.title 은 str 타입으로 선언돼 있습니다. title이
+  빠지거나 문자열이 아니면 FastAPI가 422를 자동 반환합니다.
+  (지금은 길이·빈 문자열 제한이 없습니다 — 그 제한을 더하는 것이 이후 과제입니다.)
+</code></pre></div>
+<p>이 설명이 맞는지 <em>검증 규칙만</em> 떼어 직접 돌려 확인해 봅니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># 검증 규칙 동작 확인(pydantic 발췌 실행)
+from pydantic import BaseModel, ValidationError
+
+
+class TaskCreate(BaseModel):
+    title: str
+
+
+print(TaskCreate(title=&quot;문서 읽기&quot;).title)
+
+try:
+    TaskCreate()  # title 누락
+except ValidationError:
+    print(&quot;title 누락 거부됨&quot;)
+# 출력: 문서 읽기
+# 출력: title 누락 거부됨
+</code></pre></div>
+<p>정상 요청은 통과하고, title이 빠진 요청은 검증에서 막힙니다. 에이전트가 설명한 "검증은 <code>TaskCreate</code>에서 일어난다"가 실제와 일치함을 <em>직접 확인</em>했습니다.</p>
+<div class="code-explanation">
+<p><strong>흐름 추적에서 본 것</strong></p>
+<ul>
+<li>데이터는 <strong>라우터(입구) → 저장소(보관) → 모델(검증·형태)</strong> 의 세 모듈을 거칩니다. 한 파일만 봐서는 안 보이던 <em>연결</em>이 드러났습니다.</li>
+<li>검증은 핸들러 안의 <code>if</code>문이 아니라 <strong>모델(<code>TaskCreate</code>의 타입 선언)</strong> 에서 선언적으로 일어납니다. 이걸 알면, 나중에 검증 규칙(예: 빈 제목 거부)을 더할 때 <em>어느 파일을 고쳐야 하는지</em>가 분명해집니다.</li>
+<li>추적 결과를 직접 실행으로 <em>검증</em>했습니다 — 요약을 믿기만 하지 않고 근거로 확인하는 태도입니다.</li>
+</ul>
+</div>
+<hr />
+<h2 id="47">4.7 특정 함수·엔드포인트의 책임과 예외 흐름 묻기</h2>
+<p>마지막 깊이는 <strong>국소 심화(4단계)</strong>입니다. 변경할 후보 지점을 정했다면, 그 함수 하나의 <em>책임과 예외 흐름</em>을 정밀하게 묻습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; routers/tasks.py 의 get_task 함수가 정확히 무슨 책임을 지고,
+  어떤 경우에 어떤 예외(상태 코드)를 내는지 알려 줘.
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">get_task(task_id: int)의 책임:
+- 주어진 task_id로 단건 할 일을 조회해 반환합니다.
+
+분기·예외 흐름:
+- store.get_task(task_id)가 None을 돌려주면(=해당 id 없음)
+  HTTPException(status_code=404, detail=&quot;Task not found&quot;)를 던집니다.
+- 존재하면 그 Task를 그대로 반환합니다(200).
+- 참고: task_id는 경로 파라미터가 int로 선언돼, 숫자가 아닌 값이 오면
+  FastAPI가 핸들러에 들어오기 전에 422로 막습니다.
+</code></pre></div>
+<p>이 "분기·예외 흐름"이 정확히 변경 작업의 출발점입니다. 예를 들어 "없는 id면 404 대신 빈 응답을 주자"는 요구가 생기면, <em>어디를 고쳐야 하는지</em>(이 <code>if task is None</code> 분기)가 이미 명확합니다. 탐색이 변경의 좌표를 찍어 준 셈입니다.</p>
+<p>분기 동작을 핵심만 떼어 확인합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">python</span></div><pre class="line-numbers"><code class="language-python"># get_task 분기 로직 확인(발췌 실행)
+_db = {1: {&quot;id&quot;: 1, &quot;title&quot;: &quot;문서 읽기&quot;, &quot;status&quot;: &quot;todo&quot;}}
+
+def get_task(task_id):
+    task = _db.get(task_id)
+    if task is None:
+        return (404, &quot;Task not found&quot;)
+    return (200, task)
+
+print(get_task(1))
+print(get_task(2))
+# 출력: (200, {'id': 1, 'title': '문서 읽기', 'status': 'todo'})
+# 출력: (404, 'Task not found')
+</code></pre></div>
+<p>존재하는 id는 200을, 없는 id는 404를 돌려주어, 에이전트가 설명한 예외 흐름과 정확히 맞습니다.</p>
+<hr />
+<h2 id="48">4.8 읽기 전용 탐색과 결과 메모로 정리하기</h2>
+<p>탐색의 마지막 습관은 두 가지입니다. <strong>읽기 전용을 지키는 것</strong>과 <strong>알아낸 것을 메모로 남기는 것</strong>.</p>
+<p><strong>읽기 전용을 지킨다.</strong> 탐색 단계에서는 코드를 바꾸지 않습니다. 목적이 "이해"이기 때문입니다. 그런데 탐색하다 보면 "여기 이거 잘못된 것 같은데 김에 고칠까?" 하는 충동이 듭니다. 이건 위험합니다. 아직 전체 맥락을 다 파악하지 못한 상태라, 멀쩡한 것을 망가뜨리거나 다른 작업과 섞여 리뷰가 어려워집니다. 이해와 변경을 <em>분리</em>하는 것이 안전의 기본입니다.</p>
+<p>순수하게 읽기만 하고 싶을 때 쓸 수 있는 두 가지 방법이 있습니다.</p>
+<ul>
+<li><strong>1회성 질의(<code>claude -p</code>)</strong>: 한 번 묻고 답만 받습니다. 세션을 길게 열지 않고 빠르게 확인할 때 좋습니다.</li>
+</ul>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">$ claude -p &quot;이 폴더의 엔드포인트를 메서드·경로 표로 요약해 줘&quot;
+</code></pre></div>
+<ul>
+<li><strong>플랜 모드</strong>: 에이전트를 <em>읽기 전용</em>으로 묶어 두는 모드입니다. 편집·쓰기 도구가 아예 차단되므로, 탐색·분석에 안성맞춤입니다. (플랜 모드는 6장에서 본격적으로 배웁니다 — 지금은 "탐색을 읽기 전용으로 강제하는 장치가 있다" 정도만 알아 둡니다.)</li>
+</ul>
+<p><strong>알아낸 것을 메모로 남긴다.</strong> 탐색으로 그린 지도는 머릿속에만 두면 곧 흐려집니다. 구조·엔드포인트·데이터 흐름·주의점을 짧은 메모(예: 저장소 안의 <code>NOTES.md</code>나 개인 노트)로 정리해 두면, 다음 작업에서 같은 탐색을 반복하지 않아도 됩니다. 에이전트에게 정리까지 시킬 수도 있습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; 지금까지 파악한 구조·엔드포인트·데이터 흐름·검증 위치를 NOTES.md 초안으로
+  정리해 줘. (이건 새 파일 작성이니, 내용만 보여 주고 내가 확인한 뒤 저장할게.)
+</code></pre></div>
+<div class="info-box warning">
+<p><strong>메모 작성은 "변경"이라는 점에 주의</strong></p>
+<p>구조 <em>이해</em>는 읽기 전용이지만, <code>NOTES.md</code>를 <em>디스크에 만드는 것</em>은 파일을 쓰는 변경 작업입니다. 그래서 위 예처럼 "내용만 보여 주고 내가 확인한 뒤 저장"으로 분리하거나, 권한 설정(5장)으로 통제하는 것이 좋습니다. 순수 탐색 중이라면 메모는 따로 모아 두었다가 탐색이 끝난 뒤 정리합니다.</p>
+</div>
+<hr />
+<h2 id="49-2-1-team-tasks-api">4.9 즉시 연습(2종 1세트): team-tasks-api를 에이전트에 물어 구조 지도를 실제로 작성</h2>
+<p>탐색의 산출물은 <em>머릿속 지도</em>입니다. 이 지도를 종이 빈칸으로 추측해 채우는 게 아니라, <strong>team-tasks-api 에이전트에게 실제로 물어 받은 답으로 한 장의 구조 지도를 작성</strong>합니다. 모든 작업은 읽기 전용이라 코드를 바꾸지 않습니다.</p>
+<h4 id="_2">모범: 에이전트에 물어 정리한 구조 지도(예)</h4>
+<p>아래는 4.4~4.7의 질문을 team-tasks-api에 실제로 던져 받은 답을 한 장으로 정리한 예입니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[프로젝트] 할 일(task)을 만들고 조회하는 작은 FastAPI REST API
+[진입점]   main.py (FastAPI 앱 생성 + tasks 라우터 등록 + /health)
+
+[모듈 역할]
+- routers/tasks.py : /tasks 엔드포인트(입구)
+- store.py         : 메모리(dict) 저장·조회
+- models.py        : TaskCreate/Task 데이터 구조와 TaskStatus 열거형
+
+[엔드포인트]
+- GET  /tasks            → 전체 목록
+- POST /tasks            → 생성(201), status는 todo로 시작
+- GET  /tasks/{task_id}  → 단건, 없으면 404
+
+[데이터 흐름(생성)] 요청 → create_task → store.create_task → _db에 저장
+[검증 위치] models.py TaskCreate.title (str 타입, 누락/타입 오류 → 422)
+[주의점] 저장이 메모리라 서버 재시작 시 사라짐
+</code></pre></div>
+<h4 id="team-tasks-api_1">직접 해보기 (team-tasks-api 에이전트에게 실제로 물어 지도 작성)</h4>
+<div class="project-box">
+<p><strong>즉시 연습 B — 에이전트에 <em>실제로 물어</em> 구조 지도를 채워라 (2종 1세트)</strong></p>
+<p>team-tasks-api에서 <code>claude</code>를 실행하고, 4.5의 네 유형 질문(근거 파일까지 요청)을 던져 아래 지도를 <strong>에이전트가 실제로 답한 내용</strong>으로 채우세요. 빈칸에 추측을 적지 말고, 받은 답을 옮긴 뒤 <strong>각 항목을 실제 파일을 열어 한 번씩 대조</strong>합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[프로젝트] (에이전트 답):
+[진입점]   (main.py를 열어 대조):
+[모듈 역할]
+- routers/tasks.py : (역할 / 대조한 줄):
+- store.py         : (역할 / 대조한 함수):
+- models.py        : (역할 / 대조한 클래스):
+[엔드포인트] (실제 routers/tasks.py에서 확인한 메서드·경로·하는 일):
+- 
+- 
+- 
+[데이터 흐름(생성)] (거치는 함수 순서, store.py까지 열어 확인):
+[검증 위치] (models.py에서 title 검증 확인):
+[주의점] (저장이 메모리라는 점 등, store.py로 확인):
+</code></pre></div>
+<p>핵심은 "에이전트의 답"으로 1차 작성 후, <code>main.py</code>·<code>routers/tasks.py</code>·<code>store.py</code>·<code>models.py</code>를 <strong>직접 열어</strong> 답과 실제 코드가 맞는지 대조하는 것입니다.</p>
+</div>
+<div class="project-box">
+<p><strong>즉시 연습 B 자가체크 — 묻고, 직접 대조했는지 확인하세요.</strong></p>
+<ul>
+<li>[ ] 지도의 각 항목을 <em>추측이 아니라</em> 에이전트에게 실제로 물어 받은 답으로 채웠다.</li>
+<li>[ ] 모듈 역할·엔드포인트·데이터 흐름·검증 위치를 각각 실제 파일을 열어 대조했다.</li>
+<li>[ ] 엔드포인트 목록에 메서드·경로·하는 일이 모두 있다.</li>
+<li>[ ] 데이터 흐름을 <em>모듈을 거치는 순서</em>로 적었다(한 파일에 머물지 않았다).</li>
+<li>[ ] 이 지도를 그리는 동안 코드를 한 줄도 바꾸지 않았다(읽기 전용 유지).</li>
+</ul>
+</div>
+<hr />
+<h2 id="410">4.10 흔한 오류와 오개념: 다 읽고 시작·요약 맹신·탐색 중 변경</h2>
+<div class="info-box danger">
+<p><strong>오개념 1 — "낯선 코드는 전부 읽고 나서 시작해야 한다"</strong></p>
+<p>신입이 흔히 첫 주를 "저장소의 모든 파일을 처음부터 끝까지 정독"하는 데 씁니다. 실제 업무 저장소는 수만 줄이라 이 방식은 비효율적이고, 다 읽어도 <em>무엇이 중요한지</em>는 여전히 안 보입니다.</p>
+<p><strong>교정:</strong> 다 읽지 말고 <strong>에이전트에게 물어 핵심부터</strong> 파악합니다(4.3의 깔때기: 전체 조망 → 엔드포인트 목록 → 흐름 → 국소 심화). 지금 하려는 작업에 관련된 부분만 깊이 보고, 나머지는 필요할 때 다시 묻습니다. "이해는 작업에 필요한 만큼, 깊이는 그때그때"가 원칙입니다.</p>
+</div>
+<div class="info-box danger">
+<p><strong>오개념 2 — "에이전트가 요약해 줬으니 그대로 믿으면 된다"</strong></p>
+<p>에이전트의 요약은 빠르고 대개 정확하지만, <em>항상</em> 정확하지는 않습니다. 특히 비슷한 이름의 함수가 여럿이거나, 동적으로 호출되는 코드에서는 요약이 미묘하게 틀릴 수 있습니다. 요약만 믿고 변경에 들어가면, 틀린 가정 위에 코드를 쌓게 됩니다.</p>
+<p><strong>교정:</strong> <em>변경의 근거가 되는 부분</em>은 요약을 받은 뒤 <strong>직접 파일을 열어 확인</strong>합니다(4.5의 "근거를 보여 줘", 4.6~4.7의 발췌 실행처럼). 요약은 <em>어디를 볼지</em>를 빠르게 좁혀 주는 안내일 뿐, 최종 근거는 실제 코드입니다. 신입일수록 "요약 → 근거 확인"의 두 박자를 지킵니다.</p>
+</div>
+<div class="info-box danger">
+<p><strong>오개념 3 — "탐색하다 보이는 문제를 김에 같이 고친다"</strong></p>
+<p>코드를 읽다 보면 오타나 어색한 부분이 눈에 띄어 "이왕 보는 김에" 고치고 싶어집니다. 하지만 아직 전체 맥락을 다 파악하지 못한 상태의 즉흥 수정은, 의도치 않게 기존 동작을 깨거나 지금 하려던 작업과 뒤섞여 <em>리뷰를 어렵게</em> 만듭니다.</p>
+<p><strong>교정:</strong> <strong>이해(읽기 전용)와 변경을 분리</strong>합니다(4.8). 탐색 중 발견한 개선점은 메모에 적어 두었다가, <em>별도의 작업·별도의 커밋</em>으로 다룹니다. 한 번에 한 가지 의도만 변경에 담는 것이 9장(작은 논리 단위 커밋)에서 배울 좋은 PR의 출발점입니다.</p>
+</div>
+<hr />
+<h2 id="411">4.11 단원 미니 프로젝트: 팀 저장소 구조 지도 만들기</h2>
+<p>이 단원에서 배운 것(에이전트 검색·깔때기 질문·온보딩 질문법·읽기 전용)을 모아, 1장에서 셋업한 실습 저장소 <code>team-tasks-api</code>를 <em>한 장의 구조 지도</em>로 정리합니다. 이것이 u4의 미니 프로젝트이며, 종합 프로젝트에서 "기존 저장소 파악" 단계의 예행연습입니다.</p>
+<div class="project-box">
+<p><strong>미니 프로젝트 — "team-tasks-api 구조 지도" (2종 1세트)</strong></p>
+<p><strong>목표 산출물:</strong> 실습 저장소 <code>team-tasks-api</code>를, 읽기 전용 탐색만으로 <em>엔드포인트·데이터 흐름·핵심 모듈·주의점</em>을 담은 한 장의 구조 지도로 정리합니다. 이 단원은 코드를 바꾸지 않으므로 작업 브랜치 없이 <code>main</code>에서 읽기만 합니다.</p>
+<p><strong>① 모범(진행 절차 예시):</strong></p>
+<p>마일스톤 1 — <em>전체 조망 + 엔드포인트 목록(깔때기 1~2단계)</em></p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; 이 저장소가 무엇을 하는 API인지, 폴더·파일을 역할별로 요약하고
+  엔드포인트를 메서드·경로·하는 일 표로 정리해 줘. 근거 파일도 같이.
+</code></pre></div>
+<p>마일스톤 2 — <em>핵심 흐름 추적(3단계)</em></p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; 가장 중요한 쓰기 작업(예: 생성) 요청이 어느 모듈·함수를 차례로 거치는지,
+  검증은 어디서 일어나는지 근거 코드와 함께 정리해 줘.
+</code></pre></div>
+<p>마일스톤 3 — <em>국소 심화 + 메모 정리(4단계 + 4.8)</em></p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; 앞으로 바꿀 가능성이 큰 핵심 함수 한두 개의 책임과 예외 흐름을 알려 줘.
+  그리고 지금까지 파악한 내용을 구조 지도 초안으로 정리해 줘(저장은 내가 확인 후).
+</code></pre></div>
+<p>체크포인트(이 미니 프로젝트의 검증): 4.9의 구조 지도 항목(프로젝트·진입점·모듈 역할·엔드포인트·데이터 흐름·검증 위치·주의점)이 <em>모두</em> 채워졌고, 각 항목을 <code>team-tasks-api</code>의 실제 파일(<code>main.py</code>·<code>routers/tasks.py</code>·<code>store.py</code>·<code>models.py</code>)을 직접 열어 한 번씩 대조했으면 통과입니다.</p>
+<p><strong>② 직접 작성·실행(team-tasks-api에서 실제로 탐색하세요):</strong></p>
+<p>위 세 마일스톤의 질문을 <em>직접 써서</em> <code>team-tasks-api</code>에 <strong>실제로 묻고</strong>, 에이전트가 화면에서 부른 읽기 도구와 답의 근거 파일을 그대로 기록하세요. 미리 정한 답이 아니라, <em>방금 화면에서 본 것</em>을 옮깁니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">(마일스톤 1 질문 — 내가 실제로 준 깔때기 1~2단계 질문)
+&gt; 내가 실제로 준 질문:
+[관찰] 에이전트가 부른 읽기 도구(Glob/Grep/Read)와 알아낸 엔드포인트 목록:
+
+(마일스톤 2 질문 — 내가 실제로 준 흐름 추적 질문)
+&gt; 내가 실제로 준 질문:
+[관찰] 답이 근거로 든 실제 파일·함수(예: routers/tasks.py의 create_task):
+
+(마일스톤 3 질문 — 내가 실제로 준 국소 심화 질문)
+&gt; 내가 실제로 준 질문:
+[관찰] 핵심 함수의 책임·예외 흐름과 그 근거 줄:
+
+(완성한 구조 지도 — 4.9의 빈 지도 양식을 채우되, 각 칸을 실제 파일을 열어 한 번씩 대조한 결과로 적습니다)
+</code></pre></div>
+<p><strong>자가체크(미니 프로젝트 완료 기준):</strong></p>
+<ul>
+<li>[ ] 큰 그림 → 엔드포인트 → 흐름 → 국소 심화의 <em>순서</em>로 좁혀 가며 물었는가.</li>
+<li>[ ] 각 질문에 <em>답의 형태나 근거</em>를 요구했는가(표로·근거 파일까지).</li>
+<li>[ ] 구조 지도의 모든 칸을 채웠고, <em>근거를 직접 확인</em>했는가(요약 맹신 금지).</li>
+<li>[ ] 탐색 내내 <em>코드를 바꾸지 않았는가</em>(읽기 전용 유지, 메모는 확인 후 저장).</li>
+<li>[ ] 발견한 개선점이 있다면 <em>변경에 섞지 않고</em> 메모로만 분리해 두었는가.</li>
+</ul>
+</div>
+<hr />
+<h2 id="412">4.12 마무리: 이 장에서 무엇을 가져가나</h2>
+<p>이 장에서 우리는 낯선 팀 코드를 <em>안전하게 이해하는</em> 법을 배웠습니다. 핵심은 넷입니다.</p>
+<ol>
+<li><strong>에이전트 검색</strong> — 어느 파일을 봐야 할지 에이전트가 스스로 찾아 읽으므로, 신입은 컨텍스트 파일을 고를 필요 없이 질문만 하면 됩니다.</li>
+<li><strong>깔때기 질문</strong> — 전체 조망 → 엔드포인트 목록 → 흐름 추적 → 국소 심화로 좁혀 가면 길을 잃지 않습니다.</li>
+<li><strong>온보딩 질문법</strong> — 무엇을·어디서·어떻게·만약, 그리고 "근거를 보여 줘"로 검증 가능한 답을 끌어냅니다.</li>
+<li><strong>읽기 전용 분리</strong> — 이해와 변경을 나누고, 요약은 근거로 확인하며, 발견한 개선점은 변경에 섞지 않습니다.</li>
+</ol>
+<p>다음 장(5장)에서는 드디어 <em>코드에 손대기 전의 안전장치</em> — 권한과 승인 — 를 배웁니다. 무엇을 바꿀지 정했으니, 이제 그 변경을 <em>안전하게</em> 통제하는 법으로 넘어갑니다.</p>
+
+<nav class="chapter-nav"><a href="ch_03.html">← 이전: 효과적인 작업 지시: 목표·맥락·제약·완료 조건</a><a href="index.html" style="flex:0 0 auto; text-align:center">목차</a><a href="ch_05.html" style="text-align:right">다음: 안전하게 변경하기 (1): 권한과 승인 →</a></nav>
+</main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-powershell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+</body>
+</html>

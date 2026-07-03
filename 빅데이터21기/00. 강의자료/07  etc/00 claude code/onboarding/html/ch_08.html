@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>08장: 팀 규약 주입: CLAUDE.md로 컨벤션 명문화 - Claude Code 신입 개발자 온보딩 — 첫 기능부터 첫 PR까지</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+<style>
+
+/* 디자인 토큰 — 브랜드 변경 시 여기만 수정 */
+:root {
+  --primary: #1976D2;
+  --primary-light: #E3F2FD;
+  --accent: #FF6F00;
+  --success: #2E7D32;
+  --warning: #F57F17;
+  --danger: #C62828;
+  --bg: #FAFAFA;
+  --text: #212121;
+  --text-secondary: #616161;
+  --border: #E0E0E0;
+  --code-bg: #2d2d2d;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.8; font-size: 16px;
+}
+.container { max-width: 1400px; margin: 0 auto; }
+.main-content { max-width: 1000px; padding: 40px 48px; margin: 0 auto; }
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white; padding: 48px 40px; border-radius: 16px; margin-bottom: 40px;
+}
+.chapter-header .chapter-number {
+  font-size: 14px; opacity: 0.8; text-transform: uppercase; letter-spacing: 2px;
+}
+.chapter-header h1 { font-size: 32px; margin: 8px 0 16px; font-weight: 800; }
+.chapter-header .chapter-meta { font-size: 14px; opacity: 0.9; }
+
+/* 학습 목표 */
+.learning-objectives {
+  background: var(--primary-light); border-left: 4px solid var(--primary);
+  padding: 24px 28px; border-radius: 0 12px 12px 0; margin-bottom: 36px;
+}
+.learning-objectives h3 { color: var(--primary); font-size: 16px; margin-bottom: 12px; }
+.learning-objectives li { margin: 8px 0; padding-left: 8px; }
+
+/* 섹션 / 본문 기본 요소 */
+h1 { font-size: 28px; margin: 36px 0 16px; color: var(--text); }
+h2 {
+  font-size: 26px; color: var(--primary); margin: 48px 0 20px;
+  padding-bottom: 10px; border-bottom: 2px solid var(--primary-light);
+}
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+p { margin: 12px 0; }
+ul, ol { margin: 12px 0 12px 24px; }
+li { margin: 6px 0; }
+a { color: var(--primary); }
+img { max-width: 100%; height: auto; border-radius: 12px; }
+blockquote {
+  border-left: 4px solid var(--primary); background: var(--primary-light);
+  padding: 12px 20px; margin: 16px 0; border-radius: 0 12px 12px 0;
+}
+blockquote p:last-child { margin-bottom: 0; }
+/* 인라인 코드 (pre 밖) */
+:not(pre) > code {
+  background: #f0f0f0; padding: 2px 6px; border-radius: 4px;
+  font-size: 0.9em; color: var(--danger);
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+}
+
+/* 코드 블록 (.code-block-wrapper) */
+.code-block-wrapper {
+  margin: 24px 0; border-radius: 12px; overflow: hidden;
+  box-shadow: var(--card-shadow); border: 1px solid var(--border);
+}
+.code-block-header {
+  background: #1a1a2e; color: #a0a0b0; padding: 10px 20px; font-size: 13px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+.code-block-header .lang-badge {
+  background: var(--primary); color: white; padding: 2px 10px;
+  border-radius: 10px; font-size: 11px; font-weight: 700;
+}
+pre[class*="language-"] {
+  margin: 0 !important; border-radius: 0 !important;
+  font-size: 14px !important; line-height: 1.6 !important; padding: 20px !important;
+}
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important; padding-right: 8px !important;
+}
+.code-explanation {
+  background: #f8f9fa; border-top: 1px solid var(--border); padding: 16px 20px;
+  font-size: 14px; color: var(--text-secondary); line-height: 1.7;
+}
+.code-explanation strong { color: var(--text); }
+.code-explanation .explain-title {
+  display: inline-block; background: var(--accent); color: white; font-size: 11px;
+  font-weight: 700; padding: 2px 10px; border-radius: 10px; margin-bottom: 8px;
+}
+.code-output {
+  background: #1e1e1e; color: #4EC9B0; padding: 12px 20px;
+  font-family: monospace; font-size: 13px; border-top: 1px dashed #444;
+}
+.code-output::before {
+  content: "▶ 실행 결과"; display: block; color: #808080;
+  font-size: 11px; margin-bottom: 4px;
+}
+
+/* 특수 박스 (info-box 5종) */
+.info-box { padding: 14px 20px; border-radius: 12px; margin: 16px 0; border-left: 4px solid; }
+.info-box p:last-child, .info-box ul:last-child { margin-bottom: 0; }
+.info-box.tip { background: #E8F5E9; border-color: var(--success); }
+.info-box.warning { background: #FFF8E1; border-color: var(--warning); }
+.info-box.danger { background: #FFEBEE; border-color: var(--danger); }
+.info-box.beginner { background: #F3E5F5; border-color: #7B1FA2; }
+.info-box.best-practice { background: #E0F2F1; border-color: #00695C; }
+.info-box .box-header {
+  display: flex; align-items: center; margin-bottom: 12px;
+  padding-bottom: 10px; border-bottom: 1px solid rgba(123,31,162,0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* 표 */
+.api-reference h3, .library-section h3 {
+  background: var(--primary); color: white; padding: 12px 20px;
+  border-radius: 8px 8px 0 0; margin-bottom: 0; font-size: 16px;
+}
+hr.section-divider, hr {
+  border: none; border-top: 2px solid var(--border); margin: 36px 0;
+}
+.table-responsive { overflow-x: auto; margin: 16px 0; border-radius: 8px; box-shadow: var(--card-shadow); }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+table thead { background: #f5f5f5; }
+table th { padding: 12px 16px; text-align: left; font-weight: 700; border-bottom: 2px solid var(--border); }
+table td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table tr:hover { background: #fafafa; }
+table code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 13px; color: var(--danger); }
+.api-signature {
+  background: var(--code-bg); color: #e0e0e0; padding: 8px 16px; border-radius: 6px;
+  font-family: monospace; font-size: 13px; margin: 4px 0; overflow-x: auto;
+}
+
+/* 다이어그램 */
+.diagram-container { margin: 28px 0; text-align: center; }
+.diagram-container img { max-width: 100%; border-radius: 12px; box-shadow: var(--card-shadow); }
+.diagram-container img.screenshot { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.diagram-container .caption { margin-top: 10px; font-size: 13px; color: var(--text-secondary); font-style: italic; }
+.diagram-container .svg-diagram { background: #fff; padding: 1rem; border: 1px solid var(--border); border-radius: 12px; }
+.diagram-container .svg-diagram svg { max-width: 100%; height: auto; }
+.missing-diagram { color: var(--danger); font-style: italic; padding: 1rem; background: #FFEBEE; border-radius: 8px; }
+.mermaid { margin: 24px auto; text-align: center; }
+
+/* 연습 문제 & 프로젝트 */
+.exercise-box { background: #FFF3E0; border: 2px solid var(--accent); border-radius: 12px; padding: 24px; margin: 28px 0; }
+.exercise-box h4 { color: var(--accent); }
+.project-box { background: linear-gradient(135deg, #E8EAF6, #C5CAE9); border-radius: 12px; padding: 28px; margin: 36px 0; }
+.project-box h3 { color: #283593; margin-bottom: 12px; }
+.project-readme { background: rgba(255,255,255,0.7); border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; }
+.project-file { margin: 12px 0; border-radius: 8px; overflow: hidden; }
+.project-file summary { background: rgba(255,255,255,0.7); padding: 12px 16px; cursor: pointer; font-weight: 600; border-radius: 8px; }
+.project-file pre { margin: 0; }
+
+/* FAQ */
+.faq-section details { border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; }
+.faq-section summary { padding: 14px 20px; cursor: pointer; font-weight: 600; color: var(--primary); background: #fafafa; border-radius: 8px; }
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+.faq-section .faq-answer { padding: 16px 20px; color: var(--text-secondary); }
+
+/* 챕터 네비게이션 */
+.chapter-nav { display: flex; justify-content: space-between; margin: 48px 0 24px; gap: 16px; }
+.chapter-nav a {
+  flex: 1; display: block; padding: 16px 20px; background: white;
+  border: 1px solid var(--border); border-radius: 12px; text-decoration: none;
+  color: var(--text); transition: all 0.2s;
+}
+.chapter-nav a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+
+/* ── 인덱스 페이지 ── */
+.index-container { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+.book-header { text-align: center; margin-bottom: 40px; }
+.book-header h1 { font-size: 36px; color: var(--primary); border: none; margin: 0 0 8px; }
+.book-header p { color: var(--text-secondary); font-size: 18px; }
+.chapter-list { list-style: none; margin: 0; }
+.chapter-list li { margin-bottom: 12px; }
+.chapter-list a {
+  display: flex; align-items: center; gap: 16px; padding: 16px 24px;
+  background: white; border: 1px solid var(--border); border-radius: 12px;
+  text-decoration: none; color: var(--text); transition: all 0.2s;
+}
+.chapter-list a:hover { border-color: var(--primary); box-shadow: var(--card-shadow); }
+.chapter-list .ch-num { font-weight: 700; color: var(--primary); min-width: 3.5rem; }
+.difficulty-group { margin-top: 32px; }
+.difficulty-group h2 { font-size: 18px; border: none; }
+.difficulty { display: inline-block; padding: 2px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; }
+.difficulty-입문 { background: #E8F5E9; color: #166534; }
+.difficulty-기초 { background: #E3F2FD; color: #1e40af; }
+.difficulty-중급 { background: #FFF8E1; color: #92400e; }
+.difficulty-실무 { background: #FCE7F3; color: #9d174d; }
+.difficulty-고급 { background: #FFEBEE; color: #991b1b; }
+
+/* 인쇄 / 반응형 */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper, table, .diagram-container, .project-box { break-inside: avoid; page-break-inside: avoid; }
+  h1, h2, h3, h4 { break-after: avoid; page-break-after: avoid; }
+}
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+  .chapter-nav { flex-direction: column; }
+}
+
+/* === templates/chapter_design_template.html (단일 디자인 소스, 우선 적용) === */
+
+/* ============================================================
+   디자인 토큰 (색상·그림자) — 브랜드 변경 시 여기만 수정
+   ============================================================ */
+:root {
+  --primary: #1976D2;        /* 주조색(파랑) — 헤더/제목/강조 */
+  --primary-light: #E3F2FD;  /* 주조색 옅은 톤 — 박스 배경/밑줄 */
+  --accent: #FF6F00;         /* 강조색(주황) — 해설 라벨/연습문제 */
+  --success: #2E7D32;        /* 성공(초록) */
+  --warning: #F57F17;        /* 경고(노랑) */
+  --danger: #C62828;         /* 위험(빨강) */
+  --bg: #FAFAFA;             /* 페이지 배경 */
+  --text: #212121;           /* 본문 텍스트 */
+  --text-secondary: #616161; /* 보조 텍스트 */
+  --border: #E0E0E0;         /* 테두리 */
+  --code-bg: #2d2d2d;        /* 코드 배경 */
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  font-size: 16px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   메인 콘텐츠
+   ============================================================ */
+.main-content {
+  flex: 1;
+  max-width: 1400px;
+  padding: 40px 48px;
+  margin: 0 auto;
+}
+
+/* 챕터 헤더 */
+.chapter-header {
+  background: linear-gradient(135deg, var(--primary), #1565C0);
+  color: white;
+  padding: 48px 40px;
+  border-radius: 16px;
+  margin-bottom: 40px;
+}
+
+.chapter-header .chapter-number {
+  font-size: 14px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.chapter-header h1 {
+  font-size: 32px;
+  margin: 8px 0 16px;
+  font-weight: 800;
+}
+
+.chapter-header .chapter-meta {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* 학습 목표 박스 */
+.learning-objectives {
+  background: var(--primary-light);
+  border-left: 4px solid var(--primary);
+  padding: 24px 28px;
+  border-radius: 0 12px 12px 0;
+  margin-bottom: 36px;
+}
+
+.learning-objectives h3 {
+  color: var(--primary);
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.learning-objectives li {
+  margin: 8px 0;
+  padding-left: 8px;
+  color: var(--text);
+}
+
+/* 섹션 */
+h2 {
+  font-size: 26px;
+  color: var(--primary);
+  margin: 48px 0 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--primary-light);
+}
+
+h3 { font-size: 20px; color: var(--text); margin: 32px 0 12px; }
+h4 { font-size: 17px; color: var(--text-secondary); margin: 24px 0 10px; }
+
+p { margin: 12px 0; }
+
+/* ============================================================
+   코드 블록 - 박스형 + 줄번호 + 실무 설명
+   ============================================================ */
+.code-block-wrapper {
+  margin: 24px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+}
+
+.code-block-header {
+  background: #1a1a2e;
+  color: #a0a0b0;
+  padding: 10px 20px;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.code-block-header .filename { font-weight: 600; color: #e0e0e0; }
+
+.code-block-header .lang-badge {
+  background: var(--primary);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Prism 줄번호 스타일 오버라이드 */
+pre[class*="language-"] {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  padding: 20px !important;
+}
+
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #444 !important;
+  padding-right: 8px !important;
+}
+
+/* 코드 실무 설명 박스 */
+.code-explanation {
+  background: #f8f9fa;
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.code-explanation strong { color: var(--text); }
+
+.code-explanation .explain-title {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+
+/* 코드 실행 결과 */
+.code-output {
+  background: #1e1e1e;
+  color: #4EC9B0;
+  padding: 12px 20px;
+  font-family: monospace;
+  font-size: 13px;
+  border-top: 1px dashed #444;
+}
+
+.code-output::before {
+  content: "▶ 실행 결과";
+  display: block;
+  color: #808080;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+/* ============================================================
+   특수 박스 (팁, 주의, 베스트 프랙티스, 초보자 설명)
+   ============================================================ */
+.info-box {
+  padding: 14px 20px;
+  border-radius: 12px;
+  margin: 16px 0;
+  border-left: 4px solid;
+}
+.info-box p:last-child { margin-bottom: 0; }
+.info-box ul:last-child { margin-bottom: 0; }
+
+.info-box.tip {
+  background: #E8F5E9;
+  border-color: var(--success);
+}
+
+.info-box.warning {
+  background: #FFF8E1;
+  border-color: var(--warning);
+}
+
+.info-box.danger {
+  background: #FFEBEE;
+  border-color: var(--danger);
+}
+
+.info-box.beginner {
+  background: #F3E5F5;
+  border-color: #7B1FA2;
+}
+
+.info-box.best-practice {
+  background: #E0F2F1;
+  border-color: #00695C;
+}
+
+.info-box .box-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(123, 31, 162, 0.2);
+}
+.info-box .box-icon { font-size: 22px; margin-right: 10px; flex-shrink: 0; }
+.info-box .box-title { font-weight: 700; font-size: 15px; color: #6A1B9A; }
+.info-box .box-content p:first-child { margin-top: 0; }
+
+/* ============================================================
+   라이브러리 & API 레퍼런스 테이블
+   ============================================================ */
+.api-reference, .library-section {
+  margin: 32px 0;
+}
+
+.api-reference h3, .library-section h3 {
+  background: var(--primary);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 0;
+  font-size: 16px;
+}
+
+hr.section-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 36px 0;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  margin: 16px 0;
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  font-size: 14px;
+}
+
+table thead {
+  background: #f5f5f5;
+}
+
+table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 2px solid var(--border);
+}
+
+table td {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+table tr:hover { background: #fafafa; }
+
+table code {
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+/* API 시그니처 행 */
+.api-signature {
+  background: var(--code-bg);
+  color: #e0e0e0;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 13px;
+  margin: 4px 0;
+  overflow-x: auto;
+}
+
+/* ============================================================
+   이미지 / 다이어그램
+   ============================================================ */
+.diagram-container {
+  margin: 28px 0;
+  text-align: center;
+}
+
+.diagram-container img {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+}
+
+.diagram-container .caption {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* PPTX 원본 보존 뱃지 */
+.diagram-container .pptx-badge {
+  display: inline-block;
+  background: #FF6F00;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: normal;
+  padding: 1px 6px;
+  border-radius: 8px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Mermaid 다이어그램 (인라인 렌더링) */
+.mermaid {
+  margin: 24px auto;
+  text-align: center;
+}
+
+/* ============================================================
+   연습 문제 & 프로젝트
+   ============================================================ */
+.exercise-box {
+  background: #FFF3E0;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 28px 0;
+}
+
+.exercise-box h4 { color: var(--accent); }
+
+.project-box {
+  background: linear-gradient(135deg, #E8EAF6, #C5CAE9);
+  border-radius: 12px;
+  padding: 28px;
+  margin: 36px 0;
+}
+
+/* ============================================================
+   FAQ
+   ============================================================ */
+.faq-section details {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin: 8px 0;
+  padding: 0;
+}
+
+.faq-section summary {
+  padding: 14px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--primary);
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.faq-section details[open] summary { border-radius: 8px 8px 0 0; }
+
+.faq-section details .faq-answer {
+  padding: 16px 20px;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   챕터 네비게이션 (이전/다음)
+   ============================================================ */
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  margin: 48px 0 24px;
+  gap: 16px;
+}
+
+.chapter-nav a {
+  flex: 1;
+  display: block;
+  padding: 16px 20px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.chapter-nav a:hover {
+  border-color: var(--primary);
+  box-shadow: var(--card-shadow);
+}
+
+/* ============================================================
+   인쇄용 스타일
+   ============================================================ */
+@media print {
+  .main-content { max-width: 100%; padding: 20px; }
+  .chapter-header { -webkit-print-color-adjust: exact; }
+  .code-block-wrapper { break-inside: avoid; }
+}
+
+/* ============================================================
+   반응형 - 모바일
+   ============================================================ */
+@media (max-width: 1024px) {
+  .main-content { padding: 20px 16px; }
+  .chapter-header { padding: 32px 24px; }
+  .chapter-header h1 { font-size: 24px; }
+}
+
+</style>
+</head>
+<body>
+<div class="container">
+<main class="main-content">
+  <div class="chapter-header">
+    <div class="chapter-number">Chapter 08</div>
+    <h1>팀 규약 주입: CLAUDE.md로 컨벤션 명문화</h1>
+    <div class="chapter-meta"><span class="difficulty difficulty-중급">중급</span></div>
+  </div>
+
+<h1 id="claudemd">팀 규약 주입: CLAUDE.md로 컨벤션 명문화</h1>
+<div class="learning-objectives">
+<p><strong>학습 목표</strong></p>
+<ul>
+<li>주어진 FastAPI 저장소에 빌드·테스트 명령, 코딩 컨벤션, 금지사항을 항목으로 구조화한 CLAUDE.md를 작성할 수 있습니다.</li>
+<li>팀 공유 규칙과 개인·하위 디렉터리 규칙을 구분해, 프로젝트·사용자·하위 디렉터리 세 계층의 올바른 위치에 배치할 수 있습니다.</li>
+<li><code>/init</code>로 CLAUDE.md 골격을 생성하고 <code>/memory</code>와 <code>@</code>참조로 규칙을 편집·모듈화할 수 있습니다.</li>
+<li>간결·구체·최신 유지 원칙에 비추어 기존 CLAUDE.md에서 개선점 1개 이상을 찾아 고쳐 쓸 수 있습니다.</li>
+</ul>
+</div>
+<p>7단원까지 우리는 에이전트와 함께 코드를 탐색하고(4단원), 안전하게 바꾸고(5~6단원), 실행·테스트로 검증하는(7단원) 법을 익혔습니다. 그런데 매일 일하다 보면 같은 말을 반복하는 자신을 발견하게 됩니다. "테스트는 pytest로 돌려.", "들여쓰기는 4칸이야.", "main 브랜치에 직접 커밋하지 마.", "함수에는 타입 힌트를 붙여." 세션을 새로 열 때마다 에이전트는 이 규칙들을 모른 채 시작하므로, 신입은 매번 처음부터 팀의 약속을 설명해야 합니다.</p>
+<p>이 장에서 배우는 <strong>CLAUDE.md(클로드 점 엠디)</strong> 는 바로 그 반복을 끝내는 장치입니다. 팀의 약속을 한 파일에 적어 두면, 에이전트가 세션을 시작할 때마다 그 파일을 <em>자동으로</em> 읽어 들입니다. 한 번 적어 두면 다시 설명할 필요가 없는, 저장소의 <strong>헌법(constitution)</strong> 같은 문서입니다. 이 장의 핵심 개념을 한마디로 하면 <strong>CLAUDE.md로 팀 컨벤션 주입</strong>입니다.</p>
+<blockquote>
+<p>선수 개념 상기: 이 장은 4단원의 <strong>코드베이스 탐색(c04)</strong> 위에 세워집니다. 4단원에서 우리는 에이전트에게 "이 프로젝트는 무엇을 하나요?"를 물어 구조를 파악했습니다. CLAUDE.md는 그렇게 매번 묻고 답하던 맥락 중 <em>변하지 않는 약속</em> 들을 미리 적어 두어, 에이전트가 처음부터 알고 시작하게 만드는 것입니다. 또 5단원의 권한(c05)이 "무엇을 <em>할 수 있는가</em>"를 통제했다면, CLAUDE.md는 "무엇을 <em>어떻게</em> 해야 하는가"를 알려 준다는 점에서 짝을 이룹니다.</p>
+</blockquote>
+<p>이 장의 모든 예제는 앞 장과 같은 할 일 관리 API(<code>team-tasks-api</code>) 저장소를 무대로 합니다. 팀의 규약을 이 저장소의 CLAUDE.md에 명문화해, 다음 작업부터 에이전트가 팀 표준대로 일하게 만들어 봅니다.</p>
+<hr />
+<h2 id="_1">도입: 세션마다 팀 규칙을 다시 설명하지 않으려면</h2>
+<h3 id="_2">같은 말을 반복하는 신입의 하루</h3>
+<p>월요일 아침, 여러분은 세션을 열고 "할 일 삭제 엔드포인트를 추가해 줘"라고 지시합니다. 에이전트는 코드를 더하지만, 들여쓰기를 팀 규칙과 다르게 쓰고, 테스트를 빼먹고, 커밋 메시지를 영어 평문으로 적습니다. 여러분은 "들여쓰기는 4칸이야", "pytest 테스트도 같이 써", "커밋 메시지는 <code>feat:</code>으로 시작해"라고 일일이 교정합니다.</p>
+<p>화요일에 새 세션을 엽니다. 에이전트는 어제의 교정을 기억하지 못한 채 똑같은 실수를 반복합니다. 여러분은 다시 같은 말을 합니다. 이 비효율의 원인은 분명합니다. <strong>에이전트는 세션마다 백지에서 시작</strong> 하기 때문입니다. 사람이라면 한 번 들은 팀 규칙을 기억하지만, 새 세션의 에이전트에게 어제의 대화는 존재하지 않습니다.</p>
+<div class="info-box beginner">
+<p><strong>왜 '문서에 적힌 규칙'이 '말로 한 규칙'보다 강한가</strong></p>
+<p>말로 한 규칙은 그 세션이 끝나면 사라집니다. 그러나 CLAUDE.md에 적힌 규칙은 <em>모든</em> 세션의 시작에 자동으로 다시 읽힙니다. 한 번 적는 수고로 무한히 반복되는 설명을 없애는 것입니다. 신입에게 이것은 단순한 편의가 아니라, 팀의 암묵지(말로만 전해지는 약속)를 명문화해 누구나(에이전트 포함) 처음부터 표준대로 일하게 만드는 온보딩 장치입니다.</p>
+</div>
+<h3 id="claudemd_1">CLAUDE.md가 푸는 문제</h3>
+<p>CLAUDE.md는 이 "백지 시작" 문제를 정면으로 해결합니다. 저장소 루트에 <code>CLAUDE.md</code> 파일을 두면, 에이전트는 세션을 시작할 때마다 이 파일을 읽어 그 안의 지침을 맥락으로 삼습니다. "테스트는 pytest로", "타입 힌트 필수", "main에 직접 커밋 금지" 같은 약속을 한 번 적어 두면, 매 세션 그것을 알고 시작합니다. 신입은 반복 설명에서 해방되고, 팀 전체는 일관된 코드를 얻습니다.</p>
+<hr />
+<h2 id="claudemd_2">정의: CLAUDE.md는 세션마다 자동으로 읽히는 헌법이다</h2>
+<blockquote>
+<p><strong>CLAUDE.md</strong> 란, 저장소·사용자·조직 수준에 두는 마크다운 파일로, Claude Code가 <strong>세션을 시작할 때마다 자동으로 읽어</strong> 빌드·테스트 명령, 코딩 컨벤션, 아키텍처, 금지사항 같은 영속 지침을 에이전트에 주입하는 <strong>메모리 파일(memory file)</strong> 입니다. 사람이 평문으로 적고, 에이전트가 매 세션 그것을 맥락으로 삼는다는 점에서 저장소의 <strong>헌법</strong> 에 비유됩니다.</p>
+</blockquote>
+<p>핵심 성질 세 가지를 정리합니다.</p>
+<ul>
+<li><strong>자동 로딩(automatic loading)</strong>: 사람이 "이 파일을 읽어"라고 시키지 않아도, 세션이 시작되면 에이전트가 알아서 읽습니다. 매번 컨텍스트를 붙여 넣을 필요가 없습니다.</li>
+<li><strong>계층(hierarchy)</strong>: CLAUDE.md는 한 곳에만 있는 게 아니라 여러 위치에 둘 수 있습니다. 조직 전체 규칙, 개인 작업 취향(<code>~/.claude/CLAUDE.md</code>), 프로젝트 약속(<code>./CLAUDE.md</code>), 특정 하위 폴더의 세부 규칙으로 나뉩니다.</li>
+<li><strong>추가 로딩(additive)</strong>: 에이전트는 현재 작업 디렉터리에서 위쪽으로 디렉터리 트리를 거슬러 올라가며 만나는 CLAUDE.md들을 <em>더해서</em> 읽습니다. 상위의 큰 규칙 위에 하위의 세부 규칙이 얹히는 식입니다.</li>
+</ul>
+<p>여기서 "메모리"라는 단어에 유의하세요. Claude Code의 메모리에는 두 종류가 있습니다. 하나는 우리가 직접 적는 <strong>CLAUDE.md</strong> 이고, 다른 하나는 에이전트가 사용자의 교정·선호를 보고 스스로 적어 두는 <strong>자동 메모리(auto memory)</strong> 입니다. 이 장에서 우리가 설계하는 것은 전자, 즉 사람이 의도적으로 작성하는 팀 규약입니다.</p>
+<hr />
+<h2 id="_3">동작 원리: 컨텍스트 계층과 추가 로딩</h2>
+<div class="diagram-container">
+<div class="svg-diagram" role="img" aria-label="사용자 전역(~/.claude/CLAUDE.md), 프로젝트 루트(./CLAUDE.md), 하위 디렉터리(./subdir/CLAUDE.md) 세 계층이 Claude Code 에이전트에 순서대로 추가 로딩되는 구조.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 440" width="780" height="440"
+     font-family="'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="#78909c">
+      <polygon points="0 0,10 3.5,0 7"/>
+    </marker>
+  </defs>
+  <rect width="780" height="440" fill="#ffffff"/>
+
+  <!-- 제목 -->
+  <text x="390" y="36" text-anchor="middle" font-size="20" font-weight="bold" fill="#1a1a2e">CLAUDE.md 컨텍스트 계층과 추가 로딩</text>
+
+  <!-- 계층 1: 사용자 전역 -->
+  <rect x="40" y="68" width="320" height="78" rx="8" fill="#e1f5fe" stroke="#90caf9" stroke-width="2"/>
+  <text x="60" y="95" font-size="13" font-weight="bold" fill="#1565c0">사용자 전역</text>
+  <text x="60" y="116" font-size="12" fill="#37474f" font-family="'Consolas', 'Courier New', monospace">~/.claude/CLAUDE.md</text>
+  <text x="60" y="136" font-size="11" fill="#546e7a">모든 프로젝트에 항상 적용</text>
+
+  <!-- 계층 2: 프로젝트 루트 -->
+  <rect x="40" y="178" width="320" height="78" rx="8" fill="#fff3e0" stroke="#ffcc80" stroke-width="2"/>
+  <text x="60" y="205" font-size="13" font-weight="bold" fill="#e65100">프로젝트 루트</text>
+  <text x="60" y="226" font-size="12" fill="#37474f" font-family="'Consolas', 'Courier New', monospace">./CLAUDE.md</text>
+  <text x="60" y="246" font-size="11" fill="#546e7a">팀 공유 규칙 · 저장소 헌법</text>
+
+  <!-- 계층 3: 하위 디렉터리 -->
+  <rect x="40" y="288" width="320" height="78" rx="8" fill="#f3e5f5" stroke="#ce93d8" stroke-width="2"/>
+  <text x="60" y="315" font-size="13" font-weight="bold" fill="#6a1b9a">하위 디렉터리</text>
+  <text x="60" y="336" font-size="12" fill="#37474f" font-family="'Consolas', 'Courier New', monospace">./subdir/CLAUDE.md</text>
+  <text x="60" y="356" font-size="11" fill="#546e7a">에이전트 이동 시 추가 로딩</text>
+
+  <!-- 화살표: 계층1 → 에이전트 -->
+  <line x1="360" y1="107" x2="478" y2="210" stroke="#90caf9" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- 화살표: 계층2 → 에이전트 -->
+  <line x1="360" y1="217" x2="478" y2="240" stroke="#ffcc80" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- 화살표: 계층3 → 에이전트 -->
+  <line x1="360" y1="327" x2="478" y2="270" stroke="#ce93d8" stroke-width="2" marker-end="url(#arr)"/>
+  <!-- 추가 로딩 레이블 -->
+  <text x="400" y="305" text-anchor="middle" font-size="11" fill="#6a1b9a">추가 로딩</text>
+
+  <!-- Claude Code 에이전트 박스 -->
+  <rect x="480" y="185" width="220" height="120" rx="10" fill="#e8f5e9" stroke="#a5d6a7" stroke-width="2.5"/>
+  <text x="590" y="218" text-anchor="middle" font-size="16" font-weight="bold" fill="#1b5e20">Claude Code</text>
+  <text x="590" y="240" text-anchor="middle" font-size="13" fill="#37474f">에이전트</text>
+  <text x="590" y="264" text-anchor="middle" font-size="11" fill="#546e7a">세션 시작 시 자동 로딩</text>
+  <text x="590" y="282" text-anchor="middle" font-size="11" fill="#546e7a">계층 규칙 병합 적용</text>
+
+  <!-- 하단 설명 -->
+  <text x="390" y="405" text-anchor="middle" font-size="11" fill="#78909c">각 계층은 순서대로 추가(additive)되며, 하위 경로 진입 시 해당 파일이 덧붙여 로딩됩니다</text>
+  <text x="390" y="423" text-anchor="middle" font-size="11" fill="#78909c">사용자 전역(개인 취향) · 프로젝트 루트(팀 규칙) · 하위(모듈별 규칙) 로 관심사 분리</text>
+</svg>
+
+</div>
+</div>
+
+<p>CLAUDE.md가 "어디에 두느냐"에 따라 적용 범위가 달라집니다. 에이전트가 세션을 시작할 때, 현재 작업 디렉터리에서 시작해 <strong>위쪽으로 디렉터리 트리를 거슬러 올라가며</strong> 만나는 CLAUDE.md 파일들을 차례로 읽어 합칩니다. 아래에서 위로 좁은 규칙부터 넓은 규칙까지 쌓이는 구조입니다.</p>
+<table>
+<thead>
+<tr>
+<th>위치</th>
+<th>범위</th>
+<th>무엇을 담나</th>
+<th>공유 여부</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>조직(enterprise) 수준</td>
+<td>회사 전체</td>
+<td>보안·법무 같은 전사 정책</td>
+<td>조직이 배포</td>
+</tr>
+<tr>
+<td><code>~/.claude/CLAUDE.md</code></td>
+<td>내 모든 프로젝트(사용자)</td>
+<td>나의 개인 작업 취향</td>
+<td>나만(공유 안 됨)</td>
+</tr>
+<tr>
+<td><code>./CLAUDE.md</code> (프로젝트 루트)</td>
+<td>이 저장소</td>
+<td>팀의 빌드·테스트·컨벤션 약속</td>
+<td>git으로 팀 공유</td>
+</tr>
+<tr>
+<td>하위 디렉터리의 <code>CLAUDE.md</code></td>
+<td>그 폴더 안 작업</td>
+<td>그 모듈만의 세부 규칙</td>
+<td>git으로 팀 공유</td>
+</tr>
+</tbody>
+</table>
+<p>예를 들어 <code>team-tasks-api/routers/</code>에서 작업하면, 에이전트는 <code>routers/CLAUDE.md</code>(있다면) → <code>team-tasks-api/CLAUDE.md</code>(프로젝트) → <code>~/.claude/CLAUDE.md</code>(사용자)를 거슬러 올라가며 모두 읽어 합칩니다. 좁은 규칙(라우터 폴더)이 넓은 규칙(프로젝트·개인) 위에 얹혀, 그 위치에 맞는 맥락이 완성됩니다.</p>
+<p>이 구조의 의미는 분명합니다. <strong>모두가 지켜야 할 팀 약속은 프로젝트 루트</strong> 에, <strong>나만의 취향은 사용자 수준</strong> 에, <strong>특정 모듈에만 해당하는 세부는 하위 폴더</strong> 에 둡니다. 무엇을 어디에 두느냐가 곧 "누가 그 규칙의 영향을 받는가"를 결정합니다.</p>
+<div class="info-box warning">
+<p><strong>주의: 공유되는 곳과 안 되는 곳을 헷갈리지 말 것</strong></p>
+<p><code>./CLAUDE.md</code>(프로젝트 루트)는 저장소에 포함되어 git으로 팀 전체와 공유됩니다. 반면 <code>~/.claude/CLAUDE.md</code>(사용자 수준)는 내 컴퓨터에만 있어 팀원에게 전달되지 않습니다. 그래서 "모두가 따라야 할 팀 규칙"을 사용자 수준에 적으면, 정작 동료의 에이전트는 그 규칙을 모른 채 일합니다. 팀 규칙은 반드시 프로젝트 CLAUDE.md에 두어야 합니다. 이 구분은 이 장 뒷부분에서 다시 강조합니다.</p>
+</div>
+<hr />
+<h2 id="worked-example-init-claudemd">worked example: /init로 빌드·테스트·컨벤션 담은 CLAUDE.md 생성</h2>
+<p>CLAUDE.md를 처음부터 빈손으로 쓸 필요는 없습니다. Claude Code는 <code>/init</code> 커맨드로 저장소를 분석해 초기 골격을 만들어 줍니다. 받은 팀 저장소에서 처음 이 명령을 써 보겠습니다.</p>
+<h3 id="1-init">1) /init로 초기 골격 생성</h3>
+<p>세션을 열고 다음을 입력합니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; /init
+</code></pre></div>
+<p>에이전트는 저장소를 훑어(4단원의 에이전트 검색) 구조·의존성·실행 방식을 파악하고, 다음과 같은 초기 <code>CLAUDE.md</code>를 프로젝트 루트에 만들어 줍니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">markdown</span></div><pre class="line-numbers"><code class="language-markdown"># team-tasks-api
+
+할 일(task)을 생성·조회·완료 처리하는 FastAPI 기반 백엔드 서비스입니다.
+
+## 빌드·실행
+- 의존성 설치: `pip install -r requirements.txt`
+- 개발 서버 실행: `python -m uvicorn main:app --reload`
+
+## 테스트
+- 전체 테스트: `python -m pytest -q`
+- 동작을 바꾸거나 추가하면 그 동작을 검사하는 테스트를 함께 작성합니다.
+
+## 구조
+- `main.py`: FastAPI 앱 생성과 라우터 등록 진입점
+- `routers/tasks.py`: 할 일 관련 엔드포인트
+- `models.py`: 요청·응답 데이터 모델
+- `store.py`: 메모리 기반 할 일 저장소
+</code></pre></div>
+<p><code>/init</code>는 저장소를 자동 분석해 만든 <em>초안</em> 입니다. 사실에 기반하지만 완벽하지는 않으므로, 이제 사람이 팀의 실제 약속을 더해 다듬어야 합니다.</p>
+<h3 id="2">2) 팀 컨벤션·금지사항을 더한다</h3>
+<p>초안에 팀의 코딩 컨벤션과 금지사항을 보강합니다. 다음 절(무엇을 담는가)을 참고해 다음과 같이 보강했다고 합시다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">markdown</span></div><pre class="line-numbers"><code class="language-markdown">## 코딩 컨벤션
+- 모든 함수에 타입 힌트를 붙입니다.
+- 들여쓰기는 공백 4칸, 한 줄은 79자를 넘기지 않습니다.
+- 엔드포인트는 `routers/`의 기존 스타일(APIRouter·prefix)을 따릅니다.
+
+## git 규칙
+- 작업은 항상 새 브랜치에서 합니다. main에 직접 커밋하지 않습니다.
+- 커밋 메시지는 Conventional Commits(`feat:`, `fix:`, `docs:`)를 따릅니다.
+
+## 하지 말 것
+- 테스트 없이 엔드포인트를 추가하지 않습니다.
+- `secrets/`·`.env` 파일을 읽거나 수정하지 않습니다.
+</code></pre></div>
+<h3 id="3">3) 효과 확인</h3>
+<p>이제 새 세션을 열어 같은 작업을 지시해 봅니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">나: 할 일을 삭제하는 DELETE /tasks/{task_id} 엔드포인트를 추가해 줘.
+</code></pre></div>
+<p>이번에는 "들여쓰기 4칸", "테스트도 같이", "타입 힌트", "새 브랜치에서" 같은 말을 한마디도 하지 않았습니다. 그런데도 에이전트는 CLAUDE.md를 이미 읽었기 때문에, 4칸 들여쓰기와 타입 힌트를 지킨 코드를 만들고, pytest 테스트를 함께 작성하며, 작업 브랜치에서 진행합니다. <strong>한 번 적어 둔 규약이 매 세션 자동으로 적용되는</strong> 효과를 직접 확인하는 순간입니다.</p>
+<div class="info-box tip">
+<p><strong>팁: /init는 출발점이지 종착점이 아니다</strong></p>
+<p><code>/init</code>가 만든 초안을 그대로 두지 마세요. 자동 분석은 "무엇이 있는지"는 잘 적지만, "팀이 <em>어떻게</em> 일하기로 약속했는지"(금지사항·리뷰 규칙·도메인 용어)는 사람만 압니다. <code>/init</code>로 뼈대를 얻은 뒤, 팀의 실제 약속을 더해 완성하는 흐름이 정석입니다.</p>
+</div>
+<hr />
+<h2 id="_4">무엇을 담는가: 명령·컨벤션·아키텍처·금지사항</h2>
+<p>좋은 CLAUDE.md에 무엇을 담아야 할지 막막할 수 있습니다. "에이전트가 매 세션 알고 있으면 시간을 아끼고 실수를 줄일 정보"를 담는다고 생각하면 쉽습니다. 다음 네 묶음이 핵심입니다.</p>
+<table>
+<thead>
+<tr>
+<th>묶음</th>
+<th>담을 내용</th>
+<th>예시</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>명령(commands)</td>
+<td>빌드·실행·테스트·린트 명령</td>
+<td><code>python -m pytest -q</code>, <code>python -m uvicorn main:app --reload</code></td>
+</tr>
+<tr>
+<td>컨벤션(conventions)</td>
+<td>코드 스타일·네이밍·구조 규칙</td>
+<td>타입 힌트 필수, 4칸 들여쓰기, 엔드포인트는 라우터에</td>
+</tr>
+<tr>
+<td>아키텍처(architecture)</td>
+<td>핵심 모듈의 역할과 경계</td>
+<td>저장소 로직은 <code>store.py</code>에, 라우터는 검증만</td>
+</tr>
+<tr>
+<td>금지사항(don'ts)</td>
+<td>절대 하면 안 되는 것</td>
+<td>테스트 없는 추가 금지, <code>secrets/</code> 접근 금지</td>
+</tr>
+</tbody>
+</table>
+<p>특히 <strong>명령</strong> 과 <strong>금지사항</strong> 이 가장 효과가 큽니다. 명령은 에이전트가 매번 "테스트를 어떻게 돌리지?"를 추측하지 않게 해 주고, 금지사항은 위험한 행동을 사전에 차단합니다. 반대로 너무 일반적인 조언("좋은 코드를 쓰세요")은 적지 마세요. 에이전트가 실제 행동을 바꿀 수 있는 <em>구체적인</em> 규칙만 가치가 있습니다.</p>
+<div class="info-box tip">
+<p><strong>팁: "구체적이고 검증 가능한" 규칙을 적어라</strong></p>
+<p>"코드를 깔끔하게"는 행동을 바꾸지 못합니다. "한 줄은 79자를 넘기지 않는다"는 검사할 수 있는 구체 규칙이라 행동을 바꿉니다. CLAUDE.md의 각 줄을 적을 때 "이 규칙을 지켰는지 누군가 확인할 수 있는가?"를 자문하면, 모호한 조언과 효과적인 규칙을 가려낼 수 있습니다.</p>
+</div>
+<hr />
+<h2 id="memory">/memory 편집과 @참조로 모듈화</h2>
+<h3 id="memory_1">/memory로 메모리 열고 편집하기</h3>
+<p>CLAUDE.md를 손볼 때마다 에디터로 파일을 직접 여는 대신, 세션 안에서 <code>/memory</code> 커맨드를 쓰면 어떤 메모리 파일이 있는지 둘러보고 편집할 수 있습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; /memory
+</code></pre></div>
+<p>이 명령은 현재 적용 중인 메모리 파일들(프로젝트 CLAUDE.md, 사용자 CLAUDE.md, 자동 메모리 폴더 등)을 보여 주고, 그중 하나를 골라 편집하도록 안내합니다. <code>/init</code>로 골격을 만들고 <code>/memory</code>로 다듬는 흐름이 자연스러운 한 쌍입니다.</p>
+<p>또한 작업 중 "이건 앞으로도 늘 지켜야 할 규칙이다" 싶은 것을 발견하면, 세션에서 바로 메모리에 추가하도록 부탁할 수 있습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">나: 방금 정한 &quot;엔드포인트 추가 시 테스트도 같이&quot;를 프로젝트 CLAUDE.md의 규칙으로 추가해 줘.
+</code></pre></div>
+<h3 id="_5">@참조로 긴 규칙을 모듈화하기</h3>
+<p>CLAUDE.md가 길어지면 한 파일에 모든 것을 욱여넣기보다, 다른 파일을 <code>@</code>로 끌어와 모듈화하는 편이 깔끔합니다. CLAUDE.md 안 어디에서나 <code>@경로</code>를 쓰면, 세션 시작 시 그 파일의 내용도 함께 읽힙니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">markdown</span></div><pre class="line-numbers"><code class="language-markdown"># team-tasks-api
+
+핵심 약속은 아래 파일들을 참조합니다.
+
+자세한 코딩 컨벤션: @docs/conventions.md
+API 설계 가이드: @docs/api-guide.md
+
+## 빠른 참조
+- 테스트: `python -m pytest -q`
+- 작업은 새 브랜치에서, 커밋은 Conventional Commits.
+</code></pre></div>
+<p>이렇게 하면 CLAUDE.md 본문은 빠른 참조만 간결히 유지하고, 길고 상세한 컨벤션은 별도 문서로 분리해 관리할 수 있습니다. 컨벤션 문서를 고치면 CLAUDE.md를 건드리지 않아도 자동으로 반영됩니다.</p>
+<div class="info-box warning">
+<p><strong>주의: @참조는 정리를 돕지만 분량을 줄이지는 않는다</strong></p>
+<p><code>@</code>로 분리한 파일도 세션 시작 시 함께 로딩됩니다. 즉, 파일을 나눈다고 에이전트가 읽는 총량이 줄어드는 것은 아닙니다. <code>@참조</code>의 목적은 <em>조직화</em> (관리하기 좋게 나누기)이지 <em>경량화</em> 가 아닙니다. 정말 분량을 줄이려면, 참조하는 문서 자체를 간결하게 유지해야 합니다.</p>
+</div>
+<hr />
+<h2 id="worked-example-claude">worked example: 팀 규칙(프로젝트)과 개인 취향(~/.claude) 분리</h2>
+<p>같은 규칙이라도 "팀 전체의 약속"인지 "나만의 취향"인지에 따라 두는 곳이 달라야 합니다. 구체 상황으로 풀어 봅니다.</p>
+<p>상황: 우리 팀은 "테스트는 pytest로, 커밋은 Conventional Commits로"를 약속했습니다. 한편 여러분 개인은 "에이전트가 답할 때 한국어로 설명하고, 코드 주석도 한국어로 달면 좋겠다"는 취향이 있습니다. 이 둘을 어디에 둘까요?</p>
+<h3 id="1-claudemd">1) 팀 약속 → 프로젝트 CLAUDE.md</h3>
+<p>팀 전체가 따라야 하므로 git으로 공유되는 프로젝트 루트에 둡니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">markdown</span></div><pre class="line-numbers"><code class="language-markdown"># team-tasks-api/CLAUDE.md (팀 공유)
+
+## 테스트
+- 모든 변경은 `python -m pytest -q`로 검증하고 통과를 확인합니다.
+
+## git 규칙
+- 작업은 새 브랜치에서, 커밋 메시지는 Conventional Commits를 따릅니다.
+</code></pre></div>
+<p>이 파일은 저장소에 커밋되므로, 동료가 저장소를 받아 세션을 열면 그의 에이전트도 같은 규칙을 읽습니다. 팀의 일관성이 자동으로 유지됩니다.</p>
+<h3 id="2-claudeclaudemd">2) 개인 취향 → 사용자 수준 ~/.claude/CLAUDE.md</h3>
+<p>나에게만 해당하는 취향이므로 내 컴퓨터의 사용자 수준 파일에 둡니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">markdown</span></div><pre class="line-numbers"><code class="language-markdown"># ~/.claude/CLAUDE.md (나의 모든 프로젝트에 적용, 공유 안 됨)
+
+## 응답 취향
+- 설명은 한국어로 합니다.
+- 코드 주석은 한국어로 작성합니다.
+</code></pre></div>
+<p>이 파일은 git에 올라가지 않으므로 동료에게 영향을 주지 않습니다. 대신 내가 어떤 프로젝트에서 일하든 늘 적용됩니다. 두 파일은 충돌하지 않고 <em>함께</em> 읽혀, "팀 약속 + 나의 취향"이 합쳐진 맥락을 만듭니다.</p>
+<h3 id="_6">왜 이 분리가 중요한가</h3>
+<p>만약 개인 취향("한국어로 설명")을 프로젝트 CLAUDE.md에 적으면, 영어권 동료의 에이전트에게도 강요됩니다. 반대로 팀 약속("pytest로 검증")을 사용자 수준에만 적으면, 정작 동료는 그 규칙을 모른 채 일합니다. <strong>"누가 이 규칙의 영향을 받아야 하는가"</strong> 를 기준으로 두는 곳을 정하는 것, 이것이 계층을 제대로 쓰는 핵심입니다.</p>
+<h3 id="claudemd_3">한 걸음 더: 하위 디렉터리 CLAUDE.md로 모듈별 세부 규칙 두기</h3>
+<p>계층은 "프로젝트 대 개인"에서 끝나지 않습니다. 같은 저장소 안에서도 <em>특정 폴더에만</em> 해당하는 세부 규칙은 그 폴더에 CLAUDE.md를 따로 둘 수 있습니다. 예를 들어 라우터 코드에만 적용할 약속이 있다면 <code>routers/CLAUDE.md</code>에 둡니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">markdown</span></div><pre class="line-numbers"><code class="language-markdown"># routers/CLAUDE.md (라우터 폴더에만 적용)
+
+## 라우터 작성 규칙
+- 모든 엔드포인트는 APIRouter와 prefix를 써서 정의합니다.
+- 비즈니스 로직은 라우터에 넣지 않고 store.py에 위임합니다.
+- 입력 검증 실패는 HTTPException(status_code=422)로 응답합니다.
+</code></pre></div>
+<p>이제 에이전트가 <code>routers/tasks.py</code>를 수정할 때, 디렉터리 트리를 거슬러 올라가며 <code>routers/CLAUDE.md</code>(라우터 세부)와 <code>team-tasks-api/CLAUDE.md</code>(프로젝트 전체)를 <em>모두</em> 읽어 합칩니다. 그래서 그 폴더 안에서는 라우터 전용 규칙이 추가로 적용되고, 다른 폴더에서는 그 규칙이 끼어들지 않습니다.</p>
+<p>이 방식의 장점은 <strong>규칙이 적용되는 범위를 폴더 위치로 표현</strong> 한다는 점입니다. 프로젝트 루트 CLAUDE.md에 "라우터는 이렇게, 모델은 저렇게, 저장소는 그렇게"를 다 적으면 길고 잡음이 많아집니다. 대신 각 모듈의 세부 규칙을 그 폴더의 CLAUDE.md로 분산하면, 루트는 전체 약속만 간결히 유지하고 세부는 해당 위치에서만 적용됩니다. 다만 폴더마다 CLAUDE.md를 남발하면 관리가 어려워지므로, 모듈별로 <em>분명히 다른</em> 규칙이 있을 때만 쓰는 것이 좋습니다.</p>
+<div class="info-box danger">
+<p><strong>자주 하는 실수: 팀 규칙을 개인 파일에 두기</strong></p>
+<p>신입이 흔히 저지르는 실수는, 자기 컴퓨터의 <code>~/.claude/CLAUDE.md</code>에 팀 규칙까지 적어 두고 "잘 되네"라고 안심하는 것입니다. 내 화면에서는 잘 작동하지만, 그 규칙은 동료에게 공유되지 않습니다. 결과적으로 팀 안에서 "되는 사람과 안 되는 사람"이 갈리는 혼란이 생깁니다. 팀이 함께 지킬 규칙은 반드시 git으로 공유되는 프로젝트 CLAUDE.md에 두세요.</p>
+</div>
+<hr />
+<h2 id="claudemd_4">좋은 CLAUDE.md의 원칙: 간결·구체·최신 유지</h2>
+<p>CLAUDE.md를 처음 쓰면 "많이 적을수록 좋겠지"라는 유혹에 빠지기 쉽습니다. 그러나 좋은 CLAUDE.md를 가르는 것은 분량이 아니라 세 가지 원칙입니다.</p>
+<p><strong>1. 간결(concise).</strong> 모든 것을 담으면 정작 중요한 규칙이 잡음에 묻힙니다. 에이전트가 매 세션 읽는 문서이므로, 핵심 규칙만 추려 짧게 유지해야 신호가 또렷합니다. "있으면 좋은" 정보보다 "없으면 실수하는" 정보를 우선하세요.</p>
+<p><strong>2. 구체(specific).</strong> "좋은 코드를 쓰세요" 같은 일반론은 행동을 바꾸지 못합니다. "한 줄 79자 이내", "엔드포인트는 <code>app/routers/</code>에" 처럼 검사 가능한 구체 규칙만 효과가 있습니다.</p>
+<p><strong>3. 최신 유지(up to date).</strong> CLAUDE.md는 한 번 쓰고 방치하면 낡습니다. 테스트 명령이 바뀌거나 폴더 구조가 달라졌는데 문서가 옛날 그대로면, 에이전트는 <em>틀린</em> 안내를 따라 잘못 일합니다. 관례가 바뀌면 CLAUDE.md도 같이 갱신해야 합니다. 낡은 규칙은 없는 것만 못합니다.</p>
+<div class="info-box tip">
+<p><strong>팁: 교정이 반복되면 그것을 규칙으로 승격하라</strong></p>
+<p>같은 지적을 두 번 이상 하고 있다면, 그것은 CLAUDE.md에 올라가야 할 신호입니다. "또 들여쓰기를 지적하네" 싶은 순간, 그 교정을 <code>/memory</code>로 프로젝트 CLAUDE.md의 규칙으로 승격하세요. 반복되는 교정을 영속 규칙으로 바꾸는 것이 CLAUDE.md를 키워 가는 가장 자연스러운 방법입니다.</p>
+</div>
+<hr />
+<h2 id="2-1-team-tasks-api-claudemd">즉시 연습 (2종 1세트): team-tasks-api에 실제 CLAUDE.md를 만들고 효과 확인하기</h2>
+<p>이제 종이에 골격을 채우는 대신, 1장에서 준비한 <strong>실제 <code>team-tasks-api</code> 저장소를 Claude Code로 열고</strong> <code>/init</code>로 CLAUDE.md를 직접 만든 뒤, 보강하고, <strong>새 세션에서 효과를 실제로 확인</strong>합니다. 핵심은 "CLAUDE.md가 있을 때와 없을 때 에이전트의 행동이 달라지는 것"을 화면에서 직접 겪는 것입니다. 미리 정한 답을 적는 것이 아니라, <strong>화면에 실제로 나타난 파일 내용과 에이전트의 반응을 그대로 옮겨 적습니다.</strong></p>
+<h3 id="1">1) 모범 예시 (실제 실행 예)</h3>
+<p>상황: 작은 FastAPI 저장소에서 <code>/init</code>를 실행하면, 에이전트가 저장소를 훑어 빌드·테스트·구조를 담은 CLAUDE.md 초안을 만들어 줍니다. 거기에 금지사항·컨벤션을 보강한 결과는 다음과 같습니다.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">markdown</span></div><pre class="line-numbers"><code class="language-markdown"># orders-api
+
+주문(order)을 생성·조회하는 FastAPI 백엔드입니다.
+
+## 빌드·테스트
+- 설치: `pip install -r requirements.txt`
+- 실행: `python -m uvicorn main:app --reload`
+- 테스트: `python -m pytest -q`
+
+## 컨벤션
+- 모든 함수에 타입 힌트를 붙입니다.
+- 들여쓰기 4칸, 한 줄 79자 이내.
+
+## git
+- 새 브랜치에서 작업, 커밋은 Conventional Commits.
+
+## 하지 말 것
+- 테스트 없이 엔드포인트를 추가하지 않습니다.
+- `.env`를 읽거나 수정하지 않습니다.
+</code></pre></div>
+<p>이 골격은 간결하면서도(짧음), 구체적이고(검사 가능한 규칙), 명령·컨벤션·금지사항을 모두 담았습니다. <code>/init</code>가 만든 초안에 "하지 말 것"을 사람이 더해 완성한 것입니다.</p>
+<h3 id="2-team-tasks-api">2) 직접 해보기 (team-tasks-api에서 실제로 만들고 검증)</h3>
+<div class="project-box">
+<p><strong>연습 1 — <code>/init</code>로 CLAUDE.md를 <em>실제로</em> 만들고 보강하라.</strong></p>
+<p>team-tasks-api 폴더에서 <code>claude</code>를 실행하고, 슬래시 명령 <code>/init</code>를 입력하세요. 에이전트가 저장소를 훑어 CLAUDE.md 초안을 만듭니다. 만들어진 파일을 열어, <strong>실제로 생성된 내용</strong>을 그대로 옮겨 적으세요(추측이 아니라 파일에 적힌 그대로).</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[/init 결과] CLAUDE.md에 실제로 들어간 빌드·테스트 명령:
+[/init 결과] 자동으로 잡힌 프로젝트 구조 설명:
+</code></pre></div>
+<p>이어서 다음을 에이전트에게 지시해 CLAUDE.md를 보강하세요.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">&gt; CLAUDE.md에 &quot;하지 말 것&quot; 섹션을 추가해 줘. 테스트 없이 엔드포인트를 추가하지 말 것,
+  .env를 읽거나 수정하지 말 것 두 가지를 넣어 줘.
+</code></pre></div>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[보강 결과] 추가된 &quot;하지 말 것&quot; 줄(파일에 적힌 그대로):
+</code></pre></div>
+<p><strong>연습 2 — 새 세션에서 효과를 <em>실제로</em> 확인하라.</strong></p>
+<p>CLAUDE.md가 정말 자동으로 읽히는지 확인합니다. <code>claude</code>를 한 번 종료했다가 같은 폴더에서 다시 열고(새 세션), 다음을 그대로 물어보세요.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">&gt; 이 프로젝트에서 테스트는 어떤 명령으로 돌려? 새 엔드포인트를 추가할 때 지켜야 할 규칙은?
+</code></pre></div>
+<p>에이전트가 <strong>당신이 알려 주지 않았는데도</strong> CLAUDE.md의 내용(예: <code>python -m pytest -q</code>, 테스트 없이 추가 금지)을 근거로 답하는지 화면에서 확인하고, 실제 답을 옮겨 적으세요.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">[새 세션의 실제 답] 에이전트가 댄 테스트 명령과 규칙(CLAUDE.md를 참고했는가?):
+</code></pre></div>
+<p><strong>연습 3 — 팀 규칙과 개인 취향을 <em>실제로</em> 나눠 배치하라.</strong></p>
+<p>"에이전트는 한국어로 설명한다"는 개인 취향이므로 프로젝트 CLAUDE.md가 아니라 사용자 <code>~/.claude/CLAUDE.md</code>에 둡니다. 이 규칙을 사용자 메모리에 실제로 추가하고(직접 편집하거나 <code>/memory</code>), 새 세션에서 에이전트가 한국어로 설명하는지 확인하세요.</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">text</span></div><pre class="line-numbers"><code class="language-text">한국어 규칙을 둔 파일 경로(사용자 메모리가 맞는가?):
+실제로 한국어로 설명했는가:
+</code></pre></div>
+</div>
+<div class="project-box">
+<p><strong>자가체크 — 머리로가 아니라 <em>손으로</em> 했는지 확인하세요.</strong></p>
+<ul>
+<li>[ ] team-tasks-api 폴더에서 <code>/init</code>를 실제로 실행해 CLAUDE.md 파일이 생성된 것을 확인했다.</li>
+<li>[ ] [/init 결과]에 적은 것이 추측이 아니라 생성된 파일에 실제로 적힌 내용이다.</li>
+<li>[ ] "하지 말 것" 섹션을 보강하고, 파일에 그 줄이 실제로 들어간 것을 확인했다.</li>
+<li>[ ] <strong>새 세션</strong>에서 에이전트가 CLAUDE.md를 자동으로 읽고 그 내용을 근거로 답하는 것을 직접 봤다.</li>
+<li>[ ] "테스트는 pytest로"는 팀 공유용 <strong>프로젝트 CLAUDE.md</strong>, "한국어로 설명"은 개인용 <strong>사용자 ~/.claude/CLAUDE.md</strong> 에 실제로 나눠 두었다.</li>
+<li>[ ] CLAUDE.md가 있을 때와 없을 때 에이전트의 행동이 어떻게 달라지는지 직접 겪어 설명할 수 있다.</li>
+</ul>
+</div>
+<hr />
+<h2 id="team-tasks-api-claudemd">단원 미니 프로젝트: team-tasks-api에 CLAUDE.md 심기</h2>
+<p>이 단원의 미니 프로젝트는 종이 위 빈칸이 아니라, 1장에서 준비한 <strong>실제 <code>team-tasks-api</code> 저장소</strong>에 CLAUDE.md를 직접 만들어 효과를 눈으로 확인하는 과제입니다. 1장 11절에서 이 저장소를 작업 폴더로 복사하고 <code>git init</code>·<code>pip install</code>·<code>python -m pytest -q</code>(7 passed)까지 끝냈다고 가정합니다. 그 폴더에서 그대로 이어 갑니다.</p>
+<p>마일스톤(증분):</p>
+<ol>
+<li><strong>M1 <code>/init</code>로 초안 생성.</strong> <code>team-tasks-api</code> 루트에서 <code>claude</code>를 열고 <code>/init</code>를 실행해, 저장소를 분석한 <code>CLAUDE.md</code> 초안을 만듭니다. 초안에 실제 파일(<code>main.py</code>·<code>models.py</code>·<code>store.py</code>·<code>routers/tasks.py</code>)이 구조로 적혔는지 확인합니다. (적용 개념: <code>/init</code>, 자동 로딩)</li>
+<li><strong>M2 빌드·테스트 명령 명문화.</strong> 초안의 명령이 이 저장소의 실제 명령과 일치하도록 다듬습니다. 실행은 <code>python -m uvicorn main:app --reload</code>, 테스트는 <code>python -m pytest -q</code>입니다. 잘못된 경로(<code>app.main:app</code> 등)가 있으면 바로잡습니다. (적용 개념: 명령, 최신 유지)</li>
+<li><strong>M3 컨벤션·금지사항 보강.</strong> 타입 힌트 필수·들여쓰기 4칸·"엔드포인트는 <code>routers/</code>의 기존 스타일", "테스트 없이 엔드포인트 추가 금지", "<code>store.py</code>에 저장소 로직 위임"을 적습니다. (적용 개념: 컨벤션·금지사항)</li>
+<li><strong>M4 효과 검증.</strong> 새 세션을 열어 "할 일을 삭제하는 <code>DELETE /tasks/{task_id}</code> 엔드포인트를 <code>routers/tasks.py</code>에 추가하고 테스트도 함께 써 줘"라고만 지시합니다. CLAUDE.md를 한 번 적어 둔 덕분에 타입 힌트·<code>store.py</code> 위임·테스트 작성이 자동으로 따라오는지 확인합니다.</li>
+</ol>
+<p><strong>실제 검증 단계.</strong> M4의 변경이 끝나면 반드시 저장소에서 테스트를 돌려 통과를 확인합니다("검증 전까지는 끝난 게 아니다", 7장).</p>
+<div class="code-block-wrapper"><div class="code-block-header"><span class="lang-badge">console</span></div><pre class="line-numbers"><code class="language-console">&gt; python -m pytest -q
+........                                                                 [100%]
+8 passed
+</code></pre></div>
+<p>기존 7개에 삭제 엔드포인트 테스트 1개가 더해져 통과하면, CLAUDE.md가 실제로 에이전트의 작업 방식을 바꿨다는 증거입니다.</p>
+<div class="project-box">
+<p><strong>미니 프로젝트 자가체크</strong></p>
+<ul>
+<li>[ ] <code>team-tasks-api</code> 루트에서 <code>/init</code>로 CLAUDE.md 초안을 만들었는가</li>
+<li>[ ] 빌드·테스트 명령이 실제 명령(<code>python -m uvicorn main:app --reload</code>·<code>python -m pytest -q</code>)과 일치하는가</li>
+<li>[ ] 컨벤션·금지사항에 "테스트 없는 추가 금지"·"<code>store.py</code>에 로직 위임"을 넣었는가</li>
+<li>[ ] 새 세션에서 추가 지시 없이도 에이전트가 규약대로(테스트 동반·타입 힌트) 작업했는가</li>
+<li>[ ] 변경 후 <code>python -m pytest -q</code>로 통과를 직접 확인했는가</li>
+<li>[ ] CLAUDE.md를 git에 커밋해 팀과 공유되도록 했는가</li>
+</ul>
+</div>
+<hr />
+<h2 id="_7">흔한 오류와 오개념</h2>
+<div class="info-box danger">
+<p><strong>오개념 1: "CLAUDE.md는 한 번 잘 써 두면 끝이다"</strong></p>
+<p>CLAUDE.md를 처음 정성껏 쓰고 나면 다 됐다고 여기기 쉽습니다. 그러나 프로젝트는 변합니다. 테스트 명령이 바뀌고, 폴더가 옮겨지고, 새 규칙이 생깁니다. 문서가 옛날 그대로면 에이전트는 <em>틀린</em> 안내(예: 더는 없는 폴더 경로)를 따라 잘못 일합니다. 낡은 규칙은 없는 것보다 해롭습니다.</p>
+<p>→ <strong>교정</strong>: 관례가 바뀔 때 CLAUDE.md도 함께 고치는 것을 작업의 일부로 삼으세요. 같은 교정을 두 번 했다면, 그때마다 <code>/memory</code>로 규칙을 갱신·추가하는 습관을 들이면 문서가 자연스럽게 최신으로 유지됩니다.</p>
+</div>
+<div class="info-box danger">
+<p><strong>오개념 2: "많이 적을수록 에이전트가 똑똑해진다"</strong></p>
+<p>규칙을 빠짐없이 적으려다 CLAUDE.md가 수백 줄이 되면, 정작 중요한 핵심 규칙이 잡음에 묻혀 효과가 떨어집니다. 일반론("좋은 코드를 쓰자")과 사소한 취향까지 다 적으면 신호 대 잡음 비율이 나빠집니다.</p>
+<p>→ <strong>교정</strong>: "없으면 실수하는" 핵심 규칙만 간결히 담으세요. 길고 상세한 컨벤션은 <code>@docs/conventions.md</code>로 분리하고, CLAUDE.md 본문은 빠른 참조만 또렷하게 유지합니다. 각 줄에 대해 "이게 에이전트의 행동을 실제로 바꾸는가?"를 자문하세요.</p>
+</div>
+<div class="info-box danger">
+<p><strong>오개념 3: "내 컴퓨터에서 되니까 팀도 될 것이다"</strong></p>
+<p>팀이 지켜야 할 규칙을 개인 파일(<code>~/.claude/CLAUDE.md</code>)에만 적어 두는 실수입니다. 내 화면에서는 잘 작동하지만, 그 파일은 git으로 공유되지 않아 동료의 에이전트는 그 규칙을 전혀 모릅니다. 팀 안에서 "되는 사람과 안 되는 사람"이 갈립니다.</p>
+<p>→ <strong>교정</strong>: "누가 이 규칙의 영향을 받아야 하는가"를 기준으로 위치를 정하세요. 모두가 지킬 팀 약속은 git으로 공유되는 <strong>프로젝트 CLAUDE.md</strong> 에, 나만의 취향만 <strong>사용자 ~/.claude/CLAUDE.md</strong> 에 둡니다.</p>
+</div>
+<hr />
+<h2 id="_8">자주 묻는 질문</h2>
+<div class="faq-section">
+<p><strong>Q. CLAUDE.md를 만들었는데 에이전트가 규칙을 안 지키는 것 같습니다. 왜인가요?</strong></p>
+<p>가장 흔한 원인은 두 가지입니다. 첫째, 파일이 에이전트가 읽는 위치에 없는 경우입니다. 작업 중인 디렉터리에서 위로 거슬러 올라가는 경로 안(프로젝트 루트나 상위 폴더, <code>~/.claude</code>)에 있어야 읽힙니다. 둘째, 규칙이 모호한 경우입니다. "깔끔하게"처럼 검사 불가능한 조언은 행동을 바꾸지 못합니다. "한 줄 79자 이내"처럼 구체적으로 적었는지 확인하세요. 그래도 안 지켜진다면 <code>/memory</code>로 현재 어떤 메모리가 적용 중인지 직접 확인할 수 있습니다.</p>
+<p><strong>Q. 규칙이 많아지는데 한 파일에 다 적어야 하나요?</strong></p>
+<p>아닙니다. 본문이 길어지면 <code>@docs/conventions.md</code>처럼 <code>@참조</code>로 분리해 모듈화하세요. 다만 분리한다고 에이전트가 읽는 총량이 줄지는 않으므로(세션 시작 시 함께 로딩), 분리의 목적은 <em>관리 편의</em> 라는 점을 기억하세요. 특정 폴더에만 해당하는 규칙은 그 폴더의 하위 CLAUDE.md로 분산하는 것도 방법입니다.</p>
+<p><strong>Q. CLAUDE.md와 자동 메모리는 무엇이 다른가요?</strong></p>
+<p>CLAUDE.md는 사람이 의도적으로 적는 영속 지침이고, 자동 메모리는 에이전트가 사용자의 교정·선호를 보고 스스로 적어 두는 노트입니다. 이 장에서 설계한 것은 전자입니다. 자동 메모리도 <code>/memory</code>로 무엇이 저장됐는지 둘러볼 수 있습니다.</p>
+<p><strong>Q. CLAUDE.local.md는 무엇인가요?</strong></p>
+<p>CLAUDE.md와 같은 역할을 하되 공유하지 않으려는 개인용 메모리를 같은 저장소 안에 둘 때 쓰는 변형입니다. 보통 <code>.gitignore</code>에 포함해 커밋되지 않게 합니다. "이 저장소에서 나만 쓰는 임시 메모"가 필요할 때 유용합니다.</p>
+</div>
+<hr />
+<h2 id="_9">이 장에서 익힌 것</h2>
+<p>이 장에서 우리는 세션마다 반복하던 팀 규칙 설명을, CLAUDE.md 한 파일로 자동화하는 법을 배웠습니다. 핵심을 정리합니다.</p>
+<ul>
+<li>CLAUDE.md는 <strong>세션 시작마다 자동으로 읽히는</strong> 저장소의 헌법으로, 빌드·테스트 명령·컨벤션·금지사항을 에이전트에 주입합니다.</li>
+<li>위치에 따라 <strong>계층</strong>(조직·사용자·프로젝트·하위 디렉터리)이 나뉘며, 에이전트는 디렉터리 트리를 거슬러 올라가며 <strong>추가로</strong> 읽어 합칩니다.</li>
+<li><code>/init</code>로 골격을 만들고, <code>/memory</code>로 다듬으며, <code>@참조</code>로 긴 규칙을 모듈화합니다.</li>
+<li><strong>누가 영향을 받는가</strong> 를 기준으로, 팀 약속은 프로젝트 CLAUDE.md에·개인 취향은 사용자 수준에 둡니다.</li>
+<li>좋은 CLAUDE.md는 <strong>간결·구체·최신 유지</strong> 의 세 원칙을 따릅니다.</li>
+</ul>
+<p>다음 단원에서는 이렇게 팀 표준대로 만들고 검증한 변경을, 작은 논리 단위로 커밋하고 신입의 통과의례인 첫 PR로 올리는 git 워크플로(9단원)로 이어집니다.</p>
+<hr />
+<p><strong>참고 출처</strong></p>
+<ul>
+<li><a href="https://code.claude.com/docs/en/memory">Claude Code 공식 문서 — How Claude remembers your project (Memory)</a></li>
+<li><a href="https://code.claude.com/docs/en/claude-directory">Claude Code 공식 문서 — Explore the .claude directory</a></li>
+</ul>
+
+<nav class="chapter-nav"><a href="ch_07.html">← 이전: 실행·테스트로 검증하기</a><a href="index.html" style="flex:0 0 auto; text-align:center">목차</a><a href="ch_09.html" style="text-align:right">다음: 첫 커밋과 첫 PR: git 워크플로 →</a></nav>
+</main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-powershell.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+</body>
+</html>
