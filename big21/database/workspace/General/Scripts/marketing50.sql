@@ -395,9 +395,309 @@ select case when extract(year from age(current_date, c.birth_date)) < 20 then '1
 ;
 
 -- 30. 같은 주문에 함께 담긴 상품 쌍 상위 10개(동시 구매 주문 수)를 구하라
-select oi1.order_id
-	 , count(oi1.product_id )
+select oi1.product_id 
+	 , oi2.product_id 
+	 , count(*) as cnt
   from order_items oi1
   join order_items oi2
     on oi1.order_id = oi2.order_id
  where oi1.product_id < oi2.product_id
+ group by oi1.product_id, oi2.product_id
+ order by cnt desc
+ limit 10
+;
+
+-- 31. 월별 매출과 전년 동월 매출, 전년 동월 대비(YoY) 쯩감률(%)을 구하라
+select date_trunc('month', o.order_date)::date
+	 , sum(o.total_amount ) as this_year
+	 , lag(sum(o.total_amount), 12) over(order by date_trunc('month', o.order_date)::date) as last_year
+	 , 100 * sum(o.total_amount ) / lag(sum(o.total_amount), 12) over(order by date_trunc('month', o.order_date)::date)-100 as YoY_pct
+  from orders o
+ group by 1
+;
+
+-- 32. 분기별 주문 건수, 매출과 전체 대비 분기 비중(%)을 구하라
+with calendar as (
+	select o.order_date
+		 , date_trunc('quarter', o.order_date)::date as q
+		 , o.total_amount
+	  from orders o
+  )
+select extract(year from c.q) || case when extract(month from c.q)::int <= 3 then 'Q1'
+									  when extract(month from c.q)::int <= 6 then 'Q2'
+									  when extract(month from c.q)::int <= 9 then 'Q3'
+									  when extract(month from c.q)::int <= 12 then 'Q4' end as year_q
+	 , count(*) as cnt
+	 , sum(c.total_amount) as profit
+	 , 100 * sum(c.total_amount) / sum(sum(c.total_amount)) over() as pct
+  from calendar c
+ group by 1
+ order by 1
+;
+
+-- 33. 카테고리별 취소, 환불 매출률(%)을 높은 순으로 구하라
+select p.category_id
+	 , sum(oi.quantity * oi.unit_price) as total
+	 , sum(oi.unit_price * oi.quantity) filter(where o.status in ('취소', '환불')) as cancel_refund
+	 , 100 * sum(oi.unit_price * oi.quantity) filter(where o.status in ('취소', '환불')) / sum(oi.quantity * oi.unit_price) as pct
+  from order_items oi 
+  join orders o
+    on o.order_id = oi.order_id
+  join products p 
+    on oi.product_id = p.product_id
+ group by p.category_id
+ order by 4 desc
+;
+
+-- 34. 일별 매출과 7일 이동평균을(앞 15일) 구하라
+with profit as (
+	select o.order_date::date as od
+		 , sum(o.total_amount ) as ta
+	  from orders o
+	 group by 1
+)
+select p.od
+ 	 , p.ta 
+	 , round(avg(p.ta) over(order by p.od rows between 6 preceding and current row), 1) as ma
+  from profit p
+ order by 1 desc
+ limit 15
+;
+
+-- 35. 월별 매출과 연도 내 누적 매출(YTD)을 구하라
+select date_trunc('month', o.order_date)::date
+	 , sum(o.total_amount )
+	 , sum(sum(o.total_amount)) over(partition by date_trunc('year', date_trunc('month', o.order_date)::date) order by date_trunc('month', o.order_date)::date)
+  from orders o
+ group by 1
+;
+
+-- 36. 월별 주문 수와 객단가(AOV) 추이를 구하라
+select date_trunc('month', o.order_date)::date
+	 , count(*) as cnt
+	 , round(sum(o.total_amount ) / count(*), 1) as per_unit
+  from orders o
+ group by 1
+ order by 1
+;
+
+-- 37. 미배송(결제완료+배송중) 주문이 많은 지역 상위 10개
+select c.city
+	 , count(*) as cnt
+  from orders o 
+  join customers c 
+    on o.customer_id = c.customer_id
+ where o.status in ('결제완료', '배송중')
+ group by c.city
+ order by cnt desc
+ limit 10
+;
+
+-- 38. RFM 점수를 기준으로 고객을 명명된 세그먼트로 분류하고 세그먼트별 고객 수를 구하라
+with total as (
+	select o.customer_id
+		 , max(o.order_date ) as ret
+		 , count(*) as fre
+		 , sum(o.total_amount) as mon
+	  from orders o
+	 group by o.customer_id
+),
+rfm as (
+	select t.customer_id
+		 , ntile(5) over(order by t.ret) as r
+		 , ntile(5) over(order by t.fre) as f
+		 , ntile(5) over(order by t.mon) as m
+	  from total t
+)
+select case when r.r>=4 and r.f>=4 and r.m>=4 then '핵심VIP'
+			when r.r>=4 and r.f>=4 then '충성'
+			when r.r>=5 and r.f<=2 and r.m<=2 then '신규, 활성'
+			when r.r<=3 and r.f>=4 then '이탈위험'
+			when r.r<=2 then '휴면, 이탈'
+			else '일반' end as cg
+	 , count(*)
+  from rfm r
+ group by 1
+;
+
+-- 39. 첫 유효주문 기준 월별 신규 획득 고객 수를 구하라
+with fir as (
+	select o.customer_id
+		 , min(o.order_date) as first_order
+	  from orders o
+	 group by o.customer_id 
+)
+select date_trunc('month', f.first_order)::date
+	 , count(*)
+  from fir f
+ group by 1
+ order by 1
+  
+-- 40. 지역 x 등급 교차표(회원 수)를 합계 상위 10개 지역으로 구하라
+select c.city
+	 , count(*) filter(where grade='VIP') as vip_cnt
+	 , count(*) filter(where grade='GOLD') as gold_cnt
+	 , count(*) filter(where grade='SILVER') as silver_cnt
+	 , count(*) filter(where grade='BRONZE') as bronze_cnt
+  from customers c 
+ group by c.city 
+;
+
+-- 41. 연령대 x 성별 매출 교차표
+select trunc(extract(year from age(c.birth_date)) / 10)*10 || case when c.gender = 'F' then '대 여성'
+																   when c.gender = 'M' then '대 남성' end as r
+	 , sum(o.total_amount)
+  from customers c
+  join orders o
+    on o.customer_id = c.customer_id
+ group by 1
+ order by 2 desc
+;
+  
+-- 42. 고객별 최대 매출 카테고리(대표 카테고리)의 고객 수 분포를 구하라
+with cus_cate as( 
+select o.customer_id
+	 , p.category_id 
+	 , sum(oi.unit_price * oi.quantity ) as profit
+	 , row_number() over(partition by customer_id order by sum(oi.unit_price * oi.quantity ) desc ) as rn
+  from orders o
+  join order_items oi 
+    on o.order_id = oi.order_id
+  join products p
+    on oi.product_id = p.product_id
+ group by o.customer_id, p.category_id 
+ order by o.customer_id
+)
+select c."name"
+	 , count(*)
+  from cus_cate cc
+  join categories c
+    on c.category_id = cc.category_id 
+ where cc.rn = 1
+ group by c."name" 
+;
+
+-- 43. 휴면(비활성) 회원 중 누적매출 100만원 이상 우수고객 20명을 구하라.
+with deact as (
+	select o.customer_id
+		 , sum(o.total_amount) as tot_amt
+	  from orders o
+	  join customers c 
+	    on c.customer_id = o.customer_id
+	 where c.is_active in ('false')
+	 group by 1
+)
+select d.customer_id
+	 , d.tot_amt
+  from deact d
+ where d.tot_amt >= 1000000
+ order by d.tot_amt desc
+ limit 20
+;
+
+-- 44. 유효 주문이 한 건도 없는 회원 수와 비율(%)
+select count(*)
+	 , count(*) / (select count(*) from customers c2) * 100 as pct
+  from customers c
+  left join orders o
+    on c.customer_id = o.customer_id
+ where o.customer_id is null
+;  
+
+-- 45. 유효 판매량이 가장 적은 판매 부진(데드스톡 후보) 상품 하위 10개
+select p.product_id
+	 , sum(coalesce(oi.quantity ,0)) as qty
+  from products p
+  left join order_items oi
+    on p.product_id = oi.product_id 
+ group by p.product_id 
+ order by 2
+ limit 10
+;
+
+-- 46. 재고가 많은데 판매량이 적은 과잉재고 위험 상품(판매중) 10개
+with dead_stock as (
+	select p.product_id
+		 , sum(coalesce(oi.quantity ,0)) as qty
+	  from products p
+	  left join order_items oi
+	    on p.product_id = oi.product_id
+	 group by p.product_id 
+)
+select p.product_id
+	 , p.stock_quantity
+	 , ds.qty
+  from dead_stock ds
+  join products p
+    on ds.product_id = p.product_id
+ where p.status = '판매중'
+ order by p.stock_quantity desc, ds.qty
+;
+
+-- 47. 상품 상태별(판매중/품절/단종) 과거 매출과 매출 비중(%)을 구하라
+select p.status
+	 , sum(oi.unit_price * oi.quantity) as profit_category
+	 , sum(oi.unit_price * oi.quantity) / sum(sum(oi.unit_price * oi.quantity)) over() * 100 as pct
+  from products p
+  join order_items oi
+    on oi.product_id = p.product_id 
+ group by p.status 
+;
+
+-- 48. 카테고리별 상품 수, 매출, 상품당 평균 매출(효율)을 효율 내림차순으로 구하라
+select p.category_id
+	 , count(distinct p.product_id) as cnt
+	 , sum(oi.unit_price * oi.quantity) as profit_category
+	 , round(sum(oi.unit_price * oi.quantity) / count(distinct p.product_id), 1) as avg_profit 
+  from products p
+  join order_items oi 
+    on p.product_id = oi.product_id
+ group by p.category_id
+ order by 3 desc
+;
+
+-- 49. 동일 상품을 2회 이상 구매한 고객이 많은 상품 top 10
+with ord_product as(
+	select o.customer_id 
+		 , oi.product_id 
+		 , concat(o.customer_id, '|', oi.product_id) as cnt
+	  from orders o 
+	  join order_items oi 
+	    on o.order_id = oi.order_id
+),
+cnt_ov as (
+	select op.customer_id 
+		 , op.product_id
+		 , count(op.cnt) as cnt2
+	  from ord_product op
+	 group by op.customer_id , op.product_id
+)
+select co.product_id
+	 , count(co.cnt2)
+  from cnt_ov as co
+ where co.cnt2 >= 2
+ group by co.product_id
+ order by 2 desc
+ limit 10
+;
+
+-- 50. 상품을 누적 매출 비중으로 A/B/C 등급으로 분류하고 등급별 상품 수, 매출, 비중(%)을 구하라
+with div_3 as(
+	select p.product_id
+		 , p."name"
+		 , sum(oi.unit_price * oi.quantity) as prof
+		 , ntile(3) over(order by sum(oi.unit_price * oi.quantity) ) as three
+	  from products p
+	  join order_items oi 
+	    on oi.product_id = p.product_id
+	 group by p.product_id
+)
+select case when d.three = 1 then 'C'
+			when d.three = 2 then 'B'
+			else 'A' end as grade
+	 , count(*)
+	 , sum(d.prof)
+	 , 100 * sum(d.prof) / sum(sum(d.prof)) over()
+  from div_3 d
+ group by 1
+;
