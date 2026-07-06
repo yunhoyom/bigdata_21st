@@ -482,13 +482,11 @@ select date_trunc('month', o.order_date)::date
 ;
 
 -- 37. 미배송(결제완료+배송중) 주문이 많은 지역 상위 10개
-select c.city
+select o.shipping_city 
 	 , count(*) as cnt
   from orders o 
-  join customers c 
-    on o.customer_id = c.customer_id
  where o.status in ('결제완료', '배송중')
- group by c.city
+ group by o.shipping_city 
  order by cnt desc
  limit 10
 ;
