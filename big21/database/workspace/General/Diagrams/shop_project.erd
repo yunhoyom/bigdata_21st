@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diagram version="1" name="shop_project">
+	<entities>
+		<data-source id="postgres-jdbc-19f5a7f3634-316fbbd4051d1fb6">
+			<entity id="1" name="categories" fq-name="public.categories">
+				<path name="public"/>
+				<path name="postgres"/>
+			</entity>
+			<entity id="2" name="contacts" fq-name="public.contacts">
+				<path name="public"/>
+				<path name="postgres"/>
+			</entity>
+			<entity id="3" name="sessions" fq-name="public.sessions">
+				<path name="public"/>
+				<path name="postgres"/>
+			</entity>
+			<entity id="4" name="users" fq-name="public.users">
+				<path name="public"/>
+				<path name="postgres"/>
+			</entity>
+		</data-source>
+	</entities>
+	<relations>
+		<relation name="contacts_category_id_fkey" fq-name="public.contacts.contacts_category_id_fkey" type="fk" pk-ref="1" fk-ref="2"/>
+		<relation name="categories_user_id_fkey" fq-name="public.categories.categories_user_id_fkey" type="fk" pk-ref="4" fk-ref="1"/>
+		<relation name="contacts_user_id_fkey" fq-name="public.contacts.contacts_user_id_fkey" type="fk" pk-ref="4" fk-ref="2"/>
+		<relation name="sessions_user_id_fkey" fq-name="public.sessions.sessions_user_id_fkey" type="fk" pk-ref="4" fk-ref="3"/>
+	</relations>
+</diagram>
