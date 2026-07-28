@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+import datetime as dt
 from full import full, items_df, orders_df, products_df, customers_df
 
 pd.set_option("display.float_format", "{:,.0f}".format)
@@ -33,7 +35,7 @@ mon = full.groupby("month").agg(
     total_amount=("amount", "sum"),
     pure_amount=("pure", "sum"),
     excepted=("excepted","sum"),
-    valid_order=("pure", "count")
+    valid_order=("order_id", "nunique")
 )
 print(f"\n과제 3. {mon}")
 print("위 그래프를 기반으로 봤을 때 총매출과 순매출은 차이가 있습니다.\n매출은 순매출(pure_amount)를 기준으로 합니다.")
@@ -46,7 +48,7 @@ pure_amo = full[~full["status"].isin(["canceled", "returned"])]
 
 pure_divide = pure_amo.groupby("month").agg(
     cust_count=("customer_id", "nunique"),
-    order_count=("order_id", "count"),
+    order_count=("order_id", "nunique"),
     pure_amount=("amount", "sum")
 )
 
@@ -63,7 +65,7 @@ compare = mon[["pure_amount"]].join(
     how="outer"
 )
 
-compare["diff"] = compare["pure_amount"] - mon["pure_amount"]
+compare["diff"] = compare["pure_amount"] - compare["pure_amount_check"]
 print(f"{compare}\n")
 
 # 과제 3. 
@@ -121,8 +123,20 @@ rfm_gb["amount_pct"] = rfm_gb["total_amount"] / grand_total * 100
 
 print(rfm_gb)
 
+print("\n########################## 문제 04 #######################\n")
+# print(full.groupby("customer_id")["pure"].sum())
+full = full.dropna(subset=["pure"])
+current_year = dt.datetime.now().year-1
+first_half = full[full["month"].between(f"{current_year}-01", f"{current_year}-06")]
+pure_sum = first_half.groupby("customer_id")["pure"].sum()
+first_half["grade"] = pd.qcut(pure_sum, q=[0, 0.8, 0.95, 1], labels=["일반", "상위 20%", "상위 5%"])
+
+print(pure_sum)
+
+
 print("\n########################## 문제 05 #######################\n")
 # 과제 1. 고객별 첫 유효 주문 월(코호트)과 각 주문의 경과 월(period 차이)을 계산합니다
 print(full.head())
+
 cust_month = full.groupby("customer_id")["month"].min()
 print(cust_month)
