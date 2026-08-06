@@ -8,3 +8,4 @@ big21/ml-dev/data/human_activity/
 .DS_Store
 big21/ml-dev/chap04/rf_feature_importances_top20.tif
 big21/ml-dev/chap04/tree.png
+big21/ml-dev/chap04/p239_xgb_feature_importance.tif
