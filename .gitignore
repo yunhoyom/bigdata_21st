@@ -9,3 +9,7 @@ big21/ml-dev/data/human_activity/
 big21/ml-dev/chap04/rf_feature_importances_top20.tif
 big21/ml-dev/chap04/tree.png
 big21/ml-dev/chap04/p239_xgb_feature_importance.tif
+big21/ml-dev/data/creditcard.csv
+big21/ml-dev/data/santander-customer-satisfaction/sample_submission.csv
+big21/ml-dev/data/santander-customer-satisfaction/test.csv
+big21/ml-dev/data/santander-customer-satisfaction/train.csv
