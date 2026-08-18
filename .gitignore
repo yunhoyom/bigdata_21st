@@ -13,3 +13,5 @@ big21/ml-dev/data/creditcard.csv
 big21/ml-dev/data/santander-customer-satisfaction/sample_submission.csv
 big21/ml-dev/data/santander-customer-satisfaction/test.csv
 big21/ml-dev/data/santander-customer-satisfaction/train.csv
+big21/ml-dev/data/labeledTrainData.tsv
+빅데이터21기/00. 강의자료/03 Machine Learning/00 교안/수업자료/chap08/labeledTrainData.tsv
