@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+import datetime as dt
 from full import full, items_df, orders_df, products_df, customers_df
 
 pd.set_option("display.float_format", "{:,.0f}".format)
@@ -33,10 +35,12 @@ mon = full.groupby("month").agg(
     total_amount=("amount", "sum"),
     pure_amount=("pure", "sum"),
     excepted=("excepted","sum"),
-    valid_order=("pure", "count")
+    valid_order=("order_id", "nunique")
 )
 print(f"\n과제 3. {mon}")
 print("위 그래프를 기반으로 봤을 때 총매출과 순매출은 차이가 있습니다.\n매출은 순매출(pure_amount)를 기준으로 합니다.")
+
+print(mon.info())
 
 print("\n########################## 문제 02 #######################\n")
 # 과제 1. 월별 순매출을 구매 고객수 × 고객당 주문수 × 주문당 금액(AOV) 로 분해합니다
@@ -44,7 +48,7 @@ pure_amo = full[~full["status"].isin(["canceled", "returned"])]
 
 pure_divide = pure_amo.groupby("month").agg(
     cust_count=("customer_id", "nunique"),
-    order_count=("order_id", "count"),
+    order_count=("order_id", "nunique"),
     pure_amount=("amount", "sum")
 )
 
@@ -61,7 +65,7 @@ compare = mon[["pure_amount"]].join(
     how="outer"
 )
 
-compare["diff"] = compare["pure_amount"] - mon["pure_amount"]
+compare["diff"] = compare["pure_amount"] - compare["pure_amount_check"]
 print(f"{compare}\n")
 
 # 과제 3. 
@@ -94,10 +98,45 @@ rfm["frequency_tier"] = pd.qcut(rfm["frequency"].rank(method="first"), q=5, labe
 rfm["momentary_tier"] = pd.qcut(rfm["momentary"].rank(method="first"), q=5, labels=[1,2,3,4,5])
 print(f"과제 3. .rank(method='first')로 동점이 없는 순위를 만들어 동점자 많을 경우의 오류 해결. \n {rfm[['recency_tier','frequency_tier','momentary_tier']]}")
 
-# 과제 4 안 함..
+# 과제 4 챔피언·충성·잠재 충성·이탈 위험·휴면 등 6개 세그먼트를 규칙으로 정의하고, 세그먼트별 인원과 매출 비중을 산출합니다.
+# 챔피언(555), 충성(554), 잠재 충성(553), 이탈 위험(144), 신규(511), 휴면(111)
+rfm["rfm"] = rfm["recency_tier"].astype(str) + rfm["frequency_tier"].astype(str) + rfm["momentary_tier"].astype(str)
+
+conditions = {
+    "555":"챔피언",
+    "554":"충성",
+    "553":"잠재 충성",
+    "144":"이탈 위험",
+    "511":"신규",
+    "111":"휴면"
+}
+rfm["segment"] = rfm["rfm"].map(conditions).fillna("기타")
+print(rfm.head())
+
+rfm_gb = rfm.groupby("segment").agg(
+    count=("recency","count"),
+    total_amount=("momentary","sum")
+)
+grand_total = rfm_gb["total_amount"].sum()
+
+rfm_gb["amount_pct"] = rfm_gb["total_amount"] / grand_total * 100
+
+print(rfm_gb)
+
+print("\n########################## 문제 04 #######################\n")
+# print(full.groupby("customer_id")["pure"].sum())
+full = full.dropna(subset=["pure"])
+current_year = dt.datetime.now().year-1
+first_half = full[full["month"].between(f"{current_year}-01", f"{current_year}-06")]
+pure_sum = first_half.groupby("customer_id")["pure"].sum()
+first_half["grade"] = pd.qcut(pure_sum, q=[0, 0.8, 0.95, 1], labels=["일반", "상위 20%", "상위 5%"])
+
+print(pure_sum)
+
 
 print("\n########################## 문제 05 #######################\n")
 # 과제 1. 고객별 첫 유효 주문 월(코호트)과 각 주문의 경과 월(period 차이)을 계산합니다
 print(full.head())
+
 cust_month = full.groupby("customer_id")["month"].min()
 print(cust_month)

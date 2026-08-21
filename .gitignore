@@ -14,3 +14,21 @@ venv/
 # 대용량 데이터
 big21/pandas_shopping/data/
 big21/shop-api/
+
+# ── ml-dev 실습 데이터셋 ──
+big21/ml-dev/data/human_activity/
+
+# ── 강의자료 자료실 다운로드 ──
+빅데이터21기/00. 강의자료/03 Machine Learning/02 자료실/00 data-20260804T010214Z-1-001/
+
+# ── macOS 잔여물 ──
+.DS_Store
+big21/ml-dev/chap04/rf_feature_importances_top20.tif
+big21/ml-dev/chap04/tree.png
+big21/ml-dev/chap04/p239_xgb_feature_importance.tif
+big21/ml-dev/data/creditcard.csv
+big21/ml-dev/data/santander-customer-satisfaction/sample_submission.csv
+big21/ml-dev/data/santander-customer-satisfaction/test.csv
+big21/ml-dev/data/santander-customer-satisfaction/train.csv
+big21/ml-dev/data/labeledTrainData.tsv
+빅데이터21기/00. 강의자료/03 Machine Learning/00 교안/수업자료/chap08/labeledTrainData.tsv
