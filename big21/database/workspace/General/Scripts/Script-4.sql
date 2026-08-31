@@ -1,1 +1,1 @@
-select * from product p 
+select * from users u
